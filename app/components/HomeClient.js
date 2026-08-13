@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import SearchModal from './SearchModal';
-import { Apple } from 'lucide-react';
 
 const POSTS_PER_PAGE = 10;
 
@@ -141,21 +140,7 @@ export default function HomeClient({ initialPosts }) {
         )}
       </div>
 
-      {/* Clickable Logo Portal to Mindmap & Working */}
-      <div className="ngan-da-logo-portal">
-        <a href="/mindmap" title="Truy cập Ngăn Đá Workspace" className="ngan-da-logo-link">
-          <img 
-            src="/images/ngan-da-logo-tu-lanh.png" 
-            alt="Ngăn Đá Workspace" 
-            className="ngan-da-logo-img-home" 
-          />
-        </a>
-        <a href="/working" title="Truy cập Không Gian Làm Việc" className="ngan-da-logo-link">
-          <div className="working-portal-icon-wrapper">
-            <Apple size={36} />
-          </div>
-        </a>
-      </div>
+
 
       {/* Search Bar Wrapper (Bấm để mở modal) */}
       <div

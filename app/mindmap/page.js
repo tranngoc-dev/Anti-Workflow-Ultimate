@@ -1180,117 +1180,140 @@ function MindmapDashboard({ maps, session, onCreateMap, onDeleteMap, onRenameMap
   const userName = session?.user?.email?.split('@')[0] || 'User';
   
   return (
-    <div className="min-h-screen bg-white text-gray-800">
-      <div className="mm-dash-container">
-        
-        {/* Templates Row (Only New Map like user requested) */}
-        <h2 className="mm-dash-templates-title">Khởi tạo nhanh</h2>
-        <div className="mm-dash-templates-grid">
-          
-          <div 
-            onClick={() => onCreateMap('Sơ đồ tư duy mới')}
-            className="mm-dash-template-card"
-          >
-            <div className="mm-dash-template-left">
-              <div className="mm-dash-template-icon-wrapper" style={{ background: '#f1f5f9' }}>
-                <svg width="18" height="22" viewBox="0 0 38 46" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M4 0H26L38 12V42C38 44.2 36.2 46 34 46H4C1.8 46 0 44.2 0 42V4C0 1.8 1.8 0 4 0Z" fill="#94a3b8"/>
-                  <path d="M26 0V12H38L26 0Z" fill="#64748b"/>
-                </svg>
-              </div>
-              <span className="mm-dash-template-label">New map</span>
-            </div>
-            <span className="mm-dash-template-plus">+</span>
+    <div className="min-h-screen bg-slate-50 text-gray-800 font-sans pb-12">
+      {/* 1. Dashboard Header Bar */}
+      <header className="mm-dash-header">
+        <div className="mm-dash-header-inner">
+          <div className="mm-dash-logo">
+            <span className="mm-logo-icon">🧠</span>
+            <span className="mm-logo-text">Ngăn Đá Mindmap</span>
           </div>
-
-        </div>
-
-        {/* My Mind Files Section */}
-        <div className="mm-dash-section-header">
-          <h2 className="mm-dash-section-title">My Mind</h2>
           
-          <div className="mm-dash-controls">
+          <div className="mm-dash-user-menu">
+            <span className="mm-user-badge">
+              <span className="mm-user-icon">👤</span>
+              <span className="mm-user-name">{userName}</span>
+            </span>
             <button 
               onClick={() => window.location.href = '/'} 
-              className="mm-dash-icon-btn" 
+              className="mm-dash-nav-btn home-btn" 
               title="Về trang chủ"
-              style={{ display: 'inline-flex', gap: '4px', fontSize: '11px', fontWeight: 600, padding: '3px 8px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.06)', background: '#f8fafc', marginRight: '8px' }}
             >
               🏠 Về trang chủ
             </button>
-            <span style={{ fontSize: '12px', color: '#64748b', marginRight: '4px', fontWeight: 500 }}>
-              👤 {userName}
-            </span>
             <button 
               onClick={async () => { await supabase.auth.signOut(); window.location.href = '/'; }} 
-              className="mm-dash-icon-btn" 
+              className="mm-dash-nav-btn logout-btn" 
               title="Đăng xuất tài khoản Google"
-              style={{ display: 'inline-flex', gap: '4px', fontSize: '11px', fontWeight: 600, padding: '3px 8px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.06)', background: '#f8fafc' }}
             >
               🚪 Thoát
             </button>
-            <div style={{ width: '1px', height: '16px', background: '#e2e8f0', margin: '0 4px' }} />
-            <button className="mm-dash-icon-btn" title="Sắp xếp">
-              <ArrowUpDown size={14} />
-            </button>
-            <button className="mm-dash-icon-btn" title="Bố cục lưới">
-              <Grid size={14} />
-            </button>
           </div>
         </div>
+      </header>
 
-        <div className="mm-dash-files-grid">
-          {maps.length === 0 ? (
-            <div className="mm-dash-empty-state">
-              <div className="mm-dash-empty-icon">📂</div>
-              <p className="font-semibold text-gray-500">Chưa có sơ đồ nào</p>
-              <p className="text-xs text-gray-400 mt-1">Hãy nhấp nút "New map" ở phần khởi tạo nhanh để tạo sơ đồ tư duy đầu tiên.</p>
+      {/* 2. Main Layout Container */}
+      <div className="mm-dash-content-layout">
+        
+        {/* Left Column: Sidebar with Quick Create */}
+        <aside className="mm-dash-sidebar">
+          <div className="mm-sidebar-card">
+            <h3 className="mm-sidebar-title">Khởi tạo nhanh</h3>
+            <p className="mm-sidebar-desc">Bắt đầu phác thảo ý tưởng của bạn ngay lập tức với sơ đồ trống.</p>
+            
+            <button 
+              onClick={() => onCreateMap('Sơ đồ tư duy mới')}
+              className="mm-create-btn"
+            >
+              <span className="mm-create-btn-icon">+</span>
+              <span className="mm-create-btn-text">New map</span>
+            </button>
+          </div>
+
+          <div className="mm-sidebar-help-card">
+            <h4>💡 Hướng dẫn nhanh</h4>
+            <ul>
+              <li>Nhấp đúp chuột để tạo ý tưởng độc lập</li>
+              <li>Sử dụng phím <strong>Tab</strong> để tạo nhánh con</li>
+              <li>Hệ thống tự động lưu sau mỗi 2 giây</li>
+            </ul>
+          </div>
+        </aside>
+
+        {/* Right Column: Files List Area */}
+        <main className="mm-dash-main">
+          <div className="mm-dash-main-header">
+            <h2 className="mm-dash-main-title">My Mind ({maps.length})</h2>
+            
+            <div className="mm-dash-main-controls">
+              <button className="mm-control-btn" title="Sắp xếp theo tên/ngày">
+                <ArrowUpDown size={14} />
+                <span>Sắp xếp</span>
+              </button>
+              <button className="mm-control-btn" title="Bố cục lưới">
+                <Grid size={14} />
+                <span>Lưới</span>
+              </button>
             </div>
-          ) : (
-            maps.map((map) => (
-              <div key={map.id} className="mm-dash-file-card">
-                
-                {/* Clicking on the file icon box triggers selecting the map */}
-                <div 
-                  onClick={() => onSelectMap(map.id)}
-                  className="mm-dash-file-icon-box"
-                >
-                  <DocumentIcon />
-                  
-                  {/* Share indicator overlay badge */}
-                  {map.isShared && <ShareBadge />}
-                  
-                  {/* Hover Actions Panel */}
-                  <div className="mm-dash-file-actions" onClick={(e) => e.stopPropagation()}>
-                    <button 
-                      onClick={() => onRenameMap(map.id, map.label)}
-                      title="Đổi tên"
-                      className="mm-dash-action-btn"
-                    >
-                      <Edit3 size={12} />
-                    </button>
-                    <button 
-                      onClick={() => onDeleteMap(map.id)}
-                      title="Xóa sơ đồ"
-                      className="mm-dash-action-btn delete"
-                    >
-                      <Trash2 size={12} />
-                    </button>
-                  </div>
-                </div>
+          </div>
 
-                <div 
-                  onClick={() => onSelectMap(map.id)}
-                  className="mm-dash-file-title" 
-                  title={map.label}
-                >
-                  {map.label}
-                </div>
-
+          {/* Files Container */}
+          <div className="mm-dash-files-container">
+            {maps.length === 0 ? (
+              <div className="mm-dash-empty-state-new">
+                <div className="mm-dash-empty-icon-new">📂</div>
+                <h3 className="mm-dash-empty-title-new">Chưa có sơ đồ nào</h3>
+                <p className="mm-dash-empty-desc-new">
+                  Hãy nhấn nút <strong>"New map"</strong> ở cột bên trái để tạo sơ đồ tư duy đầu tiên của bạn.
+                </p>
               </div>
-            ))
-          )}
-        </div>
+            ) : (
+              <div className="mm-dash-files-grid-new">
+                {maps.map((map) => (
+                  <div key={map.id} className="mm-file-card-new">
+                    <div 
+                      onClick={() => onSelectMap(map.id)}
+                      className="mm-file-thumbnail"
+                    >
+                      <div className="mm-file-thumbnail-icon">📄</div>
+                      {map.isShared && (
+                        <span className="mm-shared-tag">Shared</span>
+                      )}
+                      
+                      {/* Hover action overlay */}
+                      <div className="mm-file-hover-overlay" onClick={(e) => e.stopPropagation()}>
+                        <button 
+                          onClick={() => onRenameMap(map.id, map.label)}
+                          title="Đổi tên"
+                          className="mm-file-action-btn-new rename"
+                        >
+                          <Edit3 size={12} />
+                        </button>
+                        <button 
+                          onClick={() => onDeleteMap(map.id)}
+                          title="Xóa sơ đồ"
+                          className="mm-file-action-btn-new delete"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="mm-file-info-new">
+                      <div 
+                        onClick={() => onSelectMap(map.id)}
+                        className="mm-file-title-new"
+                        title={map.label}
+                      >
+                        {map.label}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </main>
 
       </div>
     </div>
@@ -1309,6 +1332,7 @@ export default function GitMindClone() {
   // Dynamic layout injection to hide global header/footer and enforce zero scroll height
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!activeMapId) return; // CHỈ inject style khi đang mở thiết kế bản đồ cụ thể
 
     const styleEl = document.createElement('style');
     styleEl.innerHTML = `
@@ -1478,7 +1502,7 @@ export default function GitMindClone() {
         document.head.removeChild(styleEl);
       }
     };
-  }, []);
+  }, [activeMapId]);
 
   // Sync isMounted to prevent SSR issues
   useEffect(() => {

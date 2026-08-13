@@ -4425,14 +4425,14 @@ body:has(.admin-layout) .site-footer {
   font-weight: 600;
   color: #9ca3af;
   letter-spacing: 0.05em;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
   text-transform: uppercase;
 }
 
 .mm-dash-templates-grid {
   display: flex;
   gap: 16px;
-  margin-bottom: 48px;
+  margin-bottom: 20px;
 }
 
 .mm-dash-template-card {
@@ -4487,7 +4487,7 @@ body:has(.admin-layout) .site-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 28px;
+  margin-bottom: 14px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.03);
   padding-bottom: 12px;
 }
@@ -4641,7 +4641,7 @@ body:has(.admin-layout) .site-footer {
 
 .mm-dash-empty-state {
   text-align: center;
-  padding: 64px 20px;
+  padding: 32px 20px;
   color: #9ca3af;
   background: #ffffff;
   border: 1px dashed rgba(0, 0, 0, 0.08);
@@ -4757,6 +4757,400 @@ body:has(.admin-layout) .site-footer {
   .header-auth-link {
     padding: 8px;
   }
+}
+
+/* ==========================================================================
+   ===== Ngăn Đá Mindmap Dashboard REDESIGN Styles =====
+   ========================================================================== */
+
+.mm-dash-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 14px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.mm-dash-header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mm-dash-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mm-logo-icon {
+  font-size: 24px;
+}
+
+.mm-logo-text {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f766e;
+  letter-spacing: -0.02em;
+}
+
+.mm-dash-user-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mm-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f1f5f9;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.mm-dash-nav-btn {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mm-dash-nav-btn:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.mm-dash-nav-btn.logout-btn {
+  color: #64748b;
+}
+
+.mm-dash-nav-btn.logout-btn:hover {
+  color: #ef4444;
+  border-color: #fee2e2;
+  background-color: #fef2f2;
+}
+
+/* Layout container */
+.mm-dash-content-layout {
+  max-width: 1200px;
+  margin: 32px auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+/* Sidebar styling */
+.mm-dash-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mm-sidebar-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.mm-sidebar-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+  margin-top: 0;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mm-sidebar-desc {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 0;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.mm-create-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #0f766e;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.15);
+}
+
+.mm-create-btn:hover {
+  background-color: #0d655f;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.25);
+}
+
+.mm-create-btn-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.mm-sidebar-help-card {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.mm-sidebar-help-card h4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.mm-sidebar-help-card ul {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+/* Main Dashboard section */
+.mm-dash-main {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+}
+
+.mm-dash-main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 16px;
+}
+
+.mm-dash-main-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+}
+
+.mm-dash-main-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mm-control-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  background: none;
+  border: 1px solid #e2e8f0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mm-control-btn:hover {
+  background-color: #f8fafc;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+/* Files lists and cards */
+.mm-dash-files-container {
+  flex: 1;
+}
+
+.mm-dash-empty-state-new {
+  text-align: center;
+  padding: 64px 24px;
+  color: #94a3b8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.mm-dash-empty-icon-new {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.mm-dash-empty-title-new {
+  font-size: 16px;
+  font-weight: 700;
+  color: #475569;
+  margin-top: 0;
+  margin-bottom: 6px;
+}
+
+.mm-dash-empty-desc-new {
+  font-size: 13px;
+  color: #94a3b8;
+  max-width: 320px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Grid layout for files */
+.mm-dash-files-grid-new {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 20px;
+}
+
+.mm-file-card-new {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.mm-file-thumbnail {
+  aspect-ratio: 1 / 1;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.mm-file-card-new:hover .mm-file-thumbnail {
+  border-color: #0f766e;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.06);
+}
+
+.mm-file-thumbnail-icon {
+  font-size: 36px;
+  transition: all 0.2s ease;
+}
+
+.mm-file-card-new:hover .mm-file-thumbnail-icon {
+  transform: scale(1.05);
+}
+
+.mm-shared-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background-color: rgba(15, 118, 110, 0.1);
+  color: #0f766e;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.mm-file-hover-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.9);
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: opacity 0.2s ease;
+}
+
+.mm-file-thumbnail:hover .mm-file-hover-overlay {
+  opacity: 1;
+}
+
+.mm-file-action-btn-new {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: #64748b;
+}
+
+.mm-file-action-btn-new:hover {
+  background-color: #f1f5f9;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+.mm-file-action-btn-new.delete:hover {
+  background-color: #fef2f2;
+  color: #ef4444;
+  border-color: #fee2e2;
+}
+
+.mm-file-info-new {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.mm-file-title-new {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 4px;
+  transition: color 0.2s ease;
+}
+
+.mm-file-card-new:hover .mm-file-title-new {
+  color: #0f766e;
 }
 
 

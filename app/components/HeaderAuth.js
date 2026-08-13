@@ -87,7 +87,47 @@ export default function HeaderAuth() {
   return (
     <div className="header-auth-container">
       {session ? (
-        <div className="header-auth-user-box" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div className="header-auth-user-box" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <a 
+            href="/blog" 
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              fontSize: '0.9rem', 
+              color: 'var(--accent)', 
+              fontWeight: 600,
+              textDecoration: 'none',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              backgroundColor: 'rgba(15, 118, 110, 0.03)',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(15, 118, 110, 0.08)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'rgba(15, 118, 110, 0.03)'; }}
+          >
+            <span>📰 Blog</span>
+          </a>
+          <a 
+            href="/mindmap" 
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              fontSize: '0.9rem', 
+              color: 'var(--accent)', 
+              fontWeight: 600,
+              textDecoration: 'none',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              backgroundColor: 'rgba(15, 118, 110, 0.03)',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(15, 118, 110, 0.08)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'rgba(15, 118, 110, 0.03)'; }}
+          >
+            <span>🧠 Mindmap</span>
+          </a>
           <a 
             href="/working" 
             style={{ 
@@ -114,25 +154,69 @@ export default function HeaderAuth() {
             </svg>
             <span>Workspace</span>
           </a>
-          <img 
-            src={session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || ''} 
-            alt="User avatar" 
-            className="header-auth-avatar"
-            onError={(e) => {
-              e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="%236B7280" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>';
-            }}
-          />
+          <a href={`/profile/${session.user.id}`} title="Trang cá nhân của bạn" style={{ display: 'inline-flex' }}>
+            <img 
+              src={session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || ''} 
+              alt="User avatar" 
+              className="header-auth-avatar"
+              onError={(e) => {
+                e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="%236B7280" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>';
+              }}
+            />
+          </a>
           <button onClick={handleSignOut} className="header-auth-btn sign-out" title="Đăng xuất">
             Thoát
           </button>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <button onClick={handleSignIn} className="header-auth-btn sign-in" title="Đăng nhập Google">
-            <GoogleIcon />
-            <span>Đăng nhập</span>
-          </button>
-          <span style={{ fontSize: '0.7rem', color: 'var(--muted)', marginTop: '4px' }}>để sử dụng chức năng bí mật</span>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <a 
+            href="/blog"
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              fontSize: '0.9rem', 
+              color: 'var(--accent)', 
+              fontWeight: 600,
+              textDecoration: 'none',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              backgroundColor: 'rgba(15, 118, 110, 0.03)',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(15, 118, 110, 0.08)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'rgba(15, 118, 110, 0.03)'; }}
+          >
+            <span>📰 Blog</span>
+          </a>
+          <a 
+            href="/mindmap"
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              fontSize: '0.9rem', 
+              color: 'var(--accent)', 
+              fontWeight: 600,
+              textDecoration: 'none',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              backgroundColor: 'rgba(15, 118, 110, 0.03)',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(15, 118, 110, 0.08)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'rgba(15, 118, 110, 0.03)'; }}
+          >
+            <span>🧠 Mindmap</span>
+          </a>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <button onClick={handleSignIn} className="header-auth-btn sign-in" title="Đăng nhập Google">
+              <GoogleIcon />
+              <span>Đăng nhập</span>
+            </button>
+            <span style={{ fontSize: '0.7rem', color: 'var(--muted)', marginTop: '4px' }}>để sử dụng chức năng bí mật</span>
+          </div>
         </div>
       )}
     </div>

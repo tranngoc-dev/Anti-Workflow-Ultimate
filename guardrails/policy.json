@@ -1,0 +1,18 @@
+{
+  "protected_branches": ["main", "master"],
+  "commands": {
+    "tests": ["npm", "run", "test"],
+    "lint": ["npm", "run", "lint"],
+    "typecheck": ["npm", "run", "typecheck"],
+    "build": ["npm", "run", "build"]
+  },
+  "debug_markers": ["DEBUG_ONLY"],
+  "allowlist": [
+    {"rule": "secret.private-key", "path": "guardrails/tests/test_guardrail.py", "reason": "Intentional scanner test fixture"},
+    {"rule": "secret.credential", "path": "guardrails/tests/test_guardrail.py", "reason": "Intentional scanner test fixture"},
+    {"rule": "source.conflict-marker", "path": "guardrails/tests/test_guardrail.py", "reason": "Intentional scanner test fixture"},
+    {"rule": "test.disabled", "path": "guardrails/tests/test_guardrail.py", "reason": "Intentional scanner test fixture"},
+    {"rule": "source.debug-marker", "path": "guardrails/tests/test_guardrail.py", "reason": "Intentional scanner test fixture"},
+    {"rule": "source.debug-marker", "path": "GUARDRAILS.md", "reason": "Documentation of the configured marker example"}
+  ]
+}
