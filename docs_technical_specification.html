@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tài Liệu Đặc Tả Kỹ Thuật Dự Án Workspace - Tulanh-simple</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FAF9F6;
+      --surface: #FFFFFF;
+      --text: #1F2937;
+      --text-muted: #4B5563;
+      --border: #E5E7EB;
+      --accent: #0F766E;
+      --accent-hover: #0D6D66;
+      --accent-light: rgba(15, 118, 110, 0.05);
+      --red: #E11D48;
+      --red-light: rgba(225, 29, 72, 0.05);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      display: flex;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 280px;
+      height: 100vh;
+      background-color: var(--surface);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-img {
+      width: 32px;
+      height: 32px;
+    }
+
+    .logo-text {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav-item a {
+      display: block;
+      padding: 8px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+
+    .nav-item a:hover {
+      background-color: var(--bg);
+      color: var(--text);
+      padding-left: 16px;
+    }
+
+    .nav-item.active a {
+      background-color: var(--accent-light);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: 280px;
+      flex: 1;
+      padding: 40px 60px;
+      max-width: 1000px;
+    }
+
+    .header-banner {
+      margin-bottom: 40px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 24px;
+    }
+
+    .project-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background-color: var(--accent-light);
+      color: var(--accent);
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 36px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: var(--text-muted);
+    }
+
+    /* Code Blocks */
+    code {
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 13.5px;
+      background-color: rgba(0, 0, 0, 0.04);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--red);
+    }
+
+    pre {
+      background-color: #1F2937;
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    pre code {
+      background-color: transparent;
+      padding: 0;
+      border-radius: 0;
+      color: #F9FAFB;
+      font-size: 13px;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      background-color: var(--surface);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    th {
+      background-color: rgba(0, 0, 0, 0.02);
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Alerts / Callouts */
+    .callout {
+      padding: 16px;
+      background-color: var(--accent-light);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 20px;
+    }
+
+    .callout-title {
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .callout.red {
+      background-color: var(--red-light);
+      border-left-color: var(--red);
+    }
+
+    .callout.red .callout-title {
+      color: var(--red);
+    }
+
+    /* Lists */
+    ul, ol {
+      padding-left: 24px;
+      margin-bottom: 16px;
+      color: var(--text-muted);
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="logo-container">
+      <img src="https://wamdmopfyhcbljeeclph.supabase.co/storage/v1/object/public/site-assets/fridge-logo.png" alt="Logo" class="logo-img">
+      <span class="logo-text">Tulanh Workspace</span>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item active"><a href="#overview">1. Tổng Quan Dự Án</a></li>
+      <li class="nav-item"><a href="#architecture">2. Kiến Trúc Kỹ Thuật</a></li>
+      <li class="nav-item"><a href="#db-schema">3. Thiết Kế Cơ Sở Dữ Liệu</a></li>
+      <li class="nav-item"><a href="#todo-widget">4. Widget Nhiệm Vụ</a></li>
+      <li class="nav-item"><a href="#notes-widget">5. Widget Ghi Chú</a></li>
+      <li class="nav-item"><a href="#pomo-widget">6. Widget Pomodoro</a></li>
+      <li class="nav-item"><a href="#portals">7. Cổng Liên Kết Trang Chủ</a></li>
+      <li class="nav-item"><a href="#directory">8. Cấu Trúc Thư Mục</a></li>
+      <li class="nav-item"><a href="#config">9. Thiết Lập Hệ Thống</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <header class="header-banner">
+      <span class="project-badge">Tài liệu kỹ thuật</span>
+      <h1>Đặc Tả Kỹ Thuật Toàn Bộ Dự Án Workspace</h1>
+      <p>Mô tả chi tiết kiến trúc, cơ sở dữ liệu, các tính năng cốt lõi và hướng dẫn vận hành hệ thống.</p>
+    </header>
+
+    <!-- 1. Tổng Quan -->
+    <section id="overview">
+      <h2>1. Tổng Quan Dự Án</h2>
+      <p>Dự án Workspace (Không gian làm việc cá nhân) là một phân hệ tính năng nâng cao được tích hợp trực tiếp vào website Next.js hiện tại (Tulanh-simple). Phân hệ này được thiết kế theo phong cách tối giản ấm áp (Warm Minimalist Theme), cung cấp cho người dùng một bộ công cụ làm việc khép kín giúp nâng cao hiệu suất cá nhân bao gồm: Quản lý công việc hàng ngày, Ghi chú nhanh dạng đa năng và Đồng hồ tập trung Pomodoro tích hợp.</p>
+      
+      <div class="callout">
+        <div class="callout-title">💡 Triết lý thiết kế</div>
+        <p>Bố cục được căn giữa cân đối, cố định chiều rộng (max-width 1280px) để không phát sinh thanh cuộn ngang trên mọi thiết bị. Toàn bộ khoảng cách đệm (paddings) và cỡ chữ tiêu đề được thu hẹp tối đa để dồn diện tích hiển thị cho nội dung chính, giúp người dùng tập trung tuyệt đối.</p>
+      </div>
+    </section>
+
+    <!-- 2. Kiến Trúc Kỹ Thuật -->
+    <section id="architecture">
+      <h2>2. Kiến Trúc Kỹ Thuật</h2>
+      <p>Hệ thống được xây dựng trên nền tảng Modern Web Stack hiệu năng cao:</p>
+      <ul>
+        <li><strong>Frontend Framework</strong>: Next.js 16 (App Router) với cơ chế render Client-side cho không gian làm việc tương tác thời gian thực.</li>
+        <li><strong>Backend & Database</strong>: Supabase (PostgreSQL) quản lý dữ liệu tập trung, xác thực người dùng và đồng bộ Realtime.</li>
+        <li><strong>Styling System</strong>: Vanilla CSS viết tập trung trong <code>working.css</code> giúp tối ưu hóa hiệu năng tải trang và kiểm soát chi tiết từng pixel giao diện.</li>
+        <li><strong>Audio System</strong>: Web Audio API sinh tần số âm thanh bíp và HTML5 Audio API kết hợp phát nhạc tĩnh cục bộ.</li>
+      </ul>
+      <p>Kiến trúc luồng dữ liệu (Data Flow) diễn ra đồng bộ giữa local state của React và database của Supabase thông qua các API Client bất đồng bộ.</p>
+    </section>
+
+    <!-- 3. Thiết Kế Cơ Sở Dữ Liệu -->
+    <section id="db-schema">
+      <h2>3. Thiết Kế Cơ Sở Dữ Liệu</h2>
+      <p>Cơ sở dữ liệu sử dụng hệ quản trị PostgreSQL trên Supabase. Hai bảng chính phục vụ riêng cho Workspace là <code>workspace_todos</code> và <code>workspace_notes</code>.</p>
+
+      <h3>Bảng: <code>workspace_todos</code></h3>
+      <p>Lưu trữ danh sách nhiệm vụ hàng ngày của người dùng.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Tên cột</th>
+            <th>Kiểu dữ liệu</th>
+            <th>Ràng buộc</th>
+            <th>Mô tả</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>id</code></td>
+            <td>UUID</td>
+            <td>Primary Key, Default: uuid_generate_v4()</td>
+            <td>Mã định danh duy nhất của nhiệm vụ</td>
+          </tr>
+          <tr>
+            <td><code>title</code></td>
+            <td>TEXT</td>
+            <td>Not Null</td>
+            <td>Tên hoặc mô tả ngắn gọn công việc</td>
+          </tr>
+          <tr>
+            <td><code>is_completed</code></td>
+            <td>BOOLEAN</td>
+            <td>Default: false</td>
+            <td>Trạng thái hoàn thành (true/false)</td>
+          </tr>
+          <tr>
+            <td><code>priority</code></td>
+            <td>TEXT</td>
+            <td>Default: 'medium'</td>
+            <td>Độ ưu tiên: 'high' | 'medium' | 'low'</td>
+          </tr>
+          <tr>
+            <td><code>deadline</code></td>
+            <td>DATE</td>
+            <td>Nullable</td>
+            <td>Hạn chót hoàn thành công việc</td>
+          </tr>
+          <tr>
+            <td><code>pomodoro_count</code></td>
+            <td>INTEGER</td>
+            <td>Default: 0</td>
+            <td>Số lượng cà chua (Pomodoro) đã tích lũy</td>
+          </tr>
+          <tr>
+            <td><code>user_id</code></td>
+            <td>UUID</td>
+            <td>Foreign Key -> auth.users(id)</td>
+            <td>ID của người sở hữu nhiệm vụ</td>
+          </tr>
+          <tr>
+            <td><code>created_at</code></td>
+            <td>TIMESTAMPTZ</td>
+            <td>Default: now()</td>
+            <td>Thời điểm tạo nhiệm vụ</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Bảng: <code>workspace_notes</code></h3>
+      <p>Lưu trữ các ghi chú cá nhân dưới định dạng văn bản Rich Text (HTML).</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Tên cột</th>
+            <th>Kiểu dữ liệu</th>
+            <th>Ràng buộc</th>
+            <th>Mô tả</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>id</code></td>
+            <td>UUID</td>
+            <td>Primary Key, Default: uuid_generate_v4()</td>
+            <td>Mã định danh duy nhất của ghi chú</td>
+          </tr>
+          <tr>
+            <td><code>title</code></td>
+            <td>TEXT</td>
+            <td>Default: 'Ghi chú mới'</td>
+            <td>Tiêu đề ghi chú</td>
+          </tr>
+          <tr>
+            <td><code>content</code></td>
+            <td>TEXT</td>
+            <td>Nullable</td>
+            <td>Nội dung định dạng HTML (Rich Text)</td>
+          </tr>
+          <tr>
+            <td><code>user_id</code></td>
+            <td>UUID</td>
+            <td>Foreign Key -> auth.users(id)</td>
+            <td>ID của người sở hữu ghi chú</td>
+          </tr>
+          <tr>
+            <td><code>created_at</code></td>
+            <td>TIMESTAMPTZ</td>
+            <td>Default: now()</td>
+            <td>Thời điểm tạo ghi chú</td>
+          </tr>
+          <tr>
+            <td><code>updated_at</code></td>
+            <td>TIMESTAMPTZ</td>
+            <td>Default: now()</td>
+            <td>Thời điểm cập nhật ghi chú gần nhất</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Hàm PostgreSQL RPC (Remote Procedure Call)</h3>
+      <p>Để tăng số tích điểm Pomodoro (cà chua) cho một nhiệm vụ một cách an toàn và tránh xung đột dữ liệu đồng thời, hệ thống sử dụng hàm RPC sau:</p>
+      <pre><code>create or replace function increment_todo_pomodoro(todo_id uuid)
+returns void as $$
+begin
+  update workspace_todos
+  set pomodoro_count = pomodoro_count + 1
+  where id = todo_id;
+end;
+$$ language plpgsql security definer;</code></pre>
+    </section>
+
+    <!-- 4. Widget Nhiệm Vụ -->
+    <section id="todo-widget">
+      <h2>4. Widget Nhiệm Vụ (Todo List)</h2>
+      <p>Cột đầu tiên của Workspace là <strong>Nhiệm vụ hàng ngày</strong>, chiếm 30% chiều rộng của Dashboard. Nó hỗ trợ các chức năng:</p>
+      <ul>
+        <li><strong>CRUD Nhiệm vụ</strong>: Thêm mới trực tiếp qua Form nhập liệu nhanh, đánh dấu hoàn thành (gạch ngang chữ và làm mờ), xóa nhiệm vụ khỏi danh sách.</li>
+        <li><strong>Thiết lập thuộc tính</strong>: Gán độ ưu tiên (High - đỏ, Medium - vàng, Low - xanh) và chọn hạn chót (Deadline) bằng trình chọn ngày gọn nhẹ.</li>
+        <li><strong>Tập trung (Focus State)</strong>: Người dùng có thể nhấn nút "Tập trung" (biểu tượng hồng tâm) trên một nhiệm vụ bất kỳ. Nhiệm vụ này sẽ được ghim vào widget Pomodoro bên cạnh làm mục tiêu hiện hành của phiên làm việc.</li>
+      </ul>
+    </section>
+
+    <!-- 5. Widget Ghi Chú -->
+    <section id="notes-widget">
+      <h2>5. Widget Ghi Chú (Notes Space)</h2>
+      <p>Chiếm cột giữa (45% chiều rộng Dashboard) và là khu vực tương tác linh hoạt nhất. Luồng giao diện (UI Flow) được thiết kế xoay quanh hai chế độ:</p>
+      
+      <h3>A. Chế độ xem danh sách (List View)</h3>
+      <p>Khi người dùng không trong trạng thái soạn thảo (hoặc sau khi bấm "Hoàn tất"), ô soạn thảo ẩn đi hoàn toàn. Khung widget hiển thị:</p>
+      <ul>
+        <li>Nút <strong>"Thêm ghi chú mới"</strong> lớn, màu Teal ở trên cùng.</li>
+        <li>Danh sách các ghi chú dưới dạng các hộp (cards) xếp dọc. Mỗi card hiển thị:
+          <ul>
+            <li><strong>Tiêu đề ghi chú</strong>: Chữ đậm rõ ràng.</li>
+            <li><strong>Bộ nút hành động</strong>: Nút Sửa (chuyển sang Editor) và nút Xóa (có hiệu ứng hover nổi bật).</li>
+            <li><strong>Nội dung ghi chú</strong>: Hiển thị an toàn định dạng HTML (`dangerouslySetInnerHTML`) trên nền màu ấm nhạt `#FAF9F6`, giới hạn chiều cao tối đa `110px` để giữ bố cục cân đối.</li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3>B. Chế độ soạn thảo (Editor View)</h3>
+      <p>Khi nhấp vào nút Sửa hoặc tạo ghi chú mới, ô soạn thảo hiện ra và chiếm trọn 100% không gian widget để viết lách thoải mái nhất:</p>
+      <ul>
+        <li><strong>Rich Text Editor</strong>: Xây dựng bằng thẻ <code>div contentEditable</code> tùy biến, hỗ trợ các phím tắt và thanh công cụ định dạng cơ bản: In đậm, In nghiêng, và Danh sách gạch đầu dòng.</li>
+        <li><strong>Auto-save (Debounce 2 giây)</strong>: Mỗi khi người dùng gõ chữ, hệ thống tự động thiết lập một bộ đệm chờ 2 giây. Nếu không có ký tự mới nào được gõ thêm, hệ thống sẽ tự động đồng bộ hóa nội dung lên cơ sở dữ liệu Supabase, hiển thị badge "Đang lưu..." và "Đã lưu ✓".</li>
+        <li><strong>Phím tắt ENTER thông minh</strong>:
+          <ul>
+            <li>Nhấn phím <code>ENTER</code> thông thường trong Editor hoặc ô Tiêu đề: Kích hoạt lưu tức thì (bỏ qua debounce 2 giây) và tự động đóng ô soạn thảo, quay lại List View.</li>
+            <li>Nhấn phím <code>Shift + Enter</code>: Cho phép xuống dòng bình thường để viết nhiều dòng.</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <!-- 6. Widget Pomodoro -->
+    <section id="pomo-widget">
+      <h2>6. Widget Pomodoro (Pomodoro Timer)</h2>
+      <p>Chiếm cột thứ ba (25% chiều rộng Dashboard), giúp quản lý chu kỳ tập trung công việc.</p>
+      <ul>
+        <li><strong>Đồng hồ đếm ngược</strong>: Hỗ trợ thời gian làm việc (25 phút - đỏ Pomodoro) và nghỉ giải lao (5 phút - xanh Teal), kèm theo tiến trình vòng tròn SVG quay đều mượt mà.</li>
+        <li><strong>Liên kết mục tiêu</strong>: Hiển thị tên nhiệm vụ đang tập trung (lấy từ Focus State của Todo). Khi hết 25 phút làm việc, hệ thống tự động cộng 1 điểm quả cà chua vào nhiệm vụ đó thông qua hàm RPC của database.</li>
+        <li><strong>Âm thanh thông báo thông minh</strong>:
+          <ul>
+            <li><strong>Kết thúc phiên làm việc (25 phút)</strong>: Phát tiếng chuông chánh niệm ngân vang từ file nhạc tĩnh `/sounds/bell.mp3` đúng <strong>3 lần liên tiếp</strong> bằng cách nghe sự kiện `'ended'` của trình duyệt.</li>
+            <li><strong>Kết thúc phiên nghỉ ngơi (5 phút)</strong>: Phát chuỗi 3 tiếng bíp "Bíp - Bíp - Bíp" bằng Web Audio API để thông báo quay lại làm việc.</li>
+          </ul>
+        </li>
+        <li><strong>Popup & Browser Notification</strong>: Gửi thông báo đẩy của hệ điều hành và hiển thị popup chúc mừng ở giữa màn hình khi hết giờ.</li>
+      </ul>
+    </section>
+
+    <!-- 7. Cổng Liên Kết Trang Chủ -->
+    <section id="portals">
+      <h2>7. Cổng Liên Kết Trang Chủ (Floating Portals)</h2>
+      <p>Để người dùng dễ dàng truy cập vào các không gian làm việc từ trang chủ, hệ thống bố trí một cụm 2 nút hành động nổi (Floating Action Buttons) cố định ở góc phải màn hình:</p>
+      <ul>
+        <li><strong>Nút 1: Ngăn Đá Workspace</strong> (Sơ đồ tư duy) - Chứa ảnh logo ngăn đá tròn trịa.</li>
+        <li><strong>Nút 2: Không Gian Làm Việc</strong> (Todo/Notes/Pomodoro) - Nằm ngay bên dưới nút 1, kích thước hoàn toàn đồng đều (`68px x 68px`), nền kính mờ (`backdrop-filter: blur(12px)`), chứa biểu tượng **Quả Táo** màu đỏ Pomodoro (`#E11D48`).</li>
+        <li><strong>Hiệu ứng Micro-animation</strong>: Khi hover vào nút Quả Táo, icon quả táo sẽ tự động phóng to nhẹ và xoay nghiêng `-5deg` mượt mà tạo cảm giác phản hồi sinh động.</li>
+      </ul>
+    </section>
+
+    <!-- 8. Cấu Trúc Thư Mục -->
+    <section id="directory">
+      <h2>8. Cấu Trúc Thư Mục</h2>
+      <p>Các file mã nguồn liên quan đến phân hệ Workspace được sắp xếp khoa học:</p>
+      <pre><code>/tulanh-simple-Tulanh
+  ├── /app
+  │    ├── /components
+  │    │    └── HomeClient.js           # Trang chủ Client (chứa cụm nút Portal)
+  │    ├── /working
+  │    │    ├── /components
+  │    │    │    ├── TodoWidget.js      # Component Todo List
+  │    │    │    ├── NotesWidget.js     # Component Ghi chú dạng List / Editor
+  │    │    │    └── PomodoroWidget.js  # Component Đồng hồ Pomodoro
+  │    │    ├── /utils
+  │    │    │    ├── sound.js           # Helper phát tiếng bíp & chuông 3 lần
+  │    │    │    └── format.js          # Helper định dạng thời gian đếm ngược
+  │    │    ├── page.js                 # Trang chính /working (CRUD logic & State)
+  │    │    └── working.css             # Toàn bộ stylesheet của Workspace
+  │    ├── globals.css                  # CSS toàn cục (chứa style Portal trang chủ)
+  │    └── layout.js                    # Layout chính bọc ngoài
+  ├── /public
+  │    └── /sounds
+  │         └── bell.mp3                # File âm thanh chuông chánh niệm MP3
+  └── /tests
+       └── format.test.mjs              # Bộ unit test định dạng thời gian</code></pre>
+    </section>
+
+    <!-- 9. Thiết Lập Hệ Thống -->
+    <section id="config">
+      <h2>9. Thiết Lập Hệ Thống</h2>
+      <p>Để chạy ứng dụng ở môi trường local, cần đảm bảo các thiết lập sau:</p>
+      
+      <h3>Cấu hình Biến môi trường (<code>.env.local</code>)</h3>
+      <p>Phải có các biến trỏ về Supabase Project hoạt động chính xác:</p>
+      <pre><code>NEXT_PUBLIC_SUPABASE_URL=https://wamdmopfyhcbljeeclph.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhbWRtb3BmeWhjYmxqZWVjbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MTkxOTAsImV4cCI6Mjk4MzM5NTE5MH0.zWu_CLZ2RGCVaY_Tbj81V1xAJOI6xbgaPnnpxgnt7cg</code></pre>
+
+      <h3>Lệnh Khởi chạy & Kiểm thử</h3>
+      <ul>
+        <li><strong>Chạy môi trường phát triển</strong>: <code>npm run dev</code></li>
+        <li><strong>Chạy bộ kiểm thử (Unit Tests)</strong>: <code>node --test tests/format.test.mjs</code></li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    // Smooth scrolling & active state for navigation links
+    document.querySelectorAll('.nav-item a').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetSection = document.querySelector(targetId);
+        
+        window.scrollTo({
+          top: targetSection.offsetTop - 20,
+          behavior: 'smooth'
+        });
+
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        this.parentElement.classList.add('active');
+      });
+    });
+
+    // Simple scroll spy to update active nav item
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('section');
+      const navItems = document.querySelectorAll('.nav-list .nav-item');
+      let currentSectionId = '';
+
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (window.scrollY >= sectionTop - 100) {
+          currentSectionId = section.getAttribute('id');
+        }
+      });
+
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        const link = item.querySelector('a');
+        if (link.getAttribute('href') === `#${currentSectionId}`) {
+          item.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

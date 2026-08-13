@@ -1,0 +1,66 @@
+{
+  "updated_at": "2026-06-19T13:36:00Z",
+  "working_on": {
+    "feature": "Lưu trí nhớ dự án (Save Brain)",
+    "task": "Export chat history and save project context",
+    "status": "completed",
+    "files": [
+      ".brain/brain.json",
+      ".brain/session.json",
+      "chat_history.html"
+    ],
+    "blockers": [],
+    "notes": "Đã sửa hoàn thiện giao diện Workspace, đã push lên nhánh Tulanh và xóa nhánh main."
+  },
+  "pending_tasks": [
+    {
+      "task": "Tích hợp Backend/Database sâu hơn cho Workspace (nếu cần)",
+      "priority": "low",
+      "notes": "Hiện tại các tính năng đang chạy tốt ở frontend, có thể cần móc nối CSDL trong các phase sau."
+    }
+  ],
+  "recent_changes": [
+    {
+      "timestamp": "2026-06-19T06:00:00Z",
+      "type": "feature",
+      "description": "Sửa lỗi lệch màn hình Workspace, chỉnh CSS cho dạng danh sách dọc (Notes), update tiếng chuông Pomodoro.",
+      "files": [
+        "app/working/working.css",
+        "app/working/page.js",
+        "app/working/components/NotesWidget.js"
+      ]
+    },
+    {
+      "timestamp": "2026-06-19T06:15:00Z",
+      "type": "infrastructure",
+      "description": "Đẩy code lên nhánh Tulanh trên GitHub và xóa nhánh main.",
+      "files": []
+    },
+    {
+      "timestamp": "2026-06-19T06:34:00Z",
+      "type": "utility",
+      "description": "Tạo file chat_history.html lưu lại đoạn chat của session hiện tại.",
+      "files": [
+        "scratch/export_chat.js",
+        "chat_history.html"
+      ]
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Lỗi regex double escape khi viết script export chat Node.js bằng tool",
+      "solution": "Chuyển sang dùng RegExp object để tránh lỗi escaping chuỗi",
+      "resolved": true
+    }
+  ],
+  "decisions_made": [
+    {
+      "decision": "Dùng nhánh Tulanh làm nhánh chính trên GitHub",
+      "reason": "Yêu cầu của User muốn lưu ở nhánh Tulanh thay vì main"
+    },
+    {
+      "decision": "Lưu chat history ra file HTML tĩnh",
+      "reason": "User muốn lưu log lại để theo dõi nhưng không thể import nguyên xi vào UI của Antigravity"
+    }
+  ]
+}

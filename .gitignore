@@ -1,0 +1,59 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# AI Brain (session logs - không cần commit)
+.brain/session_log.txt
+.brain/*.tmp
+
+# Supabase service key nếu lỡ để vào file text
+service_role_key.txt
+.gitnexus
+
+# Local archive of the retired Next.js version
+_archived-nextjs-version/
+
+# Local AI/GitNexus helper files
+.claude/
+AGENTS.md
+CLAUDE.md
+**/node_modules/
+scripts/tmp-html-import-test/node_modules/

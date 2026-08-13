@@ -1,0 +1,67 @@
+{
+  "meta": {
+    "schema_version": "1.1.0",
+    "awf_version": "3.3.0"
+  },
+  "project": {
+    "name": "tulanh-simple",
+    "type": "Web Application (Next.js)",
+    "status": "Phát triển"
+  },
+  "tech_stack": {
+    "frontend": "Next.js, React, CSS Modules (không dùng Tailwind theo mặc định)",
+    "backend": "Next.js API Routes, Supabase (Database & Auth)",
+    "database": "PostgreSQL (qua Supabase)"
+  },
+  "database_schema": {
+    "summary": "App lưu: thông tin user, log truy cập, mindmaps, ghi chú, todo, cài đặt Pomodoro",
+    "tables": [
+      {
+        "name": "users",
+        "description": "Chứa thông tin đăng nhập của người dùng"
+      },
+      {
+        "name": "visit_logs",
+        "description": "Lịch sử truy cập"
+      },
+      {
+        "name": "posts",
+        "description": "Các bài viết / nội dung"
+      }
+    ],
+    "relationships_explained": "Hệ thống quản lý dữ liệu cá nhân của người dùng, gắn các tác vụ (todo, note, pomodoro) theo từng cá nhân"
+  },
+  "api_endpoints": [
+    {
+      "path": "/api/track",
+      "explained": "Theo dõi và ghi nhận log truy cập của người dùng"
+    }
+  ],
+  "business_rules": [
+    "Workspace chỉ hiển thị trong màn hình cố định, không cuộn ngang",
+    "Ghi chú (Notes) hiển thị dạng danh sách dọc bên trái",
+    "Todo nằm ở giữa",
+    "Pomodoro nằm ở bên phải",
+    "Chuông Pomodoro phát 3 lần khi hết giờ (dùng chuông chánh niệm)"
+  ],
+  "features": [
+    "Authentication (Đăng nhập/Đăng xuất)",
+    "Admin Dashboard",
+    "Mindmap Viewer",
+    "Workspace Cá nhân (Todo, Ghi chú, Pomodoro Timer)"
+  ],
+  "knowledge_items": {
+    "patterns": [
+      "Sử dụng CSS thuần thay vì Tailwind cho các component Workspace",
+      "Giao diện cần được căn giữa và có max-width cố định (1280px) để không bị lệch"
+    ],
+    "gotchas": [
+      "Tránh thay đổi box-sizing gốc, tận dụng max-width và flexbox để sửa lỗi lệch giao diện",
+      "Cần thiết lập nhánh Tulanh trên GitHub làm nhánh chính, thay cho main"
+    ],
+    "conventions": [
+      "Các file liên quan Workspace nằm trong thư mục app/working",
+      "Định dạng code bằng prettier hoặc chuẩn riêng trong dự án"
+    ]
+  }
+}
