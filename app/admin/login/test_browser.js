@@ -15,7 +15,7 @@ const { chromium } = require('playwright');
   await page.setViewportSize({ width: 1280, height: 800 });
   
   console.log('Đang truy cập trang quản trị admin...');
-  await page.goto('https://tulanh.vercel.app/admin/login', { waitUntil: 'networkidle' });
+  await page.goto('http://localhost:3000/admin/login', { waitUntil: 'networkidle' });
   
   console.log('Đang tự động nhập Email: vutrongvtv24@gmail.com');
   await page.fill('#adminEmail', 'vutrongvtv24@gmail.com');
