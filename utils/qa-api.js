@@ -25,13 +25,21 @@ export async function getThreads(searchQuery = '') {
     if (error) throw error;
     
     // Format thread data to count comments and check if resolved
-    return (data || []).map(thread => {
+    const formatted = (data || []).map(thread => {
       const comments = thread.thread_comments || [];
       return {
         ...thread,
         comments_count: comments.length,
         is_resolved: comments.some(c => c.is_best_answer)
       };
+    });
+
+    // Sắp xếp: Bài viết có nhiều bình luận nhất xếp trên cùng, nếu bằng nhau bài mới hơn xếp trước
+    return formatted.sort((a, b) => {
+      if (b.comments_count !== a.comments_count) {
+        return b.comments_count - a.comments_count;
+      }
+      return new Date(b.created_at) - new Date(a.created_at);
     });
   } catch (err) {
     console.error('[QA-API] getThreads error:', err);
@@ -215,13 +223,21 @@ export async function getUserThreads(userId) {
 
     if (error) throw error;
     
-    return (data || []).map(thread => {
+    const formatted = (data || []).map(thread => {
       const comments = thread.thread_comments || [];
       return {
         ...thread,
         comments_count: comments.length,
         is_resolved: comments.some(c => c.is_best_answer)
       };
+    });
+
+    // Sắp xếp: Nhiều bình luận nhất lên trên cùng
+    return formatted.sort((a, b) => {
+      if (b.comments_count !== a.comments_count) {
+        return b.comments_count - a.comments_count;
+      }
+      return new Date(b.created_at) - new Date(a.created_at);
     });
   } catch (err) {
     console.error(`[QA-API] getUserThreads (${userId}) error:`, err);
