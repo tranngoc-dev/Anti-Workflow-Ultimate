@@ -12,20 +12,22 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Chạy kiểm tra session hiện tại ngay khi mount (chỉ tự động cho vào nếu đã xác thực admin trong phiên này)
-    async function checkCurrentSession() {
+    // Lắng nghe sự kiện auth thay đổi để xử lý chuyển hướng an toàn và bất đồng bộ
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const isVerified = sessionStorage.getItem('admin_verified') === 'true';
       if (!isVerified) return;
 
-      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         const { data: isAdmin } = await supabase.rpc('is_admin');
         if (isAdmin === true) {
           window.location.href = '/admin';
         }
       }
-    }
-    checkCurrentSession();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   async function handleLogin(e) {

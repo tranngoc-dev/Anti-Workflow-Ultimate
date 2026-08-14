@@ -95,7 +95,12 @@ export default function AdminLayout({ children }) {
 
   // 1. Kiểm tra Auth Guard (Chặn toàn bộ các route ngoại trừ /admin/login)
   useEffect(() => {
-    async function checkAuth() {
+    let mounted = true;
+
+    // Sử dụng onAuthStateChange lắng nghe để giải quyết bất đồng bộ khôi phục session khi tải trang
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+
       if (pathname === '/admin/login') {
         setLoading(false);
         return;
@@ -110,8 +115,9 @@ export default function AdminLayout({ children }) {
         return;
       }
 
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      if (!currentSession) {
+      if (!session) {
+        // Thực sự không có session -> xóa verified và redirect để tránh vòng lặp F5
+        sessionStorage.removeItem('admin_verified');
         window.location.href = '/admin/login';
         return;
       }
@@ -125,10 +131,14 @@ export default function AdminLayout({ children }) {
         return;
       }
 
-      setSession(currentSession);
+      setSession(session);
       setLoading(false);
-    }
-    checkAuth();
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [pathname]);
 
   async function handleLogout() {
