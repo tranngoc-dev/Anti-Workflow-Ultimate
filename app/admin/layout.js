@@ -106,13 +106,13 @@ export default function AdminLayout({ children }) {
       // Kiểm tra khóa xác thực admin độc lập
       const isVerified = sessionStorage.getItem('admin_verified') === 'true';
       if (!isVerified) {
-        router.push('/admin/login');
+        window.location.href = '/admin/login';
         return;
       }
 
       const { data: { session: currentSession } } = await supabase.auth.getSession();
       if (!currentSession) {
-        router.push('/admin/login');
+        window.location.href = '/admin/login';
         return;
       }
 
@@ -121,7 +121,7 @@ export default function AdminLayout({ children }) {
       if (error || isAdmin !== true) {
         await supabase.auth.signOut();
         sessionStorage.removeItem('admin_verified');
-        router.push('/admin/login');
+        window.location.href = '/admin/login';
         return;
       }
 
@@ -129,12 +129,12 @@ export default function AdminLayout({ children }) {
       setLoading(false);
     }
     checkAuth();
-  }, [pathname, router]);
+  }, [pathname]);
 
   async function handleLogout() {
     sessionStorage.removeItem('admin_verified');
     await supabase.auth.signOut();
-    router.push('/admin/login');
+    window.location.href = '/admin/login';
   }
 
   // Nếu đang ở trang đăng nhập, chỉ render form đăng nhập không kèm sidebar

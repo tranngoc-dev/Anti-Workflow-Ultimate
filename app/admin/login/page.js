@@ -21,12 +21,12 @@ export default function AdminLoginPage() {
       if (session) {
         const { data: isAdmin } = await supabase.rpc('is_admin');
         if (isAdmin === true) {
-          router.push('/admin');
+          window.location.href = '/admin';
         }
       }
     }
     checkCurrentSession();
-  }, [router]);
+  }, []);
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -56,7 +56,7 @@ export default function AdminLoginPage() {
 
       // Đăng nhập thành công -> Lưu khóa xác thực admin độc lập
       sessionStorage.setItem('admin_verified', 'true');
-      router.push('/admin');
+      window.location.href = '/admin';
     } catch (err) {
       console.error('[AdminLogin] Lỗi đăng nhập:', err);
       setErrorMsg(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
