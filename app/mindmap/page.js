@@ -1782,11 +1782,11 @@ CREATE POLICY "Anyone can view shared mindmaps" ON public.mindmaps
   FOR SELECT USING (is_shared = true);
 
 CREATE POLICY "Admins can do everything" ON public.mindmaps
-  FOR ALL USING (auth.uid() IN (
-    SELECT id FROM auth.users WHERE raw_user_meta_data->>'is_admin' = 'true'
-  )) WITH CHECK (auth.uid() IN (
-    SELECT id FROM auth.users WHERE raw_user_meta_data->>'is_admin' = 'true'
-  ));
+  FOR ALL USING (
+    coalesce((auth.jwt() -> 'user_metadata' ->> 'is_admin')::boolean, false) = true
+  ) WITH CHECK (
+    coalesce((auth.jwt() -> 'user_metadata' ->> 'is_admin')::boolean, false) = true
+  );
 
 -- Tạo hàm is_admin() nếu chưa có
 CREATE OR REPLACE FUNCTION public.is_admin()
@@ -1795,11 +1795,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
-  RETURN (
-    SELECT COALESCE((raw_user_meta_data->>'is_admin')::boolean, false)
-    FROM auth.users
-    WHERE id = auth.uid()
-  );
+  RETURN coalesce((auth.jwt() -> 'user_metadata' ->> 'is_admin')::boolean, false);
 END;
 $$;
 
