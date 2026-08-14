@@ -41,6 +41,35 @@
 
 ---
 
+## 📦 Cài Đặt Ban Đầu (1 Lần Duy Nhất)
+
+### Trên Windows (PowerShell):
+```powershell
+& "D:\AntiGravity\Anti-Workflow-Ultimate\install.ps1"
+```
+
+### Trên Linux / macOS:
+```bash
+bash "D:\AntiGravity\Anti-Workflow-Ultimate/install.sh"
+```
+
+---
+
+> [!IMPORTANT]
+> ## 🎯 DÀNH CHO DỰ ÁN ĐANG PHÁT TRIỂN (DỰ ÁN ĐÃ CÓ CODE):
+> **Khi bạn mở Antigravity 2.0 ở thư mục dự án đang làm, bạn chỉ cần gõ:**
+> ```text
+> /init
+> ```
+> **👉 Workflow sẽ được TỰ ĐỘNG CÀI ĐẶT vào dự án và MỌI THỨ SẼ ĐƯỢC TỰ ĐỘNG KÍCH HOẠT!**
+> 
+> * **Không mất code:** Giữ nguyên 100% source code, branches và git history hiện có.
+> * **Tự động cấu hình:** Tự động cài đặt Pre-commit Guardrail, nhận diện các lệnh test thật của dự án.
+> * **Tự động quét kiến trúc:** Tự động chạy `gitnexus analyze` để AI hiểu toàn bộ mối quan hệ trong codebase cũ trong vài giây.
+> * **Khám sức khỏe ngay:** Gợi ý chạy ngay `/audit` để phát hiện các lỗi ngầm, xung đột Database Foreign Key trước khi code tiếp!
+
+---
+
 ## 🚨 Cổng Kiểm Thử E2E Thật Sự (Mandatory E2E Gate)
 
 > **Nguyên tắc bất biến: Test E2E Thật Sự PASS 100% mới được làm tiếp!**
@@ -71,27 +100,13 @@ Thay vì giữ một cuộc trò chuyện dài hàng trăm tin nhắn, toàn b�
 
 ---
 
-## 📦 Cài Đặt 1 Chạm (Quick Install)
-
-### Trên Windows (PowerShell):
-```powershell
-& "D:\AntiGravity\Anti-Workflow-Ultimate\install.ps1"
-```
-
-### Trên Linux / macOS:
-```bash
-bash "D:\AntiGravity\Anti-Workflow-Ultimate/install.sh"
-```
-
----
-
 ## 🎮 Bảng Lệnh Slash Commands (/commands) & Ngôn Ngữ Tự Nhiên
 
 Anh có thể **gõ trực tiếp Slash Command** hoặc **nói bằng ngôn ngữ tự nhiên**, AI sẽ tự động hiểu và kích hoạt đúng quy trình tương ứng:
 
 | Lệnh Slash | Chức năng | 🗣️ Hoặc nói tự nhiên | Hành động thực tế của AI |
 | :--- | :--- | :--- | :--- |
-| `/init` | 🏁 Khởi tạo dự án | *"Tạo dự án mới...", "Bắt đầu làm app mới..."* | Tạo workspace, cài Git & Pre-commit Guardrail hook, tạo cấu trúc `.brain/`. |
+| `/init` | 🏁 Khởi tạo / Tích hợp dự án | *"Tạo dự án mới...", "Tích hợp workflow vào dự án này..."* | **Tự động nhận diện dự án mới hoặc dự án đang làm**, cài Guardrail, quét GitNexus. |
 | `/brainstorm` | 💡 Phỏng vấn ý tưởng | *"Bàn ý tưởng...", "Lên ý tưởng tính năng..."* | Phỏng vấn Socratic câu hỏi đơn, xuất bản Spec chi tiết vào `docs/superpowers/specs/`. |
 | `/visualize` | 🎨 Mockup UI/UX | *"Thiết kế giao diện...", "Dựng mockup UI..."* | Tạo prototype HTML/CSS trực quan, trích xuất bảng Design Tokens. |
 | `/plan` | 📋 Kế hoạch TDD | *"Lên kế hoạch làm...", "Phân rã task cho tính năng..."* | Gọi GitNexus tính Blast Radius $\to$ Chia nhỏ task 2–5 phút TDD & E2E Scenarios. |
