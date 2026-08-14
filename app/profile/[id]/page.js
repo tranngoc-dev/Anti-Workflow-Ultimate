@@ -256,18 +256,18 @@ export default function ProfilePage({ params }) {
                               src={RANK_BADGES[user.rank]} 
                               alt={user.rank} 
                               style={{ 
-                                width: '38px', 
-                                height: '38px', 
+                                width: '64px', 
+                                height: '64px', 
                                 objectFit: 'contain',
                                 backgroundColor: '#f8fafc',
-                                borderRadius: '8px',
-                                padding: '3px',
+                                borderRadius: '10px',
+                                padding: '6px',
                                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                                 border: '1px solid rgba(0,0,0,0.06)'
                               }}
                             />
                           ) : (
-                            <div style={{ width: '38px', height: '38px', borderRadius: '8px', backgroundColor: 'var(--border)' }} />
+                            <div style={{ width: '64px', height: '64px', borderRadius: '10px', backgroundColor: 'var(--border)' }} />
                           )}
                           <div>
                             <a href={`/profile/${user.id}`} style={{ fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none', color: 'var(--text)' }}>
