@@ -66,7 +66,7 @@ export async function getComments(threadId, currentUserId = null) {
       .from('thread_comments')
       .select(`
         *,
-        author:profiles(id, display_name, avatar_url, rank, gold_balance)
+        author:profiles!thread_comments_author_id_fkey(id, display_name, avatar_url, rank, gold_balance)
       `)
       .eq('thread_id', threadId)
       .order('is_best_answer', { ascending: false })
