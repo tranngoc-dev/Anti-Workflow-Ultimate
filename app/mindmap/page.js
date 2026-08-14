@@ -1181,36 +1181,7 @@ function MindmapDashboard({ maps, session, onCreateMap, onDeleteMap, onRenameMap
   
   return (
     <div className="min-h-screen bg-slate-50 text-gray-800 font-sans pb-12">
-      {/* 1. Dashboard Header Bar */}
-      <header className="mm-dash-header">
-        <div className="mm-dash-header-inner">
-          <div className="mm-dash-logo">
-            <span className="mm-logo-icon">🧠</span>
-            <span className="mm-logo-text">Ngăn Đá Mindmap</span>
-          </div>
-          
-          <div className="mm-dash-user-menu">
-            <span className="mm-user-badge">
-              <span className="mm-user-icon">👤</span>
-              <span className="mm-user-name">{userName}</span>
-            </span>
-            <button 
-              onClick={() => window.location.href = '/'} 
-              className="mm-dash-nav-btn home-btn" 
-              title="Về trang chủ"
-            >
-              🏠 Về trang chủ
-            </button>
-            <button 
-              onClick={async () => { await supabase.auth.signOut(); window.location.href = '/'; }} 
-              className="mm-dash-nav-btn logout-btn" 
-              title="Đăng xuất tài khoản Google"
-            >
-              🚪 Thoát
-            </button>
-          </div>
-        </div>
-      </header>
+
 
       {/* 2. Main Layout Container */}
       <div className="mm-dash-content-layout">
