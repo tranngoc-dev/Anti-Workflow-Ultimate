@@ -11,21 +11,7 @@ export default function AdminLoginPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    // Lắng nghe sự kiện auth thay đổi để xử lý chuyển hướng an toàn và bất đồng bộ
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session) {
-        const { data: isAdmin } = await supabase.rpc('is_admin');
-        if (isAdmin === true) {
-          window.location.href = '/admin';
-        }
-      }
-    });
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -46,9 +32,9 @@ export default function AdminLoginPage() {
 
       if (error) throw error;
 
-      // Kiểm tra quyền Admin bằng RPC 'is_admin'
-      const { data: isAdmin, error: adminErr } = await supabase.rpc('is_admin');
-      if (adminErr || isAdmin !== true) {
+      // Kiểm tra quyền Admin trực tiếp từ metadata của session trả về
+      const isAdmin = data.user?.user_metadata?.is_admin === true;
+      if (!isAdmin) {
         await supabase.auth.signOut();
         throw new Error('Tài khoản của bạn không có quyền truy cập trang quản trị.');
       }

@@ -113,9 +113,9 @@ export default function AdminLayout({ children }) {
         return;
       }
 
-      // Check is_admin RPC
-      const { data: isAdmin, error } = await supabase.rpc('is_admin');
-      if (error || isAdmin !== true) {
+      // Check is_admin từ metadata của session trực tiếp để tránh lỗi bất đồng bộ của RPC
+      const isAdmin = session.user?.user_metadata?.is_admin === true;
+      if (!isAdmin) {
         await supabase.auth.signOut();
         window.location.href = '/admin/login';
         return;
