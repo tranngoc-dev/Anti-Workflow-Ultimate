@@ -21,10 +21,10 @@ async function getSiteName() {
       .eq('key', 'site_name')
       .single();
     if (error) throw error;
-    return data?.value || 'Tulanh-simple';
+    return data?.value || 'Tulanh';
   } catch (err) {
     console.error('[RootLayout] Lỗi lấy tên website:', err);
-    return 'Tulanh-simple';
+    return 'Tulanh';
   }
 }
 

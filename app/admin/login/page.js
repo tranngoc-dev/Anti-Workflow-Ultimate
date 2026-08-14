@@ -101,7 +101,7 @@ export default function AdminLoginPage() {
         <header className="post-header" style={{ textAlign: 'center' }}>
           <img
             src="/images/fridge-logo.png"
-            alt="Tulanh-simple Admin"
+            alt="Tulanh Admin"
             style={{ width: '48px', height: '48px', marginBottom: '1rem' }}
           />
           <h1>Đăng nhập Admin</h1>

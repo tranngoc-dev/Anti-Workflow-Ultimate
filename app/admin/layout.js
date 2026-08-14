@@ -169,12 +169,12 @@ export default function AdminLayout({ children }) {
       {/* Sidebar */}
       <aside className="admin-sidebar" role="navigation" aria-label="Admin navigation">
         <div className="admin-sidebar__header">
-          <a href="/admin" className="admin-sidebar__logo" aria-label="Tulanh-simple Admin - Về Dashboard">
+          <a href="/admin" className="admin-sidebar__logo" aria-label="Tulanh Admin - Về Dashboard">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <rect width="20" height="20" rx="4" fill="currentColor" />
               <path d="M5 10L9 14L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            Tulanh-simple
+            Tulanh
           </a>
         </div>
 
