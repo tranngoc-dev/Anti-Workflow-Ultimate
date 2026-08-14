@@ -369,3 +369,22 @@ SELECT
     'Kim Ngư'
 FROM auth.users
 ON CONFLICT (id) DO NOTHING;
+
+
+-- =======================================================
+-- H. Auto-assign Admin metadata to vutrongvtv24@gmail.com on user signup
+-- =======================================================
+CREATE OR REPLACE FUNCTION public.set_admin_metadata()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.email = 'vutrongvtv24@gmail.com' THEN
+        NEW.raw_user_meta_data := coalesce(NEW.raw_user_meta_data, '{}'::jsonb) || '{"is_admin": true}'::jsonb;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_before_insert ON auth.users;
+CREATE TRIGGER on_auth_user_before_insert
+    BEFORE INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.set_admin_metadata();
