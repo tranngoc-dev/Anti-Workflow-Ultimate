@@ -123,12 +123,12 @@ export default function ProfilePage({ params }) {
                           src={RANK_BADGES[profile.rank]} 
                           alt={profile.rank} 
                           style={{ 
-                            width: '26px', 
-                            height: '26px', 
+                            width: '32px', 
+                            height: '32px', 
                             objectFit: 'contain',
                             backgroundColor: '#f8fafc',
                             borderRadius: '50%',
-                            padding: '3px',
+                            padding: '4px',
                             boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
                             border: '1px solid rgba(0,0,0,0.05)',
                             marginRight: '2px'
@@ -250,46 +250,36 @@ export default function ProfilePage({ params }) {
                           </span>
                           
                           {/* User Avatar & Name */}
-                          {user.avatar_url ? (
+                          {/* User Avatar & Name */}
+                          {user.rank && RANK_BADGES[user.rank] ? (
                             <img 
-                              src={user.avatar_url} 
-                              alt="avatar" 
-                              style={{ width: '32px', height: '32px', borderRadius: '50%' }}
+                              src={RANK_BADGES[user.rank]} 
+                              alt={user.rank} 
+                              style={{ 
+                                width: '38px', 
+                                height: '38px', 
+                                objectFit: 'contain',
+                                backgroundColor: '#f8fafc',
+                                borderRadius: '8px',
+                                padding: '3px',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                border: '1px solid rgba(0,0,0,0.06)'
+                              }}
                             />
                           ) : (
-                            <span style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'inline-block' }} />
+                            <div style={{ width: '38px', height: '38px', borderRadius: '8px', backgroundColor: 'var(--border)' }} />
                           )}
                           <div>
-                            <a href={`/profile/${user.id}`} style={{ fontWeight: 700, fontSize: '0.9rem', textDecoration: 'none', color: 'var(--text)' }}>
+                            <a href={`/profile/${user.id}`} style={{ fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none', color: 'var(--text)' }}>
                               {user.display_name || 'Người dùng'}
                             </a>
                             <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              fontSize: '0.7rem',
+                              fontSize: '0.75rem',
                               fontWeight: 600,
                               color: RANK_COLORS[user.rank] || '#4b5563',
                               marginTop: '2px'
                             }}>
-                              {user.rank && RANK_BADGES[user.rank] && (
-                                <img 
-                                  src={RANK_BADGES[user.rank]} 
-                                  alt={user.rank} 
-                                  style={{ 
-                                    width: '18px', 
-                                    height: '18px', 
-                                    objectFit: 'contain',
-                                    backgroundColor: '#f8fafc',
-                                    borderRadius: '50%',
-                                    padding: '2px',
-                                    boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
-                                    border: '1px solid rgba(0,0,0,0.05)',
-                                    marginRight: '2px'
-                                  }} 
-                                />
-                              )}
-                              <span>{user.rank}</span>
+                              {user.rank}
                             </div>
                           </div>
                         </div>

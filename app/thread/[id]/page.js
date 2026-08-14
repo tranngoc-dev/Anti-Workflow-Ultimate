@@ -166,15 +166,16 @@ export default function ThreadDetailPage({ params }) {
                     src={RANK_BADGES[thread.author.rank]} 
                     alt={thread.author.rank} 
                     style={{ 
-                      width: '22px', 
-                      height: '22px', 
+                      width: '28px', 
+                      height: '28px', 
                       objectFit: 'contain',
                       backgroundColor: '#f8fafc',
                       borderRadius: '50%',
-                      padding: '2px',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
-                      border: '1px solid rgba(0,0,0,0.05)',
-                      marginLeft: '2px'
+                      padding: '3px',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.12)',
+                      border: '1px solid rgba(0,0,0,0.06)',
+                      marginLeft: '4px',
+                      marginRight: '2px'
                     }} 
                   />
                 )}
@@ -313,15 +314,16 @@ export default function ThreadDetailPage({ params }) {
                       src={RANK_BADGES[comment.author.rank]} 
                       alt={comment.author.rank} 
                       style={{ 
-                        width: '18px', 
-                        height: '18px', 
+                        width: '24px', 
+                        height: '24px', 
                         objectFit: 'contain',
                         backgroundColor: '#f8fafc',
                         borderRadius: '50%',
-                        padding: '2px',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
-                        border: '1px solid rgba(0,0,0,0.05)',
-                        marginLeft: '2px'
+                        padding: '3px',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.12)',
+                        border: '1px solid rgba(0,0,0,0.06)',
+                        marginLeft: '4px',
+                        marginRight: '2px'
                       }} 
                     />
                   )}
