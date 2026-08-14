@@ -139,14 +139,22 @@ CREATE TRIGGER update_profiles_updated_at
 -- B. Auto-create Profile on User Signup (Google OAuth / Auth Signup)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+    init_gold INTEGER := 0;
+    init_rank TEXT := 'Kim Ngư';
 BEGIN
+    IF NEW.email = 'vutrongvtv24@gmail.com' THEN
+        init_gold := 1000;
+        init_rank := 'Thiên Long';
+    END IF;
+
     INSERT INTO public.profiles (id, display_name, avatar_url, gold_balance, rank)
     VALUES (
         NEW.id,
         COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', NEW.email),
         COALESCE(NEW.raw_user_meta_data->>'avatar_url', NEW.raw_user_meta_data->>'picture'),
-        0,
-        'Kim Ngư'
+        init_gold,
+        init_rank
     )
     ON CONFLICT (id) DO NOTHING;
     RETURN NEW;
@@ -182,14 +190,22 @@ CREATE TRIGGER z_protect_profile_score_trigger
 -- D. Auto-update Rank based on Gold balance
 CREATE OR REPLACE FUNCTION public.update_user_rank()
 RETURNS TRIGGER AS $$
+DECLARE
+    user_email TEXT;
 BEGIN
-    NEW.rank = CASE
-        WHEN NEW.gold_balance >= 1000 THEN 'Thiên Long'
-        WHEN NEW.gold_balance >= 500 THEN 'Hỏa Long'
-        WHEN NEW.gold_balance >= 200 THEN 'Đế Long'
-        WHEN NEW.gold_balance >= 50 THEN 'Linh Long'
-        ELSE 'Kim Ngư'
-    END;
+    SELECT email INTO user_email FROM auth.users WHERE id = NEW.id;
+
+    IF user_email = 'vutrongvtv24@gmail.com' THEN
+        NEW.rank := 'Thiên Long';
+    ELSE
+        NEW.rank = CASE
+            WHEN NEW.gold_balance >= 1000 THEN 'Thiên Long'
+            WHEN NEW.gold_balance >= 500 THEN 'Hỏa Long'
+            WHEN NEW.gold_balance >= 200 THEN 'Đế Long'
+            WHEN NEW.gold_balance >= 50 THEN 'Linh Long'
+            ELSE 'Kim Ngư'
+        END;
+    END IF;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
