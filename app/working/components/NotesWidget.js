@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { Plus, Trash2, Bold, Italic, List, AlertCircle, FileText } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 export default function NotesWidget({
   notes = [],
@@ -231,7 +232,7 @@ export default function NotesWidget({
                   <div className="notes-card-body">
                     {note.content && note.content.trim() !== '' && note.content !== '<br>' ? (
                       <div 
-                        dangerouslySetInnerHTML={{ __html: note.content }} 
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note.content || '') }} 
                         className="notes-card-html-content"
                       />
                     ) : (

@@ -590,3 +590,13 @@ GRANT EXECUTE ON FUNCTION public.get_post_view_counts() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_post_view_counts() TO anon;
 GRANT EXECUTE ON FUNCTION public.get_visit_logs_stats() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_visit_logs_stats() TO anon;
+
+-- Indexes for high-frequency queries
+CREATE INDEX IF NOT EXISTS idx_visit_logs_created_at ON public.visit_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_visit_logs_ip ON public.visit_logs(ip_address);
+CREATE INDEX IF NOT EXISTS idx_page_views_post_slug ON public.page_views(post_slug);
+CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON public.page_views(created_at);
+CREATE INDEX IF NOT EXISTS idx_comments_status ON public.comments(status);
+CREATE INDEX IF NOT EXISTS idx_comments_post_slug ON public.comments(post_slug);
+CREATE INDEX IF NOT EXISTS idx_posts_slug ON public.posts(slug);
+CREATE INDEX IF NOT EXISTS idx_posts_created_at ON public.posts(created_at);

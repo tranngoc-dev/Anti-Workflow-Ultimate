@@ -76,6 +76,12 @@ export default [
         afterEach: "readonly",
         beforeAll: "readonly",
         afterAll: "readonly",
+        Blob: "readonly",
+        DOMParser: "readonly",
+        TextDecoder: "readonly",
+        URLSearchParams: "readonly",
+        Notification: "readonly",
+        FileReader: "readonly",
       }
     },
     rules: {
