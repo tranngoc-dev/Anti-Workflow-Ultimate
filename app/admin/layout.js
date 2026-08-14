@@ -108,16 +108,7 @@ export default function AdminLayout({ children }) {
 
       setLoading(true);
 
-      // Kiểm tra khóa xác thực admin độc lập
-      const isVerified = sessionStorage.getItem('admin_verified') === 'true';
-      if (!isVerified) {
-        window.location.href = '/admin/login';
-        return;
-      }
-
       if (!session) {
-        // Thực sự không có session -> xóa verified và redirect để tránh vòng lặp F5
-        sessionStorage.removeItem('admin_verified');
         window.location.href = '/admin/login';
         return;
       }
@@ -126,7 +117,6 @@ export default function AdminLayout({ children }) {
       const { data: isAdmin, error } = await supabase.rpc('is_admin');
       if (error || isAdmin !== true) {
         await supabase.auth.signOut();
-        sessionStorage.removeItem('admin_verified');
         window.location.href = '/admin/login';
         return;
       }
@@ -142,7 +132,6 @@ export default function AdminLayout({ children }) {
   }, [pathname]);
 
   async function handleLogout() {
-    sessionStorage.removeItem('admin_verified');
     await supabase.auth.signOut();
     window.location.href = '/admin/login';
   }

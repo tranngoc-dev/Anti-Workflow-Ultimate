@@ -14,9 +14,6 @@ export default function AdminLoginPage() {
   useEffect(() => {
     // Lắng nghe sự kiện auth thay đổi để xử lý chuyển hướng an toàn và bất đồng bộ
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const isVerified = sessionStorage.getItem('admin_verified') === 'true';
-      if (!isVerified) return;
-
       if (session) {
         const { data: isAdmin } = await supabase.rpc('is_admin');
         if (isAdmin === true) {
@@ -56,8 +53,7 @@ export default function AdminLoginPage() {
         throw new Error('Tài khoản của bạn không có quyền truy cập trang quản trị.');
       }
 
-      // Đăng nhập thành công -> Lưu khóa xác thực admin độc lập
-      sessionStorage.setItem('admin_verified', 'true');
+      // Đăng nhập thành công -> chuyển hướng sang trang quản trị
       window.location.href = '/admin';
     } catch (err) {
       console.error('[AdminLogin] Lỗi đăng nhập:', err);
