@@ -253,13 +253,14 @@ export default function ProfilePage({ params }) {
                             <a href={`/profile/${user.id}`} style={{ fontWeight: 700, fontSize: '0.9rem', textDecoration: 'none', color: 'var(--text)' }}>
                               {user.display_name || 'Người dùng'}
                             </a>
-                            <span style={{
-                              display: 'inline-flex',
+                            <div style={{
+                              display: 'flex',
                               alignItems: 'center',
                               gap: '4px',
                               fontSize: '0.7rem',
                               fontWeight: 600,
-                              color: RANK_COLORS[user.rank] || '#4b5563'
+                              color: RANK_COLORS[user.rank] || '#4b5563',
+                              marginTop: '2px'
                             }}>
                               {user.rank && RANK_BADGES[user.rank] && (
                                 <img 
@@ -268,8 +269,8 @@ export default function ProfilePage({ params }) {
                                   style={{ width: '12px', height: '12px', objectFit: 'contain' }} 
                                 />
                               )}
-                              {user.rank}
-                            </span>
+                              <span>{user.rank}</span>
+                            </div>
                           </div>
                         </div>
 
