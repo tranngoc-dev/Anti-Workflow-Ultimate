@@ -62,7 +62,7 @@
 .working-container {
   min-height: 100vh;
   background-color: var(--bg-color);
-  padding: 40px 16px;
+  padding: 24px 16px;
   box-sizing: border-box;
   display: flex;
   justify-content: center;
@@ -71,62 +71,30 @@
 
 .working-inner {
   width: 100%;
-  max-width: 560px;
+  max-width: 960px;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* 3. Header */
+/* 2.1 Grid Layout */
+.working-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 820px) {
+  .working-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+/* 3. Header (Ẩn đi vì dùng header chung) */
 .working-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 12px;
-  border-bottom: var(--border);
-}
-
-.working-title-area h1 {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text-main);
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-.working-subtitle {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin: 4px 0 0 0;
-}
-
-.sync-status {
-  font-size: 11px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--text-muted);
-}
-
-.working-btn-signout {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-muted);
-  background: none;
-  border: var(--border);
-  border-radius: var(--radius-sm);
-  padding: 4px 10px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: var(--transition);
-}
-
-.working-btn-signout:hover {
-  color: var(--text-main);
-  border-color: var(--text-main);
+  display: none !important;
 }
 
 /* 4. Thẻ UI Flat */
@@ -134,10 +102,10 @@
   background-color: var(--card-bg);
   border: var(--border);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: 28px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   box-sizing: border-box;
 }
 
@@ -156,8 +124,8 @@
   border: none;
   background: none;
   border-radius: var(--radius-sm);
-  padding: 8px;
-  font-size: 13px;
+  padding: 10px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--text-muted);
   cursor: pointer;
@@ -182,13 +150,13 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  padding: 16px 0;
+  padding: 24px 0;
 }
 
 .timer-ring-svg {
   transform: rotate(-90deg);
-  width: 140px;
-  height: 140px;
+  width: 220px;
+  height: 220px;
 }
 
 .timer-ring-bg {
@@ -202,23 +170,23 @@
 
 .timer-time-text {
   position: absolute;
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 52px;
+  font-weight: 800;
   color: var(--text-main);
   font-family: monospace;
 }
 
 .current-task-row {
   text-align: center;
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--text-muted);
   margin-top: 8px;
 }
 
 .current-task-name {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-main);
-  margin-left: 4px;
+  margin-left: 6px;
 }
 
 /* 7. Stats Row */
@@ -227,8 +195,8 @@
   grid-template-columns: repeat(3, 1fr);
   border-top: var(--border);
   border-bottom: var(--border);
-  padding: 16px 0;
-  margin: 8px 0;
+  padding: 20px 0;
+  margin: 10px 0;
   text-align: center;
 }
 
@@ -243,16 +211,16 @@
 }
 
 .stat-label {
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .stat-value {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 800;
   color: var(--accent-color);
 }
 
@@ -260,7 +228,7 @@
 .controls-row {
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .btn-primary {
@@ -268,9 +236,9 @@
   color: #FFFFFF;
   border: none;
   border-radius: var(--radius-md);
-  padding: 12px 28px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 14px 36px;
+  font-size: 16px;
+  font-weight: 700;
   cursor: pointer;
   transition: var(--transition);
 }
@@ -283,8 +251,8 @@
   background: none;
   border: var(--border);
   border-radius: var(--radius-md);
-  padding: 12px 18px;
-  font-size: 14px;
+  padding: 14px 22px;
+  font-size: 16px;
   color: var(--text-main);
   cursor: pointer;
   transition: var(--transition);
@@ -298,12 +266,12 @@
 .task-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .task-input-row {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
 .task-input {
@@ -311,8 +279,8 @@
   border: var(--border);
   background-color: var(--bg-color);
   border-radius: var(--radius-md);
-  padding: 12px 16px;
-  font-size: 14px;
+  padding: 14px 18px;
+  font-size: 15px;
   color: var(--text-main);
   outline: none;
   transition: var(--transition);
@@ -327,9 +295,9 @@
   border: var(--border);
   color: var(--accent-color);
   border-radius: var(--radius-md);
-  width: 44px;
-  font-size: 20px;
-  font-weight: 500;
+  width: 52px;
+  font-size: 22px;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;

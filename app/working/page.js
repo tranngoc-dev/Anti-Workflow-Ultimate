@@ -873,220 +873,217 @@ export default function WorkingPage() {
       </div>
 
       <div className="working-inner">
-        {/* Header */}
-        <div className="working-header">
-          <div className="working-title-area">
-            <h1>Focus Timer</h1>
-            <p className="working-subtitle">
-              Xin chào, {session.user.user_metadata?.full_name || session.user.email}!
-            </p>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span className="sync-status">
-              <span style={{ 
-                width: '6px', 
-                height: '6px', 
-                borderRadius: '50%', 
-                backgroundColor: syncStatus === 'saved' ? '#3B6D11' : (syncStatus === 'saving' ? '#F59E0B' : '#EF4444')
-              }}></span>
-              {syncStatus === 'saved' ? 'Đã đồng bộ' : (syncStatus === 'saving' ? 'Đang lưu...' : 'Lỗi đồng bộ')}
-            </span>
-            <button onClick={handleSignOut} className="working-btn-signout">
-              <LogOut size={12} />
-              Thoát
-            </button>
-          </div>
+        {/* Status Bar */}
+        <div className="working-top-status" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', padding: '0 4px' }}>
+          <span className="sync-status" style={{ fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)' }}>
+            <span style={{ 
+              width: '8px', 
+              height: '8px', 
+              borderRadius: '50%', 
+              backgroundColor: syncStatus === 'saved' ? '#3B6D11' : (syncStatus === 'saving' ? '#F59E0B' : '#EF4444')
+            }}></span>
+            {syncStatus === 'saved' ? 'Đã đồng bộ đám mây' : (syncStatus === 'saving' ? 'Đang lưu...' : 'Lỗi đồng bộ')}
+          </span>
+          <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>
+            Xin chào, <strong>{session.user.user_metadata?.full_name || session.user.email}</strong>
+          </span>
         </div>
 
-        {/* Thẻ đếm giờ Pomodoro */}
-        <section className="focus-card">
-          {/* Nhãn chế độ hiện tại */}
-          <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: 700, color: 'var(--accent-color)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            {mode === 'work' ? 'Phiên Làm Việc (25p)' : 'Phiên Nghỉ Ngơi (5p)'}
-          </div>
-
-          {/* Vòng tròn Timer */}
-          <div className="timer-ring-container">
-            <svg viewBox="0 0 120 120" className="timer-ring-svg">
-              <circle cx="60" cy="60" r="52" strokeWidth="5" fill="none" className="timer-ring-bg" />
-              <circle 
-                cx="60" 
-                cy="60" 
-                r="52" 
-                strokeWidth="5" 
-                fill="none" 
-                strokeLinecap="round"
-                strokeDasharray="326.7"
-                strokeDashoffset={strokeDashoffset}
-                className="timer-ring-progress"
-              />
-            </svg>
-            <div className="timer-time-text">
-              {formatTime(timeLeft)}
-            </div>
-          </div>
-
-          <div className="current-task-row">
-            <span>Đang làm:</span>
-            <span className="current-task-name">
-              {activeTodo ? activeTodo.title : 'Chưa chọn việc'}
-            </span>
-          </div>
-
-          {/* Stats Row */}
-          <div className="stats-row">
-            <div className="stat-item">
-              <span className="stat-label">Phiên hôm nay</span>
-              <span className="stat-value">{stats.sessionsToday}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Phút tập trung</span>
-              <span className="stat-value">{stats.focusMinutes}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Việc xong</span>
-              <span className="stat-value">{stats.tasksDone}</span>
-            </div>
-          </div>
-
-          {/* Controls */}
-          <div className="controls-row">
-            {isRunning ? (
-              <button onClick={pauseTimer} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Pause size={16} fill="#ffffff" /> Tạm dừng
-              </button>
-            ) : (
-              <button onClick={startTimer} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Play size={16} fill="#ffffff" /> Bắt đầu
-              </button>
-            )}
-            <button onClick={resetTimer} className="btn-secondary" title="Thiết lập lại">
-              <RotateCcw size={16} />
-            </button>
-            <button 
-              onClick={() => setIsMuted(!isMuted)} 
-              className="btn-secondary" 
-              title={isMuted ? 'Bật chuông báo' : 'Tắt chuông báo'}
-              style={{ padding: '12px' }}
-            >
-              {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-            </button>
-          </div>
-        </section>
-
-        {/* Danh sách Tasks */}
-        <section className="focus-card">
-          <div className="task-section">
-            <form onSubmit={handleAddTask} className="task-input-row">
-              <input 
-                type="text" 
-                value={taskInput} 
-                onChange={(e) => setTaskInput(e.target.value)} 
-                placeholder="Thêm việc cần làm..." 
-                maxLength="60"
-                className="task-input"
-              />
-              <button type="submit" className="btn-add-task">+</button>
-            </form>
-
-            <div className="task-list-container">
-              {todos.length === 0 ? (
-                <div className="empty-log" style={{ padding: '24px 0' }}>Chưa có nhiệm vụ nào. Thêm việc ở trên anh nhé!</div>
-              ) : (
-                todos.map((todo) => (
-                  <div 
-                    key={todo.id} 
-                    onClick={() => handleSelectTodo(todo)}
-                    className={`task-item ${activeTodo && activeTodo.id === todo.id ? 'active' : ''} ${todo.is_completed ? 'done' : ''}`}
-                  >
-                    <div className="task-item-left">
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleToggleTodo(todo.id, todo.is_completed);
-                        }}
-                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                      >
-                        {todo.is_completed ? (
-                          <CheckCircle2 size={18} color="var(--accent-color)" />
-                        ) : (
-                          <Circle size={18} color="var(--text-muted)" />
-                        )}
-                      </button>
-                      <span className="task-title" title={todo.title}>{todo.title}</span>
-                      {todo.pomodoros_completed > 0 && (
-                        <span className="task-pomo-count">🍅 {todo.pomodoros_completed}</span>
-                      )}
-                    </div>
-                    <div className="task-actions">
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteTodo(todo.id);
-                        }}
-                        className="btn-task-action delete"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* Ambient Sound */}
-        <section className="focus-card">
-          <div className="sound-section">
-            <span className="sound-title">Âm thanh nền</span>
-            <div className="sound-row">
-              <button onClick={() => handleToggleSound('none')} className={`sound-btn ${sound === 'none' ? 'active' : ''}`}>Tắt</button>
-              <button onClick={() => handleToggleSound('chanh-niem')} className={`sound-btn ${sound === 'chanh-niem' ? 'active' : ''}`}>🔔 Chánh Niệm</button>
-              <button onClick={() => handleToggleSound('rain')} className={`sound-btn ${sound === 'rain' ? 'active' : ''}`}>🌧 Mưa</button>
-              <button onClick={() => handleToggleSound('forest')} className={`sound-btn ${sound === 'forest' ? 'active' : ''}`}>🌿 Rừng</button>
-              <button onClick={() => handleToggleSound('cafe')} className={`sound-btn ${sound === 'cafe' ? 'active' : ''}`}>☕ Cà phê</button>
-              <button onClick={() => handleToggleSound('wave')} className={`sound-btn ${sound === 'wave' ? 'active' : ''}`}>🌊 Sóng biển</button>
-              <button onClick={() => handleToggleSound('wind')} className={`sound-btn ${sound === 'wind' ? 'active' : ''}`}>🍃 Gió thổi</button>
-              <button onClick={() => handleToggleSound('lofi')} className={`sound-btn ${sound === 'lofi' ? 'active' : ''}`}>🎹 Nhạc Lofi</button>
-              <button onClick={() => handleToggleSound('white')} className={`sound-btn ${sound === 'white' ? 'active' : ''}`}>〰 Noise</button>
-            </div>
-            {sound !== 'none' && (
-              <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '12px', padding: '0 8px' }}>
-                <span style={{ fontSize: '13px', color: '#8E8E93', fontWeight: 500 }}>Âm lượng:</span>
-                <input 
-                  type="range" 
-                  min="0" 
-                  max="1" 
-                  step="0.05" 
-                  value={ambientVolume}
-                  onChange={(e) => setAmbientVolume(parseFloat(e.target.value))}
-                  style={{ flex: 1, accentColor: '#3B6D11' }}
-                />
+        <div className="working-grid">
+          <div className="working-col-left" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* Thẻ đếm giờ Pomodoro */}
+            <section className="focus-card">
+              {/* Nhãn chế độ hiện tại */}
+              <div style={{ textAlign: 'center', fontSize: '15px', fontWeight: 800, color: 'var(--accent-color)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                {mode === 'work' ? 'Phiên Làm Việc (25p)' : 'Phiên Nghỉ Ngơi (5p)'}
               </div>
-            )}
-          </div>
-        </section>
 
-        {/* Nhật ký phiên (Session Log) */}
-        <section className="focus-card">
-          <div className="log-section">
-            <span className="sound-title">Nhật ký hôm nay</span>
-            <div className="log-list">
-              {logs.length === 0 ? (
-                <div className="empty-log">Chưa có phiên nào hôm nay.</div>
-              ) : (
-                logs.map((log) => (
-                  <div key={log.id} className="log-item">
-                    <span className={`log-dot ${log.isWork ? 'work' : 'break'}`}></span>
-                    <span className="log-time">{log.time}</span>
-                    <span className="log-desc">{log.label}</span>
+              {/* Vòng tròn Timer */}
+              <div className="timer-ring-container">
+                <svg viewBox="0 0 120 120" className="timer-ring-svg">
+                  <circle cx="60" cy="60" r="52" strokeWidth="5" fill="none" className="timer-ring-bg" />
+                  <circle 
+                    cx="60" 
+                    cy="60" 
+                    r="52" 
+                    strokeWidth="5" 
+                    fill="none" 
+                    strokeLinecap="round"
+                    strokeDasharray="326.7"
+                    strokeDashoffset={strokeDashoffset}
+                    className="timer-ring-progress"
+                  />
+                </svg>
+                <div className="timer-time-text">
+                  {formatTime(timeLeft)}
+                </div>
+              </div>
+
+              <div className="current-task-row" style={{ fontSize: '14px' }}>
+                <span>Đang làm:</span>
+                <span className="current-task-name">
+                  {activeTodo ? activeTodo.title : 'Chưa chọn việc'}
+                </span>
+              </div>
+
+              {/* Stats Row */}
+              <div className="stats-row">
+                <div className="stat-item">
+                  <span className="stat-label">Phiên hôm nay</span>
+                  <span className="stat-value">{stats.sessionsToday}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Phút tập trung</span>
+                  <span className="stat-value">{stats.focusMinutes}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Việc xong</span>
+                  <span className="stat-value">{stats.tasksDone}</span>
+                </div>
+              </div>
+
+              {/* Controls */}
+              <div className="controls-row">
+                {isRunning ? (
+                  <button onClick={pauseTimer} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Pause size={18} fill="#ffffff" /> Tạm dừng
+                  </button>
+                ) : (
+                  <button onClick={startTimer} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Play size={18} fill="#ffffff" /> Bắt đầu
+                  </button>
+                )}
+                <button onClick={resetTimer} className="btn-secondary" title="Thiết lập lại">
+                  <RotateCcw size={18} />
+                </button>
+                <button 
+                  onClick={() => setIsMuted(!isMuted)} 
+                  className="btn-secondary" 
+                  title={isMuted ? 'Bật chuông báo' : 'Tắt chuông báo'}
+                  style={{ padding: '12px' }}
+                >
+                  {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                </button>
+              </div>
+            </section>
+
+            {/* Ambient Sound */}
+            <section className="focus-card">
+              <div className="sound-section">
+                <span className="sound-title">Âm thanh nền</span>
+                <div className="sound-row">
+                  <button onClick={() => handleToggleSound('none')} className={`sound-btn ${sound === 'none' ? 'active' : ''}`}>Tắt</button>
+                  <button onClick={() => handleToggleSound('chanh-niem')} className={`sound-btn ${sound === 'chanh-niem' ? 'active' : ''}`}>🔔 Chánh Niệm</button>
+                  <button onClick={() => handleToggleSound('rain')} className={`sound-btn ${sound === 'rain' ? 'active' : ''}`}>🌧 Mưa</button>
+                  <button onClick={() => handleToggleSound('forest')} className={`sound-btn ${sound === 'forest' ? 'active' : ''}`}>🌿 Rừng</button>
+                  <button onClick={() => handleToggleSound('cafe')} className={`sound-btn ${sound === 'cafe' ? 'active' : ''}`}>☕ Cà phê</button>
+                  <button onClick={() => handleToggleSound('wave')} className={`sound-btn ${sound === 'wave' ? 'active' : ''}`}>🌊 Sóng biển</button>
+                  <button onClick={() => handleToggleSound('wind')} className={`sound-btn ${sound === 'wind' ? 'active' : ''}`}>🍃 Gió thổi</button>
+                  <button onClick={() => handleToggleSound('lofi')} className={`sound-btn ${sound === 'lofi' ? 'active' : ''}`}>🎹 Nhạc Lofi</button>
+                  <button onClick={() => handleToggleSound('white')} className={`sound-btn ${sound === 'white' ? 'active' : ''}`}>〰 Noise</button>
+                </div>
+                {sound !== 'none' && (
+                  <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '12px', padding: '0 8px' }}>
+                    <span style={{ fontSize: '13px', color: '#8E8E93', fontWeight: 500 }}>Âm lượng:</span>
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max="1" 
+                      step="0.05" 
+                      value={ambientVolume}
+                      onChange={(e) => setAmbientVolume(parseFloat(e.target.value))}
+                      style={{ flex: 1, accentColor: '#3B6D11' }}
+                    />
                   </div>
-                ))
-              )}
-            </div>
+                )}
+              </div>
+            </section>
           </div>
-        </section>
+
+          <div className="working-col-right" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* Danh sách Tasks */}
+            <section className="focus-card" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <div className="task-section" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <form onSubmit={handleAddTask} className="task-input-row">
+                  <input 
+                    type="text" 
+                    value={taskInput} 
+                    onChange={(e) => setTaskInput(e.target.value)} 
+                    placeholder="Thêm việc cần làm..." 
+                    maxLength="60"
+                    className="task-input"
+                  />
+                  <button type="submit" className="btn-add-task">+</button>
+                </form>
+
+                <div className="task-list-container" style={{ flex: 1, maxHeight: 'none' }}>
+                  {todos.length === 0 ? (
+                    <div className="empty-log" style={{ padding: '24px 0', fontSize: '13px' }}>Chưa có nhiệm vụ nào. Thêm việc ở trên anh nhé!</div>
+                  ) : (
+                    todos.map((todo) => (
+                      <div 
+                        key={todo.id} 
+                        onClick={() => handleSelectTodo(todo)}
+                        className={`task-item ${activeTodo && activeTodo.id === todo.id ? 'active' : ''} ${todo.is_completed ? 'done' : ''}`}
+                      >
+                        <div className="task-item-left">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleTodo(todo.id, todo.is_completed);
+                            }}
+                            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                          >
+                            {todo.is_completed ? (
+                              <CheckCircle2 size={20} color="var(--accent-color)" />
+                            ) : (
+                              <Circle size={20} color="var(--text-muted)" />
+                            )}
+                          </button>
+                          <span className="task-title" title={todo.title}>{todo.title}</span>
+                          {todo.pomodoros_completed > 0 && (
+                            <span className="task-pomo-count">🍅 {todo.pomodoros_completed}</span>
+                          )}
+                        </div>
+                        <div className="task-actions">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteTodo(todo.id);
+                            }}
+                            className="btn-task-action delete"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </section>
+
+            {/* Nhật ký phiên (Session Log) */}
+            <section className="focus-card">
+              <div className="log-section">
+                <span className="sound-title">Nhật ký hôm nay</span>
+                <div className="log-list">
+                  {logs.length === 0 ? (
+                    <div className="empty-log" style={{ fontSize: '13px' }}>Chưa có phiên nào hôm nay.</div>
+                  ) : (
+                    logs.map((log) => (
+                      <div key={log.id} className="log-item" style={{ fontSize: '13px' }}>
+                        <span className={`log-dot ${log.isWork ? 'work' : 'break'}`}></span>
+                        <span className="log-time">{log.time}</span>
+                        <span className="log-desc">{log.label}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
       </div>
     </main>
   );
