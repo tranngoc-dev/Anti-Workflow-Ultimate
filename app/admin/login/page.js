@@ -12,21 +12,11 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Lắng nghe sự kiện thay đổi trạng thái Auth của Supabase để xử lý redirect sau OAuth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session) {
-        const { data: isAdmin, error } = await supabase.rpc('is_admin');
-        if (isAdmin === true) {
-          router.push('/admin');
-        } else if (event === 'SIGNED_IN') {
-          setErrorMsg('Tài khoản của bạn không có quyền truy cập trang quản trị.');
-          await supabase.auth.signOut();
-        }
-      }
-    });
-
-    // Chạy kiểm tra session hiện tại ngay khi mount
+    // Chạy kiểm tra session hiện tại ngay khi mount (chỉ tự động cho vào nếu đã xác thực admin trong phiên này)
     async function checkCurrentSession() {
+      const isVerified = sessionStorage.getItem('admin_verified') === 'true';
+      if (!isVerified) return;
+
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         const { data: isAdmin } = await supabase.rpc('is_admin');
@@ -36,10 +26,6 @@ export default function AdminLoginPage() {
       }
     }
     checkCurrentSession();
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, [router]);
 
   async function handleLogin(e) {
@@ -68,6 +54,8 @@ export default function AdminLoginPage() {
         throw new Error('Tài khoản của bạn không có quyền truy cập trang quản trị.');
       }
 
+      // Đăng nhập thành công -> Lưu khóa xác thực admin độc lập
+      sessionStorage.setItem('admin_verified', 'true');
       router.push('/admin');
     } catch (err) {
       console.error('[AdminLogin] Lỗi đăng nhập:', err);
