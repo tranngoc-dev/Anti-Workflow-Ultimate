@@ -61,6 +61,13 @@ export default function PostClient({ initialPost, slug }) {
   const [commentSubmitted, setCommentSubmitted] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
 
+  // Edit comment state
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingContent, setEditingContent] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
+
+  const isAdmin = user?.user_metadata?.is_admin === true || user?.email === 'vutrongvtv24@gmail.com';
+
   const [renderedBody, setRenderedBody] = useState('');
 
   // 1. Khởi tạo trạng thái và check sessionStorage xem đã mở khóa chưa
@@ -252,9 +259,8 @@ export default function PostClient({ initialPost, slug }) {
     try {
       const { data, error } = await supabase
         .from('comments')
-        .select('author_name, content, created_at')
+        .select('id, user_id, author_name, content, created_at, status')
         .eq('post_slug', slug)
-        .eq('status', 'approved')
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -349,6 +355,46 @@ export default function PostClient({ initialPost, slug }) {
       alert('Gửi bình luận thất bại. Vui lòng thử lại sau.');
     } finally {
       setSubmitLoading(false);
+    }
+  }
+
+  // Handle edit blog comment
+  async function handleSaveBlogComment(commentId) {
+    if (!editingContent.trim()) {
+      alert('Nội dung bình luận không được để trống.');
+      return;
+    }
+    setEditLoading(true);
+    try {
+      const { error } = await supabase
+        .from('comments')
+        .update({ content: editingContent.trim(), updated_at: new Date().toISOString() })
+        .eq('id', commentId);
+
+      if (error) throw error;
+      setEditingCommentId(null);
+      setEditingContent('');
+      loadComments();
+    } catch (err) {
+      alert('Lỗi khi sửa bình luận: ' + (err.message || 'Thử lại sau.'));
+    } finally {
+      setEditLoading(false);
+    }
+  }
+
+  // Handle delete blog comment
+  async function handleDeleteBlogComment(commentId) {
+    if (!confirm('Bạn có chắc muốn xóa bình luận này không?')) return;
+    try {
+      const { error } = await supabase
+        .from('comments')
+        .delete()
+        .eq('id', commentId);
+
+      if (error) throw error;
+      loadComments();
+    } catch (err) {
+      alert('Lỗi khi xóa bình luận: ' + (err.message || 'Thử lại sau.'));
     }
   }
 
@@ -692,19 +738,89 @@ export default function PostClient({ initialPost, slug }) {
             comments.map((c, index) => {
               const initial = (c.author_name || '?').charAt(0).toUpperCase();
               const color = getAvatarColor(c.author_name);
+              const isCommentAuthor = user?.id && user?.id === c.user_id;
+              const isEditing = editingCommentId === c.id;
+
               return (
-                <div className="comment-item" key={index}>
+                <div className="comment-item" key={c.id || index}>
                   <div className="comment-item__avatar" style={{ background: color }} aria-hidden="true">
                     {initial}
                   </div>
                   <div className="comment-item__body">
-                    <div className="comment-item__header">
-                      <span className="comment-item__name">{c.author_name}</span>
-                      <time className="comment-item__date" dateTime={c.created_at}>
-                        {formatDate(c.created_at)}
-                      </time>
+                    <div className="comment-item__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <span className="comment-item__name">{c.author_name}</span>
+                        <time className="comment-item__date" dateTime={c.created_at}>
+                          {formatDate(c.created_at)}
+                        </time>
+                      </div>
+                      {!isEditing && (isCommentAuthor || isAdmin) && (
+                        <div style={{ display: 'flex', gap: '8px', fontSize: '0.8rem' }}>
+                          {isCommentAuthor && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingCommentId(c.id);
+                                setEditingContent(c.content);
+                              }}
+                              style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontWeight: 600 }}
+                            >
+                              Sửa
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteBlogComment(c.id)}
+                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 600 }}
+                          >
+                            Xóa {isAdmin && !isCommentAuthor && '(Admin)'}
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <p className="comment-item__text">{c.content}</p>
+                    {isEditing ? (
+                      <div style={{ marginTop: '8px' }}>
+                        <textarea
+                          rows={3}
+                          value={editingContent}
+                          onChange={(e) => setEditingContent(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            border: '1px solid var(--accent)',
+                            backgroundColor: 'var(--surface)',
+                            color: 'var(--text)',
+                            fontSize: '0.95rem',
+                            outline: 'none',
+                            marginBottom: '6px'
+                          }}
+                        />
+                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingCommentId(null);
+                              setEditingContent('');
+                            }}
+                            disabled={editLoading}
+                            style={{ padding: '4px 10px', fontSize: '0.8rem', background: 'none', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer' }}
+                          >
+                            Hủy
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleSaveBlogComment(c.id)}
+                            disabled={editLoading}
+                            style={{ padding: '4px 10px', fontSize: '0.8rem', backgroundColor: 'var(--accent)', color: 'white', border: 'none', borderRadius: '4px', cursor: editLoading ? 'not-allowed' : 'pointer', fontWeight: 600 }}
+                          >
+                            {editLoading ? 'Đang lưu...' : 'Lưu'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="comment-item__text">{c.content}</p>
+                    )}
                   </div>
                 </div>
               );

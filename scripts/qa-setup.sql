@@ -446,6 +446,7 @@ CREATE POLICY "Allow admin modify posts" ON public.posts
 -- 3. Create comments table
 CREATE TABLE IF NOT EXISTS public.comments (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
     post_id UUID REFERENCES public.posts(id) ON DELETE CASCADE,
     post_slug TEXT NOT NULL,
     author_name TEXT NOT NULL,
@@ -459,13 +460,17 @@ CREATE TABLE IF NOT EXISTS public.comments (
 ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow public read approved comments" ON public.comments
-    FOR SELECT USING (status = 'approved' OR public.is_admin());
+    FOR SELECT USING (status = 'approved' OR auth.uid() = user_id OR public.is_admin());
 
 CREATE POLICY "Allow public insert comments" ON public.comments
     FOR INSERT WITH CHECK (true);
 
-CREATE POLICY "Allow admin modify comments" ON public.comments
-    FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+CREATE POLICY "Allow author or admin update comments" ON public.comments
+    FOR UPDATE USING (auth.uid() = user_id OR public.is_admin())
+    WITH CHECK (auth.uid() = user_id OR public.is_admin());
+
+CREATE POLICY "Allow author or admin delete comments" ON public.comments
+    FOR DELETE USING (auth.uid() = user_id OR public.is_admin());
 
 -- 4. Create visit_logs table
 CREATE TABLE IF NOT EXISTS public.visit_logs (

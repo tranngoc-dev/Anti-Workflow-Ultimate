@@ -1,10 +1,24 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/utils/supabase';
-import { getThreadById, getComments, createComment, likeComment, unlikeComment, setBestAnswer, RANK_BADGES, RANK_COLORS } from '@/utils/qa-api';
+import { 
+  getThreadById, 
+  getComments, 
+  createComment, 
+  updateComment, 
+  deleteComment, 
+  deleteThread, 
+  likeComment, 
+  unlikeComment, 
+  setBestAnswer, 
+  RANK_BADGES, 
+  RANK_COLORS 
+} from '@/utils/qa-api';
 
 export default function ThreadDetailPage({ params }) {
+  const router = useRouter();
   // Unwrapping params using React.use() to comply with Next.js App Router patterns
   const resolvedParams = use(params);
   const threadId = resolvedParams.id;
@@ -15,6 +29,13 @@ export default function ThreadDetailPage({ params }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  // State chỉnh sửa comment inline
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingContent, setEditingContent] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
+
+  const isAdmin = currentUser?.user_metadata?.is_admin === true || currentUser?.email === 'vutrongvtv24@gmail.com';
 
   // Load initial data
   useEffect(() => {
@@ -63,6 +84,62 @@ export default function ThreadDetailPage({ params }) {
       alert('Có lỗi xảy ra khi gửi bình luận. Vui lòng thử lại!');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleStartEdit = (comment) => {
+    setEditingCommentId(comment.id);
+    setEditingContent(comment.content);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCommentId(null);
+    setEditingContent('');
+  };
+
+  const handleSaveEdit = async (commentId) => {
+    if (!editingContent.trim()) {
+      alert('Nội dung không được để trống.');
+      return;
+    }
+    setEditLoading(true);
+    try {
+      await updateComment(commentId, editingContent.trim());
+      setEditingCommentId(null);
+      setEditingContent('');
+      
+      // Reload comments
+      const commentsData = await getComments(threadId, currentUser?.id);
+      setComments(commentsData);
+    } catch (err) {
+      alert('Lỗi khi cập nhật câu trả lời: ' + (err.message || 'Thử lại sau.'));
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!confirm('Bạn có chắc chắn muốn xóa câu trả lời này không?')) return;
+
+    try {
+      await deleteComment(commentId);
+      // Reload comments
+      const commentsData = await getComments(threadId, currentUser?.id);
+      setComments(commentsData);
+    } catch (err) {
+      alert('Lỗi khi xóa câu trả lời: ' + (err.message || 'Thử lại sau.'));
+    }
+  };
+
+  const handleDeleteThread = async () => {
+    if (!confirm('Bạn có chắc chắn muốn xóa toàn bộ câu hỏi này cùng các câu trả lời liên quan không?\n\nHành động này không thể hoàn tác.')) return;
+
+    try {
+      await deleteThread(threadId);
+      alert('Đã xóa câu hỏi thành công.');
+      router.push('/');
+    } catch (err) {
+      alert('Lỗi khi xóa câu hỏi: ' + (err.message || 'Thử lại sau.'));
     }
   };
 
@@ -138,10 +215,35 @@ export default function ThreadDetailPage({ params }) {
 
   return (
     <div style={{ maxWidth: '800px', margin: '40px auto', padding: '0 20px', color: 'var(--text)' }}>
-      {/* Back to Home */}
-      <a href="/" style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '24px' }}>
-        ← Quay lại trang chủ Q&A
-      </a>
+      {/* Back to Home & Actions */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+        <a href="/" style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          ← Quay lại trang chủ Q&A
+        </a>
+
+        {/* Nút xóa câu hỏi cho tác giả hoặc Admin */}
+        {(isOwner || isAdmin) && (
+          <button
+            onClick={handleDeleteThread}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              backgroundColor: '#fee2e2',
+              color: '#b91c1c',
+              border: '1px solid #fca5a5',
+              borderRadius: '6px',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            🗑️ Xóa câu hỏi {isAdmin && !isOwner && '(Admin)'}
+          </button>
+        )}
+      </div>
 
       {/* Main Question Card */}
       <article style={{ backgroundColor: 'var(--surface)', padding: '32px', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '32px' }}>
@@ -265,6 +367,8 @@ export default function ThreadDetailPage({ params }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {comments.map((comment) => {
             const isCommentAuthor = currentUser?.id === comment.author_id;
+            const isEditing = editingCommentId === comment.id;
+
             return (
               <div 
                 key={comment.id}
@@ -296,62 +400,161 @@ export default function ThreadDetailPage({ params }) {
                 )}
 
                 {/* Comment Meta */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                  {comment.author?.avatar_url ? (
-                    <img 
-                      src={comment.author.avatar_url} 
-                      alt="avatar" 
-                      style={{ width: '24px', height: '24px', borderRadius: '50%' }}
-                    />
-                  ) : (
-                    <span style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'inline-block' }} />
-                  )}
-                  <a href={`/profile/${comment.author?.id}`} style={{ fontWeight: 700, color: 'var(--text)', fontSize: '0.95rem', textDecoration: 'none' }}>
-                    {comment.author?.display_name || 'Người dùng'}
-                  </a>
-                  {comment.author?.rank && RANK_BADGES[comment.author.rank] && (
-                    <img 
-                      src={RANK_BADGES[comment.author.rank]} 
-                      alt={comment.author.rank} 
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {comment.author?.avatar_url ? (
+                      <img 
+                        src={comment.author.avatar_url} 
+                        alt="avatar" 
+                        style={{ width: '24px', height: '24px', borderRadius: '50%' }}
+                      />
+                    ) : (
+                      <span style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'inline-block' }} />
+                    )}
+                    <a href={`/profile/${comment.author?.id}`} style={{ fontWeight: 700, color: 'var(--text)', fontSize: '0.95rem', textDecoration: 'none' }}>
+                      {comment.author?.display_name || 'Người dùng'}
+                    </a>
+                    {comment.author?.rank && RANK_BADGES[comment.author.rank] && (
+                      <img 
+                        src={RANK_BADGES[comment.author.rank]} 
+                        alt={comment.author.rank} 
+                        style={{ 
+                          width: '24px', 
+                          height: '24px', 
+                          objectFit: 'contain',
+                          backgroundColor: '#f8fafc',
+                          borderRadius: '50%',
+                          padding: '3px',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.12)',
+                          border: '1px solid rgba(0,0,0,0.06)',
+                          marginLeft: '4px',
+                          marginRight: '2px'
+                        }} 
+                      />
+                    )}
+                    <span 
                       style={{ 
-                        width: '24px', 
-                        height: '24px', 
-                        objectFit: 'contain',
-                        backgroundColor: '#f8fafc',
-                        borderRadius: '50%',
-                        padding: '3px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.12)',
-                        border: '1px solid rgba(0,0,0,0.06)',
-                        marginLeft: '4px',
-                        marginRight: '2px'
-                      }} 
-                    />
+                        padding: '1px 5px', 
+                        borderRadius: '3px', 
+                        fontSize: '0.7rem', 
+                        fontWeight: 600,
+                        backgroundColor: RANK_COLORS[comment.author?.rank] || '#4b5563',
+                        color: 'white'
+                      }}
+                    >
+                      {comment.author?.rank || 'Kim Ngư'}
+                    </span>
+                    <span style={{ color: 'var(--muted)', fontSize: '0.8rem' }}>
+                      🪙 {comment.author?.gold_balance || 0} Gold
+                    </span>
+                    <span style={{ color: 'var(--border)' }}>·</span>
+                    <time style={{ fontSize: '0.8rem', color: 'var(--muted)' }} dateTime={comment.created_at}>
+                      {formatDate(comment.created_at)}
+                    </time>
+                  </div>
+
+                  {/* Nút sửa / xóa comment */}
+                  {!isEditing && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {isCommentAuthor && (
+                        <button
+                          onClick={() => handleStartEdit(comment)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--accent)',
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            padding: '4px 8px',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          ✏️ Sửa
+                        </button>
+                      )}
+                      {(isCommentAuthor || isAdmin) && (
+                        <button
+                          onClick={() => handleDeleteComment(comment.id)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#ef4444',
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            padding: '4px 8px',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          🗑️ Xóa {isAdmin && !isCommentAuthor && '(Admin)'}
+                        </button>
+                      )}
+                    </div>
                   )}
-                  <span 
-                    style={{ 
-                      padding: '1px 5px', 
-                      borderRadius: '3px', 
-                      fontSize: '0.7rem', 
-                      fontWeight: 600,
-                      backgroundColor: RANK_COLORS[comment.author?.rank] || '#4b5563',
-                      color: 'white'
-                    }}
-                  >
-                    {comment.author?.rank || 'Kim Ngư'}
-                  </span>
-                  <span style={{ color: 'var(--muted)', fontSize: '0.8rem' }}>
-                    🪙 {comment.author?.gold_balance || 0} Gold
-                  </span>
-                  <span style={{ color: 'var(--border)' }}>·</span>
-                  <time style={{ fontSize: '0.8rem', color: 'var(--muted)' }} dateTime={comment.created_at}>
-                    {formatDate(comment.created_at)}
-                  </time>
                 </div>
 
-                {/* Comment Content */}
-                <div style={{ fontSize: '1rem', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
-                  {comment.content}
-                </div>
+                {/* Comment Content or Inline Edit Form */}
+                {isEditing ? (
+                  <div style={{ marginBottom: '16px' }}>
+                    <textarea
+                      rows={3}
+                      value={editingContent}
+                      onChange={(e) => setEditingContent(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--accent)',
+                        outline: 'none',
+                        fontFamily: 'inherit',
+                        fontSize: '0.95rem',
+                        backgroundColor: 'var(--surface)',
+                        color: 'var(--text)',
+                        resize: 'vertical',
+                        marginBottom: '8px'
+                      }}
+                    />
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                      <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        disabled={editLoading}
+                        style={{
+                          padding: '6px 14px',
+                          background: 'none',
+                          border: '1px solid var(--border)',
+                          borderRadius: '6px',
+                          fontSize: '0.85rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Hủy
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSaveEdit(comment.id)}
+                        disabled={editLoading}
+                        style={{
+                          padding: '6px 14px',
+                          backgroundColor: 'var(--accent)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '0.85rem',
+                          fontWeight: 600,
+                          cursor: editLoading ? 'not-allowed' : 'pointer'
+                        }}
+                      >
+                        {editLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '1rem', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
+                    {comment.content}
+                  </div>
+                )}
 
                 {/* Actions */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(0,0,0,0.03)', paddingTop: '12px' }}>
@@ -410,3 +613,4 @@ export default function ThreadDetailPage({ params }) {
     </div>
   );
 }
+

@@ -263,3 +263,53 @@ export const RANK_COLORS = {
   'Thiên Long': '#7c3aed'     // Purple
 };
 
+// 13. Update a thread comment
+export async function updateComment(commentId, content) {
+  try {
+    const { data, error } = await supabase
+      .from('thread_comments')
+      .update({ content, updated_at: new Date().toISOString() })
+      .eq('id', commentId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('[QA-API] updateComment error:', err);
+    throw err;
+  }
+}
+
+// 14. Delete a thread comment (author or admin)
+export async function deleteComment(commentId) {
+  try {
+    const { error } = await supabase
+      .from('thread_comments')
+      .delete()
+      .eq('id', commentId);
+
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('[QA-API] deleteComment error:', err);
+    throw err;
+  }
+}
+
+// 15. Delete a thread (author or admin)
+export async function deleteThread(threadId) {
+  try {
+    const { error } = await supabase
+      .from('threads')
+      .delete()
+      .eq('id', threadId);
+
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('[QA-API] deleteThread error:', err);
+    throw err;
+  }
+}
+
