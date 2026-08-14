@@ -388,3 +388,205 @@ DROP TRIGGER IF EXISTS on_auth_user_before_insert ON auth.users;
 CREATE TRIGGER on_auth_user_before_insert
     BEFORE INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.set_admin_metadata();
+
+
+-- =======================================================
+-- Blog, Comments, Settings and Analytics Schema
+-- Added for full feature parity on new Supabase databases
+-- =======================================================
+
+-- 1. Create site_settings table
+CREATE TABLE IF NOT EXISTS public.site_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read site_settings" ON public.site_settings
+    FOR SELECT USING (true);
+
+CREATE POLICY "Allow admin modify site_settings" ON public.site_settings
+    FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+INSERT INTO public.site_settings (key, value) VALUES
+('site_name', 'Tulanh'),
+('excluded_view_ips', '127.0.0.1'),
+('predefined_tags', '["Frontend", "Design", "Devops"]')
+ON CONFLICT (key) DO NOTHING;
+
+-- 2. Create posts table
+CREATE TABLE IF NOT EXISTS public.posts (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    title TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    content TEXT NOT NULL,
+    excerpt TEXT,
+    cover_image TEXT,
+    is_visible BOOLEAN DEFAULT true NOT NULL,
+    draft BOOLEAN DEFAULT false NOT NULL,
+    tags TEXT[] DEFAULT '{}'::TEXT[] NOT NULL,
+    post_password TEXT,
+    post_password_hash TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read active posts" ON public.posts
+    FOR SELECT USING (
+        (draft = false AND is_visible = true) OR public.is_admin()
+    );
+
+CREATE POLICY "Allow admin modify posts" ON public.posts
+    FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+-- 3. Create comments table
+CREATE TABLE IF NOT EXISTS public.comments (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    post_id UUID REFERENCES public.posts(id) ON DELETE CASCADE,
+    post_slug TEXT NOT NULL,
+    author_name TEXT NOT NULL,
+    author_email TEXT,
+    content TEXT NOT NULL,
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read approved comments" ON public.comments
+    FOR SELECT USING (status = 'approved' OR public.is_admin());
+
+CREATE POLICY "Allow public insert comments" ON public.comments
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow admin modify comments" ON public.comments
+    FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+-- 4. Create visit_logs table
+CREATE TABLE IF NOT EXISTS public.visit_logs (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    ip_address TEXT NOT NULL,
+    page_path TEXT NOT NULL,
+    user_agent TEXT,
+    referrer TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.visit_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public insert visit_logs" ON public.visit_logs
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow admin view visit_logs" ON public.visit_logs
+    FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+-- 5. Create page_views table
+CREATE TABLE IF NOT EXISTS public.page_views (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    post_slug TEXT NOT NULL,
+    visitor_ip TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.page_views ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public insert page_views" ON public.page_views
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow admin view page_views" ON public.page_views
+    FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+-- Analytics and Helper functions
+CREATE OR REPLACE FUNCTION public.get_view_summary(days integer DEFAULT 30)
+RETURNS TABLE(views_today bigint, total_views bigint)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    (SELECT count(*)::bigint FROM public.visit_logs WHERE created_at >= timezone('utc'::text, now() - interval '1 day')),
+    (SELECT count(*)::bigint FROM public.visit_logs WHERE days IS NULL OR created_at >= timezone('utc'::text, now() - (days || ' days')::interval));
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_daily_views(days integer DEFAULT 30)
+RETURNS TABLE(date date, views bigint)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    created_at::date AS date,
+    count(*)::bigint AS views
+  FROM public.visit_logs
+  WHERE days IS NULL OR created_at >= timezone('utc'::text, now() - (days || ' days')::interval)
+  GROUP BY created_at::date
+  ORDER BY date ASC;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_top_posts(limit_count integer, days integer DEFAULT 30)
+RETURNS TABLE(title text, views bigint)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    p.title,
+    count(v.id)::bigint AS views
+  FROM public.page_views v
+  JOIN public.posts p ON v.post_slug = p.slug
+  WHERE days IS NULL OR v.created_at >= timezone('utc'::text, now() - (days || ' days')::interval)
+  GROUP BY p.title
+  ORDER BY views DESC
+  LIMIT limit_count;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_post_view_counts()
+RETURNS TABLE(slug text, views bigint)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    post_slug AS slug,
+    count(*)::bigint AS views
+  FROM public.page_views
+  GROUP BY post_slug;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_visit_logs_stats()
+RETURNS TABLE(total_hits bigint, hits_today bigint, unique_ips bigint)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    (SELECT count(*)::bigint FROM public.visit_logs),
+    (SELECT count(*)::bigint FROM public.visit_logs WHERE created_at >= timezone('utc'::text, now() - interval '1 day')),
+    (SELECT count(DISTINCT ip_address)::bigint FROM public.visit_logs);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_view_summary(integer) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_view_summary(integer) TO anon;
+GRANT EXECUTE ON FUNCTION public.get_daily_views(integer) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_daily_views(integer) TO anon;
+GRANT EXECUTE ON FUNCTION public.get_top_posts(integer, integer) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_top_posts(integer, integer) TO anon;
+GRANT EXECUTE ON FUNCTION public.get_post_view_counts() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_post_view_counts() TO anon;
+GRANT EXECUTE ON FUNCTION public.get_visit_logs_stats() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_visit_logs_stats() TO anon;
