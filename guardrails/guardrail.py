@@ -120,7 +120,12 @@ def resolve_commands(repo: Path, policy: dict[str, Any]) -> tuple[list[Command],
         missing = [script for script in aliases.values() if not scripts.get(script)]
         if missing:
             return [], [Finding("config.commands-missing", f"Node project does not declare required scripts: {', '.join(missing)}.", "package.json", remedy="Add the scripts or declare exact commands in guardrails/policy.json.")]
-        return [Command(category, ["npm", "run", script]) for category, script in aliases.items()], []
+        cmds = [Command(category, ["npm", "run", script]) for category, script in aliases.items()]
+        for e2e_key in ("test:e2e", "e2e"):
+            if scripts.get(e2e_key):
+                cmds.append(Command("e2e", ["npm", "run", e2e_key]))
+                break
+        return cmds, []
     if (repo / "go.mod").is_file():
         return [Command("tests", ["go", "test", "./..."]), Command("lint", ["go", "vet", "./..."]), Command("build", ["go", "build", "./..."])], []
     if (repo / "Cargo.toml").is_file():
