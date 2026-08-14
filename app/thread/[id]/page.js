@@ -81,7 +81,7 @@ export default function ThreadDetailPage({ params }) {
       const commentsData = await getComments(threadId, currentUser.id);
       setComments(commentsData);
     } catch (err) {
-      alert('Có lỗi xảy ra khi gửi bình luận. Vui lòng thử lại!');
+      alert(err.message || 'Có lỗi xảy ra khi gửi bình luận. Vui lòng thử lại!');
     } finally {
       setSubmitting(false);
     }

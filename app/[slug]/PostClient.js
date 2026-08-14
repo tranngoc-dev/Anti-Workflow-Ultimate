@@ -340,6 +340,21 @@ export default function PostClient({ initialPost, slug }) {
     setSubmitLoading(true);
 
     try {
+      // Check if user is comment banned
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('comment_banned_until')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.comment_banned_until && new Date(profile.comment_banned_until) > new Date()) {
+        const banDate = new Date(profile.comment_banned_until).toLocaleDateString('vi-VN', {
+          day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+        alert(`Tài khoản của bạn đang bị tạm khóa tính năng bình luận đến ${banDate} do vi phạm quy định.`);
+        return;
+      }
+
       const { error } = await supabase.from('comments').insert({
         post_slug: slug,
         user_id: user.id,
@@ -352,7 +367,7 @@ export default function PostClient({ initialPost, slug }) {
       setCommentSubmitted(true);
     } catch (err) {
       console.error('[Post] Gửi bình luận thất bại:', err);
-      alert('Gửi bình luận thất bại. Vui lòng thử lại sau.');
+      alert(err.message || 'Gửi bình luận thất bại. Vui lòng thử lại sau.');
     } finally {
       setSubmitLoading(false);
     }

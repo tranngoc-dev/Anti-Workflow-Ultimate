@@ -127,6 +127,20 @@ export async function createThread(title, content, authorId) {
 // 5. Create a comment
 export async function createComment(threadId, content, authorId) {
   try {
+    // Check if user is comment banned
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('comment_banned_until')
+      .eq('id', authorId)
+      .single();
+
+    if (profile?.comment_banned_until && new Date(profile.comment_banned_until) > new Date()) {
+      const banDate = new Date(profile.comment_banned_until).toLocaleDateString('vi-VN', {
+        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+      throw new Error(`Tài khoản của bạn đang bị tạm khóa tính năng bình luận đến ${banDate} do vi phạm quy định.`);
+    }
+
     const { data, error } = await supabase
       .from('thread_comments')
       .insert([{ thread_id: threadId, author_id: authorId, content }])
@@ -325,6 +339,75 @@ export async function deleteThread(threadId) {
     return true;
   } catch (err) {
     console.error('[QA-API] deleteThread error:', err);
+    throw err;
+  }
+}
+
+// 16. Admin update user rank and gold
+export async function adminUpdateUserRank(userId, newRank, newGold = null) {
+  try {
+    const updateData = { 
+      rank: newRank,
+      updated_at: new Date().toISOString()
+    };
+    if (newGold !== null && !isNaN(newGold)) {
+      updateData.gold_balance = parseInt(newGold, 10);
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(updateData)
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('[QA-API] adminUpdateUserRank error:', err);
+    throw err;
+  }
+}
+
+// 17. Admin ban user from commenting (default 24 hours)
+export async function adminBanUserComments(userId, hours = 24) {
+  try {
+    const banUntil = new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ 
+        comment_banned_until: banUntil,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('[QA-API] adminBanUserComments error:', err);
+    throw err;
+  }
+}
+
+// 18. Admin unban user from commenting
+export async function adminUnbanUserComments(userId) {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ 
+        comment_banned_until: null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('[QA-API] adminUnbanUserComments error:', err);
     throw err;
   }
 }

@@ -2,17 +2,28 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
+import { 
+  RANK_BADGES, 
+  RANK_COLORS, 
+  adminUpdateUserRank, 
+  adminBanUserComments, 
+  adminUnbanUserComments 
+} from '@/utils/qa-api';
+
+const RANKS = ['Kim Ngư', 'Linh Long', 'Đế Long', 'Hỏa Long', 'Thiên Long'];
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [rpcError, setRpcError] = useState(false);
+  const [rankFilter, setRankFilter] = useState('all');
+  const [banFilter, setBanFilter] = useState('all');
+  const [actionLoadingId, setActionLoadingId] = useState(null);
 
   // Stats
   const [totalCount, setTotalCount] = useState(0);
+  const [bannedCount, setBannedCount] = useState(0);
   const [activeCount, setActiveCount] = useState(0);
-  const [todayCount, setTodayCount] = useState(0);
 
   useEffect(() => {
     loadUsers();
@@ -20,16 +31,9 @@ export default function AdminUsersPage() {
 
   async function loadUsers() {
     setLoading(true);
-    setRpcError(false);
     try {
       const { data, error } = await supabase.rpc('get_registered_users');
-      if (error) {
-        // RPC might not exist yet
-        if (error.code === 'PGRST202' || error.message?.includes('does not exist')) {
-          setRpcError(true);
-        }
-        throw error;
-      }
+      if (error) throw error;
 
       const userList = data || [];
       setUsers(userList);
@@ -44,327 +48,447 @@ export default function AdminUsersPage() {
   function calculateStats(userList) {
     setTotalCount(userList.length);
 
-    // Active users: last sign in in the last 30 days
+    const now = new Date();
+    const banned = userList.filter((u) => u.comment_banned_until && new Date(u.comment_banned_until) > now);
+    setBannedCount(banned.length);
+
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const active = userList.filter((u) => {
-      if (!u.last_sign_in_at) return false;
-      return new Date(u.last_sign_in_at) >= thirtyDaysAgo;
-    });
+    const active = userList.filter((u) => u.last_sign_in_at && new Date(u.last_sign_in_at) >= thirtyDaysAgo);
     setActiveCount(active.length);
-
-    // New today: registered today
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-    const today = userList.filter((u) => {
-      if (!u.created_at) return false;
-      return new Date(u.created_at) >= startOfToday;
-    });
-    setTodayCount(today.length);
   }
 
-  // Get dynamic background color for user avatar based on email characters
-  function getAvatarColor(email) {
-    if (!email) return '#0f766e';
-    const colors = [
-      '#0f766e', // teal
-      '#0369a1', // blue
-      '#15803d', // green
-      '#b45309', // orange
-      '#be185d', // pink
-      '#6d28d9', // purple
-      '#4338ca', // indigo
-      '#c2410c', // deep orange
-    ];
-    let hash = 0;
-    for (let i = 0; i < email.length; i++) {
-      hash += email.charCodeAt(i);
-    }
-    return colors[hash % colors.length];
-  }
-
-  function formatDate(dateString) {
-    if (!dateString) return 'Chưa có thông tin';
+  // Handle update rank
+  async function handleRankChange(userId, newRank) {
+    setActionLoadingId(userId);
     try {
-      const date = new Date(dateString);
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}/${month}/${year}`;
+      await adminUpdateUserRank(userId, newRank);
+      // Cập nhật state local
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, rank: newRank } : u));
     } catch (err) {
-      return dateString;
+      alert('Lỗi cập nhật Cấp bậc Rank: ' + (err.message || 'Thử lại sau.'));
+    } finally {
+      setActionLoadingId(null);
+    }
+  }
+
+  // Handle adjust gold
+  async function handleGoldChange(userId, currentGold) {
+    const promptValue = prompt('Nhập số dư điểm Gold mới cho thành viên:', currentGold || 0);
+    if (promptValue === null) return;
+    
+    const parsedGold = parseInt(promptValue, 10);
+    if (isNaN(parsedGold) || parsedGold < 0) {
+      alert('Số điểm Gold phải là một số nguyên dương hợp lệ.');
+      return;
+    }
+
+    setActionLoadingId(userId);
+    try {
+      const currentRank = users.find(u => u.id === userId)?.rank || 'Kim Ngư';
+      await adminUpdateUserRank(userId, currentRank, parsedGold);
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, gold_balance: parsedGold } : u));
+    } catch (err) {
+      alert('Lỗi cập nhật điểm Gold: ' + (err.message || 'Thử lại sau.'));
+    } finally {
+      setActionLoadingId(null);
+    }
+  }
+
+  // Handle ban comments (24h)
+  async function handleBanComments(userId, userName) {
+    if (!confirm(`Bạn có chắc chắn muốn CẤM bình luận thành viên "${userName}" trong vòng 24 giờ (1 ngày)?`)) return;
+
+    setActionLoadingId(userId);
+    try {
+      const updated = await adminBanUserComments(userId, 24);
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, comment_banned_until: updated.comment_banned_until } : u));
+      calculateStats(users);
+    } catch (err) {
+      alert('Lỗi khi cấm bình luận: ' + (err.message || 'Thử lại sau.'));
+    } finally {
+      setActionLoadingId(null);
+    }
+  }
+
+  // Handle unban comments
+  async function handleUnbanComments(userId, userName) {
+    if (!confirm(`Mở khóa quyền bình luận ngay cho thành viên "${userName}"?`)) return;
+
+    setActionLoadingId(userId);
+    try {
+      await adminUnbanUserComments(userId);
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, comment_banned_until: null } : u));
+      calculateStats(users);
+    } catch (err) {
+      alert('Lỗi khi mở khóa bình luận: ' + (err.message || 'Thử lại sau.'));
+    } finally {
+      setActionLoadingId(null);
     }
   }
 
   function formatDateTime(dateString) {
-    if (!dateString) return 'Chưa đăng nhập';
+    if (!dateString) return 'Chưa có';
     try {
       const date = new Date(dateString);
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-      const hour = String(date.getHours()).padStart(2, '0');
-      const minute = String(date.getMinutes()).padStart(2, '0');
-      const second = String(date.getSeconds()).padStart(2, '0');
-      return `${day}/${month}/${year} lúc ${hour}:${minute}:${second}`;
+      return date.toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     } catch (err) {
       return dateString;
     }
   }
 
-  // Filter users by email or name
+  function isUserCommentBanned(bannedUntil) {
+    if (!bannedUntil) return false;
+    return new Date(bannedUntil) > new Date();
+  }
+
+  // Filter users
   const filteredUsers = users.filter((u) => {
-    const emailMatch = u.email?.toLowerCase().includes(searchQuery.toLowerCase());
-    const metadata = u.raw_user_meta_data || {};
-    const name = metadata.name || metadata.full_name || '';
-    const nameMatch = name.toLowerCase().includes(searchQuery.toLowerCase());
-    return emailMatch || nameMatch;
+    // Search query
+    const emailMatch = (u.email || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const nameMatch = (u.display_name || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch = emailMatch || nameMatch;
+
+    // Rank filter
+    const matchRank = rankFilter === 'all' || (u.rank || 'Kim Ngư') === rankFilter;
+
+    // Ban filter
+    const isBanned = isUserCommentBanned(u.comment_banned_until);
+    let matchBan = true;
+    if (banFilter === 'banned') matchBan = isBanned;
+    if (banFilter === 'normal') matchBan = !isBanned;
+
+    return matchSearch && matchRank && matchBan;
   });
-
-  // DB Setup Script
-  const sqlSetupCommand = `CREATE OR REPLACE FUNCTION public.get_registered_users()
-RETURNS TABLE (
-  id uuid,
-  email varchar,
-  created_at timestamptz,
-  last_sign_in_at timestamptz,
-  raw_user_meta_data jsonb
-)
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public, auth
-STABLE
-AS $$
-BEGIN
-  IF NOT public.is_admin() THEN
-    RAISE EXCEPTION 'Quyền truy cập bị từ chối: Chỉ tài khoản Admin mới được thực thi hàm này.';
-  END IF;
-
-  RETURN QUERY
-  SELECT u.id, u.email::varchar, u.created_at, u.last_sign_in_at, u.raw_user_meta_data
-  FROM auth.users u
-  ORDER BY u.created_at DESC;
-END;
-$$;
-
-REVOKE ALL ON FUNCTION public.get_registered_users() FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.get_registered_users() TO authenticated;`;
 
   return (
     <>
-      <div className="admin-page__header">
-        <h1 className="admin-page__title">Danh sách Người dùng Đăng ký</h1>
-        <p style={{ color: 'var(--muted)', marginTop: '4px', fontSize: '0.95rem' }}>
-          Xem và tìm kiếm thông tin các thành viên đã đăng ký tài khoản trên website của bạn.
-        </p>
+      <div className="admin-page__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div>
+          <h1 className="admin-page__title" style={{ margin: 0 }}>Quản lý Thành viên & Cấp bậc Rank</h1>
+          <p style={{ color: 'var(--muted)', marginTop: '4px', fontSize: '0.95rem' }}>
+            Phân cấp bậc Rank, cấp điểm Gold và quản lý quyền bình luận của thành viên trên toàn hệ thống.
+          </p>
+        </div>
+        <button
+          onClick={loadUsers}
+          className="admin-btn admin-btn--secondary"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+        >
+          🔄 Làm mới
+        </button>
       </div>
 
-      {rpcError ? (
-        /* Database configuration guide card */
-        <div style={{
-          background: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '12px',
-          padding: '2rem',
-          marginTop: '2rem',
-          boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem', color: '#b91c1c' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
-              <line x1="12" y1="9" x2="12" y2="13"></line>
-              <line x1="12" y1="17" x2="12.01" y2="17"></line>
-            </svg>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Cần Cấu hình Cơ sở dữ liệu</h2>
+      {/* Stats Grid */}
+      <div className="admin-stats-grid" style={{ marginBottom: '24px' }}>
+        <div className="stat-card stat-card--accent">
+          <div className="stat-card__title">Tổng thành viên</div>
+          <div className="stat-card__value">{totalCount.toLocaleString('vi-VN')}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-card__title">Đang bị cấm bình luận</div>
+          <div className="stat-card__value" style={{ color: bannedCount > 0 ? '#ef4444' : 'inherit' }}>
+            {bannedCount.toLocaleString('vi-VN')}
           </div>
-          <p style={{ fontSize: '0.95rem', color: '#475569', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-            Trang này cần gọi một hàm Cơ sở dữ liệu bảo mật (`public.get_registered_users()`) để liệt kê tài khoản người dùng từ Supabase Authentication. 
-            Vui lòng sao chép đoạn truy vấn SQL bên dưới, mở **Supabase Dashboard &rarr; SQL Editor &rarr; New Query**, dán vào và bấm **Run** để cài đặt.
-          </p>
-          
-          <pre style={{
-            background: '#0f172a',
-            color: '#34d399',
-            padding: '1.25rem',
-            borderRadius: '8px',
-            overflowX: 'auto',
-            fontSize: '13px',
-            fontFamily: 'monospace',
-            lineHeight: 1.5,
-            border: '1px solid #1e293b',
-            maxHeight: '300px',
-            marginBottom: '1.5rem'
-          }}>
-            <code>{sqlSetupCommand}</code>
-          </pre>
+        </div>
+        <div className="stat-card">
+          <div className="stat-card__title">Hoạt động (30 ngày qua)</div>
+          <div className="stat-card__value">{activeCount.toLocaleString('vi-VN')}</div>
+        </div>
+      </div>
 
-          <button
-            onClick={loadUsers}
-            className="admin-btn admin-btn--primary"
-            style={{ padding: '8px 20px', borderRadius: '8px', fontWeight: '600' }}
+      {/* Toolbar & Search & Filters */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '20px', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', flex: 1 }}>
+          {/* Search Box */}
+          <input
+            type="text"
+            className="logs-search-input"
+            placeholder="Tìm kiếm thành viên theo Tên hoặc Email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              padding: '10px 16px',
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              backgroundColor: 'var(--surface)',
+              color: 'var(--text)',
+              fontSize: '0.9rem',
+              minWidth: '280px'
+            }}
+          />
+
+          {/* Filter Rank */}
+          <select
+            value={rankFilter}
+            onChange={(e) => setRankFilter(e.target.value)}
+            style={{
+              padding: '10px 14px',
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              backgroundColor: 'var(--surface)',
+              color: 'var(--text)',
+              fontSize: '0.9rem',
+              outline: 'none'
+            }}
           >
-            🔄 Tôi đã cài đặt xong, tải lại trang
-          </button>
+            <option value="all">Tất cả Cấp bậc Rank</option>
+            {RANKS.map(r => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+
+          {/* Filter Ban status */}
+          <select
+            value={banFilter}
+            onChange={(e) => setBanFilter(e.target.value)}
+            style={{
+              padding: '10px 14px',
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              backgroundColor: 'var(--surface)',
+              color: 'var(--text)',
+              fontSize: '0.9rem',
+              outline: 'none'
+            }}
+          >
+            <option value="all">Tất cả trạng thái</option>
+            <option value="normal">Bình thường</option>
+            <option value="banned">🚫 Đang bị cấm bình luận</option>
+          </select>
+        </div>
+
+        {searchQuery && (
+          <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
+            Tìm thấy <strong>{filteredUsers.length}</strong> thành viên
+          </span>
+        )}
+      </div>
+
+      {/* User Table content */}
+      {loading ? (
+        <p style={{ color: 'var(--muted)', marginTop: '2rem' }}>Đang tải danh sách thành viên...</p>
+      ) : filteredUsers.length === 0 ? (
+        <div className="admin-empty" style={{
+          textAlign: 'center',
+          padding: '3rem 1rem',
+          background: 'var(--surface)',
+          borderRadius: '12px',
+          border: '1px solid var(--border)',
+          color: 'var(--muted)'
+        }}>
+          <p>Không tìm thấy thành viên nào khớp với điều kiện lọc.</p>
         </div>
       ) : (
-        <>
-          {/* Stats Grid */}
-          <div className="admin-stats-grid">
-            <div className="stat-card stat-card--accent">
-              <div className="stat-card__title">Tổng thành viên</div>
-              <div className="stat-card__value">{totalCount.toLocaleString('vi-VN')}</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-card__title">Hoạt động (30 ngày qua)</div>
-              <div className="stat-card__value">{activeCount.toLocaleString('vi-VN')}</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-card__title">Thành viên mới hôm nay</div>
-              <div className="stat-card__value">{todayCount.toLocaleString('vi-VN')}</div>
-            </div>
-          </div>
+        <div className="admin-table-wrapper" style={{ overflowX: 'auto' }}>
+          <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th>Thành viên</th>
+                <th>Cấp bậc Rank (Set Level)</th>
+                <th>Điểm Gold</th>
+                <th>Quyền Bình luận</th>
+                <th>Ngày tham gia</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.map((user) => {
+                const isBanned = isUserCommentBanned(user.comment_banned_until);
+                const userRank = user.rank || 'Kim Ngư';
+                const isBusy = actionLoadingId === user.id;
 
-          {/* Search Box */}
-          <div className="logs-toolbar" style={{ gap: '1rem', justifyContent: 'flex-start' }}>
-            <div className="logs-search-wrapper" style={{ maxWidth: '420px' }}>
-              <svg
-                className="logs-search-icon"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-              <input
-                type="text"
-                className="logs-search-input"
-                placeholder="Tìm kiếm thành viên theo Tên hoặc Email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            {searchQuery && (
-              <span style={{ fontSize: '14px', color: 'var(--muted)' }}>
-                Tìm thấy <strong>{filteredUsers.length}</strong> kết quả
-              </span>
-            )}
-          </div>
-
-          {/* User Table content */}
-          {loading ? (
-            <p style={{ color: 'var(--muted)' }}>Đang tải danh sách người dùng...</p>
-          ) : filteredUsers.length === 0 ? (
-            <div className="admin-empty" style={{
-              textAlign: 'center',
-              padding: '3rem 1rem',
-              background: '#ffffff',
-              borderRadius: '12px',
-              border: '1px solid #e2e8f0',
-              color: 'var(--muted)'
-            }}>
-              <p>Không tìm thấy thành viên nào khớp với điều kiện tìm kiếm.</p>
-            </div>
-          ) : (
-            <div className="admin-table-wrapper">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Thành viên</th>
-                    <th>ID Tài khoản</th>
-                    <th>Ngày đăng ký</th>
-                    <th>Lần đăng nhập cuối</th>
-                    <th>Trạng thái</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.map((user) => {
-                    const metadata = user.raw_user_meta_data || {};
-                    const name = metadata.name || metadata.full_name || 'Chưa cập nhật tên';
-                    const initial = name.charAt(0).toUpperCase();
-                    const color = getAvatarColor(user.email);
-
-                    // Check active state
-                    const thirtyDaysAgo = new Date();
-                    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-                    const isActive = user.last_sign_in_at && new Date(user.last_sign_in_at) >= thirtyDaysAgo;
-
-                    return (
-                      <tr key={user.id}>
-                        <td data-label="Thành viên">
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{
-                              width: '36px',
-                              height: '36px',
-                              borderRadius: '50%',
-                              backgroundColor: color,
-                              color: '#ffffff',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontWeight: '700',
-                              fontSize: '14px',
-                              flexShrink: 0
-                            }}>
-                              {initial}
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                              <strong style={{ color: '#1e293b', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {name}
-                              </strong>
-                              <span style={{ color: '#64748b', fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {user.email}
-                              </span>
-                            </div>
+                return (
+                  <tr key={user.id}>
+                    {/* Thành viên */}
+                    <td data-label="Thành viên">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {user.avatar_url ? (
+                          <img 
+                            src={user.avatar_url} 
+                            alt="avatar" 
+                            style={{ width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0 }} 
+                          />
+                        ) : (
+                          <div style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '50%',
+                            backgroundColor: '#0f766e',
+                            color: '#ffffff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: '700',
+                            fontSize: '14px',
+                            flexShrink: 0
+                          }}>
+                            {(user.display_name || '?').charAt(0).toUpperCase()}
                           </div>
-                        </td>
-                        <td data-label="ID Tài khoản" style={{ fontFamily: 'monospace', fontSize: '12px', color: '#64748b' }}>
-                          {user.id}
-                        </td>
-                        <td data-label="Ngày đăng ký">
-                          <span style={{ fontSize: '13px', fontWeight: 500 }}>{formatDate(user.created_at)}</span>
-                        </td>
-                        <td data-label="Lần đăng nhập cuối">
-                          <span style={{ fontSize: '13px', fontWeight: 500, color: user.last_sign_in_at ? '#0f766e' : '#64748b' }}>
-                            {formatDateTime(user.last_sign_in_at)}
+                        )}
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                          <strong style={{ color: 'var(--text)', fontSize: '14px' }}>
+                            {user.display_name || 'Chưa đặt tên'}
+                          </strong>
+                          <span style={{ color: 'var(--muted)', fontSize: '12px' }}>
+                            {user.email}
                           </span>
-                        </td>
-                        <td data-label="Trạng thái">
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Cấp bậc Rank Dropdown */}
+                    <td data-label="Cấp bậc Rank">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {RANK_BADGES[userRank] && (
+                          <img 
+                            src={RANK_BADGES[userRank]} 
+                            alt={userRank} 
+                            style={{ 
+                              width: '28px', 
+                              height: '28px', 
+                              objectFit: 'contain',
+                              backgroundColor: '#f8fafc',
+                              borderRadius: '50%',
+                              padding: '2px',
+                              border: '1px solid rgba(0,0,0,0.06)'
+                            }} 
+                          />
+                        )}
+                        <select
+                          disabled={isBusy}
+                          value={userRank}
+                          onChange={(e) => handleRankChange(user.id, e.target.value)}
+                          style={{
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            backgroundColor: RANK_COLORS[userRank] || '#4b5563',
+                            color: 'white',
+                            border: 'none',
+                            cursor: isBusy ? 'not-allowed' : 'pointer',
+                            outline: 'none'
+                          }}
+                        >
+                          {RANKS.map(r => (
+                            <option key={r} value={r} style={{ backgroundColor: '#ffffff', color: '#1e293b' }}>
+                              {r}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </td>
+
+                    {/* Điểm Gold */}
+                    <td data-label="Điểm Gold">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontWeight: 700, color: '#d97706', fontSize: '0.95rem' }}>
+                          🪙 {user.gold_balance || 0}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleGoldChange(user.id, user.gold_balance)}
+                          disabled={isBusy}
+                          style={{
+                            padding: '2px 6px',
+                            fontSize: '0.75rem',
+                            border: '1px solid var(--border)',
+                            borderRadius: '4px',
+                            background: 'none',
+                            cursor: 'pointer',
+                            color: 'var(--muted)'
+                          }}
+                          title="Chỉnh sửa số Gold"
+                        >
+                          ✏️
+                        </button>
+                      </div>
+                    </td>
+
+                    {/* Quyền Bình luận */}
+                    <td data-label="Quyền Bình luận">
+                      {isBanned ? (
+                        <div>
                           <span style={{
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '5px',
-                            fontSize: '11px',
-                            fontWeight: '600',
+                            gap: '4px',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
                             padding: '3px 8px',
-                            borderRadius: '20px',
-                            background: isActive ? '#ecfdf5' : '#f1f5f9',
-                            color: isActive ? '#047857' : '#64748b',
-                            border: isActive ? '1px solid #10b981' : '1px solid #cbd5e1'
+                            borderRadius: '12px',
+                            backgroundColor: '#fee2e2',
+                            color: '#b91c1c',
+                            border: '1px solid #fca5a5'
                           }}>
-                            <span style={{
-                              width: '6px',
-                              height: '6px',
-                              borderRadius: '50%',
-                              background: isActive ? '#10b981' : '#94a3b8'
-                            }} />
-                            {isActive ? 'Hoạt động' : 'Ngoại tuyến'}
+                            🚫 Bị cấm đến:
                           </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </>
+                          <div style={{ fontSize: '0.75rem', color: '#b91c1c', marginTop: '2px', fontWeight: 600 }}>
+                            {formatDateTime(user.comment_banned_until)}
+                          </div>
+                        </div>
+                      ) : (
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          padding: '3px 8px',
+                          borderRadius: '12px',
+                          backgroundColor: '#ecfdf5',
+                          color: '#047857',
+                          border: '1px solid #a7f3d0'
+                        }}>
+                          ✅ Bình thường
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Ngày tham gia */}
+                    <td data-label="Ngày tham gia" style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>
+                      {formatDateTime(user.created_at)}
+                    </td>
+
+                    {/* Thao tác cấm / mở khóa */}
+                    <td data-label="Thao tác">
+                      {isBanned ? (
+                        <button
+                          type="button"
+                          disabled={isBusy}
+                          onClick={() => handleUnbanComments(user.id, user.display_name)}
+                          className="admin-btn admin-btn--sm admin-btn--success"
+                          style={{ fontSize: '0.8rem', padding: '4px 10px' }}
+                        >
+                          {isBusy ? '...' : '✅ Mở khóa'}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={isBusy}
+                          onClick={() => handleBanComments(user.id, user.display_name)}
+                          className="admin-btn admin-btn--sm admin-btn--warning"
+                          style={{ fontSize: '0.8rem', padding: '4px 10px' }}
+                        >
+                          {isBusy ? '...' : '🚫 Cấm 1 ngày'}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </>
   );
 }
+

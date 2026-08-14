@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     avatar_url TEXT,
     gold_balance INTEGER DEFAULT 0 CHECK (gold_balance >= 0) NOT NULL,
     rank TEXT DEFAULT 'Kim Ngư' CHECK (rank IN ('Kim Ngư', 'Linh Long', 'Đế Long', 'Hỏa Long', 'Thiên Long')) NOT NULL,
+    comment_banned_until TIMESTAMP WITH TIME ZONE DEFAULT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
