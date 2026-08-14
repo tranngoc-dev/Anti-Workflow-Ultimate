@@ -135,7 +135,7 @@ export default function ProfilePage({ params }) {
                           }} 
                         />
                       )}
-                      Rank: {profile.rank || 'Kim Ngư'}
+                      {profile.rank || 'Kim Ngư'}
                     </span>
                     <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--accent)' }}>
                       🪙 {profile.gold_balance || 0} Gold
