@@ -12,7 +12,20 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // ⚠️ Nếu đã đăng nhập và là admin thì nhảy thẳng vào admin luôn
+    // Lắng nghe sự kiện thay đổi trạng thái Auth của Supabase để xử lý redirect sau OAuth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        const { data: isAdmin, error } = await supabase.rpc('is_admin');
+        if (isAdmin === true) {
+          router.push('/admin');
+        } else if (event === 'SIGNED_IN') {
+          setErrorMsg('Tài khoản của bạn không có quyền truy cập trang quản trị.');
+          await supabase.auth.signOut();
+        }
+      }
+    });
+
+    // Chạy kiểm tra session hiện tại ngay khi mount
     async function checkCurrentSession() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
@@ -23,6 +36,10 @@ export default function AdminLoginPage() {
       }
     }
     checkCurrentSession();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [router]);
 
   async function handleLogin(e) {
