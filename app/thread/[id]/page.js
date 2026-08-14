@@ -165,7 +165,17 @@ export default function ThreadDetailPage({ params }) {
                   <img 
                     src={RANK_BADGES[thread.author.rank]} 
                     alt={thread.author.rank} 
-                    style={{ width: '16px', height: '16px', objectFit: 'contain' }} 
+                    style={{ 
+                      width: '22px', 
+                      height: '22px', 
+                      objectFit: 'contain',
+                      backgroundColor: '#f8fafc',
+                      borderRadius: '50%',
+                      padding: '2px',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                      border: '1px solid rgba(0,0,0,0.05)',
+                      marginLeft: '2px'
+                    }} 
                   />
                 )}
                 <span 
@@ -302,7 +312,17 @@ export default function ThreadDetailPage({ params }) {
                     <img 
                       src={RANK_BADGES[comment.author.rank]} 
                       alt={comment.author.rank} 
-                      style={{ width: '14px', height: '14px', objectFit: 'contain' }} 
+                      style={{ 
+                        width: '18px', 
+                        height: '18px', 
+                        objectFit: 'contain',
+                        backgroundColor: '#f8fafc',
+                        borderRadius: '50%',
+                        padding: '2px',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                        border: '1px solid rgba(0,0,0,0.05)',
+                        marginLeft: '2px'
+                      }} 
                     />
                   )}
                   <span 

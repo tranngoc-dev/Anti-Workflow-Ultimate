@@ -122,7 +122,17 @@ export default function ProfilePage({ params }) {
                         <img 
                           src={RANK_BADGES[profile.rank]} 
                           alt={profile.rank} 
-                          style={{ width: '16px', height: '16px', objectFit: 'contain' }} 
+                          style={{ 
+                            width: '26px', 
+                            height: '26px', 
+                            objectFit: 'contain',
+                            backgroundColor: '#f8fafc',
+                            borderRadius: '50%',
+                            padding: '3px',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                            border: '1px solid rgba(0,0,0,0.05)',
+                            marginRight: '2px'
+                          }} 
                         />
                       )}
                       Rank: {profile.rank || 'Kim Ngư'}
@@ -266,7 +276,17 @@ export default function ProfilePage({ params }) {
                                 <img 
                                   src={RANK_BADGES[user.rank]} 
                                   alt={user.rank} 
-                                  style={{ width: '12px', height: '12px', objectFit: 'contain' }} 
+                                  style={{ 
+                                    width: '18px', 
+                                    height: '18px', 
+                                    objectFit: 'contain',
+                                    backgroundColor: '#f8fafc',
+                                    borderRadius: '50%',
+                                    padding: '2px',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                                    border: '1px solid rgba(0,0,0,0.05)',
+                                    marginRight: '2px'
+                                  }} 
                                 />
                               )}
                               <span>{user.rank}</span>
