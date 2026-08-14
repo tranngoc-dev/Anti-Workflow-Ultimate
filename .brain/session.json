@@ -1,66 +1,88 @@
 {
-  "updated_at": "2026-06-19T13:36:00Z",
+  "updated_at": "2026-08-14T15:12:00Z",
   "working_on": {
-    "feature": "Lưu trí nhớ dự án (Save Brain)",
-    "task": "Export chat history and save project context",
+    "feature": "Admin Auth & Codebase Security Audit (Fix All)",
+    "task": "Hoàn thành khắc phục toàn bộ lỗi đăng nhập Admin, vòng lặp F5, thiếu bảng Settings và các lỗi Audit",
     "status": "completed",
     "files": [
-      ".brain/brain.json",
-      ".brain/session.json",
-      "chat_history.html"
+      "app/admin/layout.js",
+      "app/admin/login/page.js",
+      "middleware.js",
+      "app/components/HeaderAuth.js",
+      "app/working/components/NotesWidget.js",
+      "scripts/qa-setup.sql",
+      "eslint.config.mjs",
+      "docs/reports/audit_2026_08_14.md"
     ],
     "blockers": [],
-    "notes": "Đã sửa hoàn thiện giao diện Workspace, đã push lên nhánh Tulanh và xóa nhánh main."
+    "notes": "Đã test tự động Playwright đăng nhập Admin thành công 100%, vượt qua toàn bộ Guardrails."
   },
-  "pending_tasks": [
-    {
-      "task": "Tích hợp Backend/Database sâu hơn cho Workspace (nếu cần)",
-      "priority": "low",
-      "notes": "Hiện tại các tính năng đang chạy tốt ở frontend, có thể cần móc nối CSDL trong các phase sau."
-    }
-  ],
+  "pending_tasks": [],
   "recent_changes": [
     {
-      "timestamp": "2026-06-19T06:00:00Z",
-      "type": "feature",
-      "description": "Sửa lỗi lệch màn hình Workspace, chỉnh CSS cho dạng danh sách dọc (Notes), update tiếng chuông Pomodoro.",
+      "timestamp": "2026-08-14T07:45:00Z",
+      "type": "bugfix",
+      "description": "Sửa lỗi F5 Loop: Đọc is_admin trực tiếp từ session user_metadata thay vì gọi RPC bất đồng bộ; bỏ redirect tự động ở trang Login.",
       "files": [
-        "app/working/working.css",
-        "app/working/page.js",
-        "app/working/components/NotesWidget.js"
+        "app/admin/layout.js",
+        "app/admin/login/page.js"
       ]
     },
     {
-      "timestamp": "2026-06-19T06:15:00Z",
-      "type": "infrastructure",
-      "description": "Đẩy code lên nhánh Tulanh trên GitHub và xóa nhánh main.",
-      "files": []
+      "timestamp": "2026-08-14T07:48:00Z",
+      "type": "bugfix",
+      "description": "Sửa cấu hình Next.js Middleware trỏ đúng Supabase project mới (xywmdsieytqsxqpqvcwj).",
+      "files": [
+        "middleware.js"
+      ]
     },
     {
-      "timestamp": "2026-06-19T06:34:00Z",
-      "type": "utility",
-      "description": "Tạo file chat_history.html lưu lại đoạn chat của session hiện tại.",
+      "timestamp": "2026-08-14T07:55:00Z",
+      "type": "database",
+      "description": "Khởi tạo đầy đủ các bảng blog (site_settings, posts, comments, visit_logs, page_views) và 5 hàm RPC thống kê trên Supabase mới.",
       "files": [
-        "scratch/export_chat.js",
-        "chat_history.html"
+        "scripts/qa-setup.sql"
+      ]
+    },
+    {
+      "timestamp": "2026-08-14T08:09:00Z",
+      "type": "security",
+      "description": "Thực hiện Fix All Audit: Khắc phục XSS trong NotesWidget, chạy npm audit fix (0 vulnerabilities), thêm 8 Indexes cho DB và tinh chỉnh ESLint globals.",
+      "files": [
+        "app/working/components/NotesWidget.js",
+        "package.json",
+        "package-lock.json",
+        "eslint.config.mjs",
+        "scripts/qa-setup.sql",
+        "docs/reports/audit_2026_08_14.md"
       ]
     }
   ],
   "errors_encountered": [
     {
-      "error": "Lỗi regex double escape khi viết script export chat Node.js bằng tool",
-      "solution": "Chuyển sang dùng RegExp object để tránh lỗi escaping chuỗi",
+      "error": "Vòng lặp tải trang liên tục khi đăng nhập Admin",
+      "solution": "Cập nhật đúng project Supabase trong middleware.js và chuyển cơ chế check admin sang đọc metadata trực tiếp từ session.",
+      "resolved": true
+    },
+    {
+      "error": "Could not find the table 'public.site_settings' in the schema cache",
+      "solution": "Khởi tạo bảng site_settings và toàn bộ schema blog trên project Supabase mới.",
+      "resolved": true
+    },
+    {
+      "error": "Lỗ hổng XSS tiềm ẩn trong NotesWidget",
+      "solution": "Bọc DOMPurify.sanitize() cho HTML nội dung ghi chú.",
       "resolved": true
     }
   ],
   "decisions_made": [
     {
-      "decision": "Dùng nhánh Tulanh làm nhánh chính trên GitHub",
-      "reason": "Yêu cầu của User muốn lưu ở nhánh Tulanh thay vì main"
+      "decision": "Dùng tài khoản vutrongvtv24@gmail.com với mật khẩu kocopass@123hTc làm Admin toàn quyền",
+      "reason": "Yêu cầu của Sếp để quản trị nhanh chóng trên cả Frontend và Backend"
     },
     {
-      "decision": "Lưu chat history ra file HTML tĩnh",
-      "reason": "User muốn lưu log lại để theo dõi nhưng không thể import nguyên xi vào UI của Antigravity"
+      "decision": "Bỏ cơ chế bảo mật 2 lớp phụ (sessionStorage)",
+      "reason": "Tối ưu trải nghiệm: đăng nhập 1 lần là vào thẳng trang quản trị"
     }
   ]
 }
