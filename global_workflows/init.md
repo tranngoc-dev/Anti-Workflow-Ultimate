@@ -1,109 +1,93 @@
 ---
-description: ✨ Khởi tạo dự án mới với Cổng Guardrail và Quản lý Context
+description: ✨ Tự động khởi tạo dự án mới hoặc Tích hợp vào dự án đang làm
 ---
 
-# WORKFLOW: /init - Khởi Tạo Dự Án Chuẩn Toàn Diện
+# WORKFLOW: /init - Khởi Tạo Hoặc Tích Hợp Dự Án Tự Động 100%
 
-**Vai trò:** Project Initializer & Architect  
-**Mục tiêu:** Nắm bắt ý tưởng dự án, thiết lập workspace chuẩn 4 tầng (AWF, Superpowers, GitNexus, Guardrails), kích hoạt cổng bảo vệ pre-commit.
+**Vai trò:** Project Initializer & Auto-Onboarding Lead  
+**Mục tiêu:** Tự động phát hiện loại dự án (Mới hoàn toàn hay Đang phát triển), tự động cài đặt bộ quy tắc, cổng Guardrail và quét đồ thị GitNexus mà **không làm mất bất kỳ dòng code cũ nào**.
 
 **NGÔN NGỮ: Luôn trả lời bằng tiếng Việt thân thiện, rõ ràng.**
 
 ---
 
-## 🗺️ Vị Trí Trong Quy Trình Khép Kín
+## 🔍 Giai đoạn 0: Tự Động Nhận Diện Ngữ Cảnh Thư Mục (Smart Detection)
 
-```
-[/init] ← BẠN ĐANG Ở ĐÂY (Khởi tạo dự án + Cài Guardrails)
-   ↓
-[/brainstorm] (Làm rõ ý tưởng theo phương pháp Socratic)
-   ↓
-[/visualize] (Dựng UI Mockup & Design Tokens)
-   ↓
-[gitnexus analyze] ➔ [/plan] (Lập kế hoạch TDD có tính toán Impact)
-   ↓
-🔄 [MODULAR HANDOVER ➔ Mở Session mới]
-   ↓
-[/code] (Subagents TDD + Git Worktree + Cổng Guardrail)
-```
+AI tự động kiểm tra thư mục hiện tại:
+* **Nếu thư mục ĐÃ CÓ code** (có `package.json`, `go.mod`, `Cargo.toml`, `pyproject.toml`, hoặc thư mục `.git/`):
+  $\longrightarrow$ **Kích hoạt [KỊCH BẢN B: TÍCH HỢP DỰ ÁN ĐANG LÀM]** (Tự động 100%).
+* **Nếu thư mục TRỐNG hoặc chỉ mới tạo:**
+  $\longrightarrow$ **Kích hoạt [KỊCH BẢN A: KHỞI TẠO DỰ ÁN MỚI]**.
 
 ---
 
-## Giai đoạn 1: Thu Thập Thông Tin Dự Án (Nhanh Gọn)
+## 🌟 KỊCH BẢN A: KHỞI TẠO DỰ ÁN MỚI (Từ đầu)
 
-Hỏi người dùng 3 câu hỏi cơ bản:
-1. **Tên dự án là gì?** (Ví dụ: `coffee-shop-app`, `vibe-crm`)
-2. **Mục tiêu chính của ứng dụng?** (1–2 câu mô tả sản phẩm giải quyết vấn đề gì)
-3. **Loại ứng dụng dự kiến?** (Web App Next.js/React, Backend API, Mobile, hay Tool/CLI?)
-
----
-
-## Giai đoạn 2: Khởi Tạo Workspace & Cấu Trúc Thư Mục
-
-Tạo cấu trúc thư mục tiêu chuẩn:
-
-```
-{project-name}/
-├── .brain/
-│   ├── preferences.json       # Cấu hình persona & technical level
-│   ├── session.json           # Lưu trạng thái active phase & plan
-│   ├── session_log.txt        # Append log nhẹ nhàng
-│   └── handovers/             # Checkpoint giữa các session
-├── docs/
-│   ├── superpowers/
-│   │   ├── specs/             # Nơi lưu trữ Spec chi tiết
-│   │   └── plans/             # Nơi lưu trữ Implementation Plans
-│   └── ideas.md
-├── guardrails/                # Cổng kiểm soát pre-commit vật lý
-│   ├── guardrail.py
-│   ├── install.py
-│   ├── policy.json
-│   └── hooks/
-├── .gemini/
-│   ├── GEMINI.md
-│   └── mcp_config.json
-├── AGENTS.md
-├── AI_CODE_WORKFLOW.md
-├── GUARDRAILS.md
-└── README.md
-```
+1. **Hỏi nhanh người dùng 3 thông tin:**
+   - Tên dự án là gì?
+   - Mục tiêu chính của app?
+   - Loại app (Web Next.js/React, Backend API, Mobile, CLI)?
+2. **Tạo cấu trúc workspace chuẩn:**
+   - Tạo `.brain/`, `docs/superpowers/specs/`, `docs/superpowers/plans/`.
+   - Cài đặt `guardrails/` và chạy `python guardrails/install.py`.
+   - Tạo file `AI_CODE_WORKFLOW.md`, `GEMINI.md`, `AGENTS.md`, `GUARDRAILS.md`, `README.md`.
+3. **Khởi tạo Git và First Commit:**
+   ```bash
+   git init
+   git add .
+   git commit -m "chore: initial project workspace with anti-workflow guardrails"
+   ```
+4. **Hướng dẫn bước tiếp theo:** Gợi ý `/brainstorm` hoặc `/visualize`.
 
 ---
 
-## Giai đoạn 3: Thiết Lập Git & Cài Đặt Guardrails
+## ⚡ KỊCH BẢN B: TÍCH HỢP TỰ ĐỘNG VÀO DỰ ÁN ĐANG LÀM (Zero-Manual Steps)
 
-Tự động thực hiện các lệnh khởi tạo:
-```bash
-# 1. Khởi tạo Git nếu chưa có
-git init
+Nếu phát hiện đây là dự án đang phát triển, AI **TỰ ĐỘNG THỰC HIỆN TOÀN BỘ CÁC BƯỚC SAU MÀ KHÔNG CẦN NGƯỜI DÙNG LÀM THỦ CÔNG**:
 
-# 2. Cài đặt Cổng gác Pre-commit Guardrail
-python guardrails/install.py
+### Bước 1: Bảo Toàn Mã Nguồn & Tạo Cấu Trúc Bổ Trợ
+* Giữ nguyên 100% mã nguồn, file cấu hình và lịch sử Git hiện có.
+* Tự động tạo thư mục `.brain/` và `docs/superpowers/` nếu chưa có.
+* Copy/tạo các file quy tắc: `AI_CODE_WORKFLOW.md`, `GEMINI.md`, `AGENTS.md`, `GUARDRAILS.md`.
 
-# 3. Tạo commit đầu tiên
-git add .
-git commit -m "chore: initial project workspace with anti-workflow guardrails"
-```
+### Bước 2: Tự Động Cài Đặt & Cấu Hình Guardrails
+1. Copy thư mục `guardrails/` vào thư mục gốc dự án.
+2. Tự động kích hoạt Git Hook:
+   ```bash
+   python guardrails/install.py
+   ```
+3. **Tự động nhận diện công nghệ để cấu hình `guardrails/policy.json`:**
+   * Nếu là Node.js (`package.json`): Tự động trích xuất các lệnh `test`, `lint`, `typecheck`, `build`, `test:e2e`.
+   * Nếu là Python: Cấu hình `pytest`, `ruff`, `mypy`, `build`.
+   * Nếu là Rust/Go: Cấu hình `cargo`/`go`.
 
----
+### Bước 3: Tự Động Quét Bản Đồ Kiến Trúc Bằng GitNexus
+* Tự động chạy quét đồ thị toàn bộ codebase hiện tại:
+  ```bash
+  npx gitnexus analyze
+  ```
+* GitNexus sẽ phân tích AST toàn bộ các file, xác định các API routes, function calls, clusters và contract interfaces.
 
-## Giai đoạn 4: Xác Nhận & Điều Hướng Tiếp Theo
+### Bước 4: Báo Cáo Hoàn Tất Tích Hợp (Executive Dashboard)
 
 Hiển thị thông báo hoàn tất:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✨ DỰ ÁN ĐÃ ĐƯỢC KHỞI TẠO HOÀN HẢO!
+✨ ĐÃ TỰ ĐỘNG TÍCH HỢP ANTI-WORKFLOW VÀO DỰ ÁN HIỆN TẠI!
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📁 Dự án: {project-name}
-🔒 Cổng Guardrail: Đã kích hoạt (Chặn commit main, bảo vệ test)
-🧠 Context System: Đã cấu hình (.brain/)
+📁 Dự án: {Project Name} (Công nghệ nhận diện: {Tech Stack})
+🔒 Cổng Guardrail: ĐÃ CÀI ĐẶT & KÍCH HOẠT (Bảo vệ nhánh main, ép test thật)
+🧠 Bản đồ GitNexus: ĐÃ QUÉT XONG ({N} files, {M} symbols, {K} API routes)
+📦 Ngữ cảnh dự án: Đã khởi tạo .brain/ và docs/superpowers/
 
-🚀 BƯỚC TIẾP THEO:
-1️⃣ /brainstorm - Bàn ý tưởng sâu & thiết kế kiến trúc (Khuyên dùng)
-2️⃣ /visualize - Thiết kế UI Mockup & Style guide
-3️⃣ /plan - Lên kế hoạch chi tiết nếu đã có sẵn Spec
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 BƯỚC TIẾP THEO ANH NÊN CHỌN:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-💡 Gợi ý: Gõ /brainstorm để cùng AI thảo luận và làm rõ tính năng!
+1️⃣ /audit - Khám tổng quát dự án hiện tại (Tìm lỗi tiềm ẩn & xung đột DB) ⭐ Khuyên dùng
+2️⃣ /plan - Lên kế hoạch phát triển tính năng mới
+3️⃣ /debug - Sửa một lỗi đang phát sinh trong dự án
+4️⃣ /test - Chạy kiểm thử toàn bộ hệ thống hiện tại
 ```
