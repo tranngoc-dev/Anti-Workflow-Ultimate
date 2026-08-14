@@ -40,15 +40,19 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
    * Viết test fail trước $\to$ Xác nhận test fail $\to$ Viết code tối thiểu để pass test $\to$ Refactor $\to$ Commit.
    * Bất kỳ code nào viết trước test đều vi phạm quy chuẩn.
    * Không bao giờ sửa hoặc xóa test hợp lệ chỉ để làm cho một implementation sai vượt qua kiểm tra.
-4. **Quy tắc Sửa lỗi Lần đầu Thất bại (Failed-First-Fix Rule):**
+4. **Quy Chuẩn Toàn Vẹn Cơ Sở Dữ Liệu & Explicit FK Hints (Database & PostgREST Integrity Policy):** ⭐ MỚI
+   * **Bắt buộc Explicit FK Hint:** Khi viết truy vấn Supabase / PostgREST nhúng (Embedded Query), **LUÔN LUÔN** chỉ định rõ Foreign Key Constraint (ví dụ: `supabase.from('questions').select('*, profiles!author_id(*)')` hoặc `profiles!questions_user_id_fkey(*)`), **tuyệt đối không dùng dạng ngầm định `profiles(*)`** khi có khả năng bảng đích có nhiều Foreign Key tham chiếu tới.
+   * **Database Migration Impact Analysis:** Mỗi khi tạo bảng mới, thêm cột FK mới hoặc thay đổi DB Schema $\to$ **BẮT BUỘC** quét lại toàn bộ các file gọi API/Query hiện có trong codebase để phát hiện các truy vấn embed bị xung đột (Ambiguous FK).
+   * **Cấm Shallow Mocking Duy Nhất:** Không chỉ dựa vào Unit Test với Supabase mock. Phải có ít nhất một Integration Test hoặc Runtime Smoke Test chạy với Database thật/local để xác thực PostgREST không trả về lỗi runtime.
+5. **Quy tắc Sửa lỗi Lần đầu Thất bại (Failed-First-Fix Rule):**
    * Khi fix bug, phải tìm ra nguyên nhân gốc rễ (Root Cause) bằng chứng cứ (`systematic-debugging` + `gitnexus trace`).
    * Nếu lần sửa đầu tiên thất bại hoặc làm hỏng test khác $\to$ **DỪNG LẠI NGAY LẬP TỨC**, rollback thay đổi thử nghiệm và quay lại bước điều tra. Cấm đắp thêm các tầng vá lỗi suy đoán (speculative patching) hoặc fallback che giấu lỗi.
-5. **Cổng Gác Vật lý (Strict Physical Guardrails):**
+6. **Cổng Gác Vật lý (Strict Physical Guardrails):**
    * Cài đặt và kích hoạt hook `guardrails/guardrail.py`.
    * Cấm commit trực tiếp lên nhánh được bảo vệ (`main`, `master`).
    * Cấm commit khi chưa vượt qua 4 kiểm tra thật: `tests`, `lint`, `typecheck`, `build`.
    * Tuyệt đối không dùng `git commit --no-verify` để lách cổng.
-6. **Cổng Triển Khai (Live-Test Deployment Gate):**
+7. **Cổng Triển Khai (Live-Test Deployment Gate):**
    * Tuyệt đối không tự ý deploy lên production hoặc chạy migration phá hủy khi chưa có sự xác nhận rõ ràng của người dùng sau khi đã kiểm thử trực tiếp (Live-test).
 
 ---
@@ -75,7 +79,7 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
 * Quét AST và lập bản đồ quan hệ toàn dự án vào LadybugDB.
 
 ### 4.4. Giai đoạn 4: Lập Kế hoạch TDD (`/plan`)
-* Sử dụng GitNexus `impact` để tính toán Blast Radius.
+* Sử dụng GitNexus `impact` để tính toán Blast Radius (bao gồm phân tích tác động schema DB).
 * Phân rã công việc thành các task nhỏ (2–5 phút) với đầy đủ code spec và lệnh test $\to$ Lưu vào `docs/superpowers/plans/<feature>.md`.
 * Đóng gói Session 1 bằng `/save-brain`.
 
@@ -83,6 +87,7 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
 * *(Mở Session mới nếu cần)* $\to$ Gõ `/recap` nạp ngữ cảnh.
 * Kích hoạt `using-git-worktrees` tạo nhánh làm việc cô lập.
 * Điều phối Subagents theo `subagent-driven-development`, áp dụng Strict TDD trên từng task.
+* Áp dụng Explicit FK hint trên mọi truy vấn database.
 * Cổng `guardrail.py` tự động thẩm định mỗi commit.
 
 ### 4.6. Giai đoạn 6: Review Độc lập 2 Lớp (`/review`)
@@ -94,9 +99,10 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
 ### 4.7. Giai đoạn 7: Xử lý Lỗi Chuyên sâu (`/debug`)
 * Khi gặp lỗi phức tạp: Áp dụng `systematic-debugging` 4 bước kết hợp `gitnexus trace` để định vị chính xác vị trí lỗi.
 
-### 4.8. Giai đoạn 8: Nghiệm thu, Kiểm toán, Triển khai & Lưu Trí nhớ
+### 4.8. Giai đoạn 8: Nghiệm thu, Kiểm toán Toàn vẹn, Triển khai & Lưu Trí nhớ
 * Merge nhánh worktree an toàn (`finishing-a-development-branch`).
-* Chạy `/audit` quét bảo mật, lỗ hổng package và secrets.
+* Chạy `/audit` (quét Bảo mật, Code Quality, Dependencies và **Database Relationship Integrity**).
+* Chạy Runtime API / Browser Smoke Test trong `/test`.
 * Xuất báo cáo Handoff chuẩn $\to$ Hướng dẫn người dùng Live-test.
 * Sau khi người dùng xác nhận $\to$ Chạy `/deploy` $\to$ Chạy `/save-brain` cập nhật Eternal Memory.
 
@@ -109,5 +115,5 @@ AI bắt buộc phải **DỪNG LẠI và HỎI Ý KIẾN NGƯỜI DÙNG** khi:
 2. Cần thực hiện Migration cơ sở dữ liệu có tính chất xóa hoặc thay đổi dữ liệu khó phục hồi.
 3. Cần xóa dữ liệu hoặc thay đổi cấu trúc bảng ảnh hưởng dữ liệu người dùng.
 4. Phát hiện thay đổi có rủi ro bảo mật, xác thực (auth), phân quyền hoặc lộ lọt secrets.
-5. Phát hiện vùng ảnh hưởng (Blast Radius từ GitNexus) vượt xa phạm vi đã thống nhất ban đầu.
+5. Phát hiện vùng ảnh hưởng (Blast Radius từ GitNexus hoặc DB Schema Conflict) vượt xa phạm vi đã thống nhất ban đầu.
 6. Lỗi fix lần 1 thất bại và chưa xác định được nguyên nhân gốc rễ có bằng chứng.

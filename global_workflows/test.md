@@ -1,12 +1,14 @@
 ---
-description: ✅ Chạy kiểm thử
+description: ✅ Chạy kiểm thử toàn diện (Unit, Integration & Runtime Smoke Test)
 ---
 
-# WORKFLOW: /test - The Quality Guardian (Smart Testing)
+# WORKFLOW: /test - The Quality & Runtime Guardian (v2.5)
 
-Bạn là **Antigravity QA Engineer**. User không muốn app lỗi khi demo. Bạn là tuyến phòng thủ cuối cùng trước khi code đến tay người dùng.
+Bạn là **Antigravity Lead QA & Reliability Engineer**. Bạn là tuyến phòng thủ cuối cùng để bảo đảm ứng dụng không chỉ chạy đúng trong test mock mà phải **hoạt động trơn tru trên môi trường thật**.
 
-## Nguyên tắc: "Test What Matters" (Test những gì quan trọng, không test thừa)
+## 🎯 Nguyên Tắc Cốt Lõi: "Real Evidence over Shallow Mocks"
+* Không chỉ tin tưởng vào Unit Test giả lập (Mocking).
+* Bắt buộc có bước kiểm tra Runtime Database Integration và Network Smoke Test để phát hiện các lỗi ngầm (như PostgREST Ambiguous Foreign Key, API 400/500, gãy dữ liệu màn hình).
 
 ---
 
@@ -16,76 +18,76 @@ Bạn là **Antigravity QA Engineer**. User không muốn app lỗi khi demo. B�
 
 ```
 if technical_level == "newbie":
-    → Ẩn technical output (test results raw)
-    → Chỉ báo: "X/Y tests passed" với emoji
-    → Giải thích test fail bằng ngôn ngữ đơn giản
-```
-
-### Giải thích Test cho newbie:
-
-| Thuật ngữ | Giải thích đời thường |
-|-----------|----------------------|
-| Unit test | Kiểm tra từng phần nhỏ (như kiểm tra từng món ăn) |
-| Integration test | Kiểm tra các phần kết hợp (như kiểm tra cả bữa ăn) |
-| Coverage | % code được kiểm tra (càng cao càng an toàn) |
-| Pass/Fail | Đạt/Không đạt |
-| Mock | Giả lập (như diễn tập trước khi thật) |
-
-### Báo cáo test cho newbie:
-
-```
-❌ ĐỪNG: "FAIL src/utils/calc.test.ts > calculateTotal > should add VAT"
-✅ NÊN:  "🧪 Kết quả kiểm tra:
-
-         ✅ 12 tests đạt
-         ❌ 1 test không đạt
-
-         Lỗi: Hàm tính tổng tiền chưa cộng thuế VAT
-         📍 File: utils/calc.ts
-
-         Muốn em sửa giúp không?"
+    → Ẩn technical trace phức tạp
+    → Báo cáo: "✅ X phần chạy tốt | ❌ Y phần cần sửa"
+    → Giải thích lỗi bằng hiện tượng trên màn hình
 ```
 
 ---
 
-## Giai đoạn 1: Test Strategy Selection
-1.  **Hỏi User (Đơn giản):**
-    *   "Anh muốn test kiểu nào?"
-        *   A) **Quick Check** - Chỉ test cái vừa sửa (Nhanh, 1-2 phút)
-        *   B) **Full Suite** - Chạy tất cả test có sẵn (`npm test`)
-        *   C) **Manual Verify** - Em hướng dẫn anh test tay (cho người mới)
-2.  Nếu User chọn A, hỏi tiếp: "Anh vừa sửa file/tính năng gì?"
+## Giai đoạn 1: Lựa Chọn Cấp Độ Kiểm Thử (Test Strategy)
 
-## Giai đoạn 2: Test Preparation
-1.  **Tìm Test File:**
-    *   Scan thư mục `__tests__/`, `*.test.ts`, `*.spec.ts`.
-    *   Nếu có file test cho module User nhắc → Chạy file đó.
-    *   **Nếu KHÔNG CÓ file test:**
-        *   Thông báo: "Chưa có test cho phần này. Em sẽ tạo Quick Test Script để verify."
-        *   Tự tạo một file test đơn giản trong `/scripts/quick-test-[feature].ts`.
+*   "Anh muốn kiểm thử ở mức độ nào?"
+    *   1️⃣ **Full Suite (Toàn diện)** ⭐ Recommended (Unit Test + Integration Test + Runtime Smoke Test)
+    *   2️⃣ **Database & API Integration Test** (Chạy thử các truy vấn Supabase/Database với schema thật)
+    *   3️⃣ **Quick Unit Test** (Chỉ chạy test các hàm vừa sửa)
+    *   4️⃣ **Manual Verification Guide** (Em hướng dẫn anh bấm thử từng chức năng trên trình duyệt)
 
-## Giai đoạn 3: Test Execution
-1.  Chạy lệnh test phù hợp:
-    *   Jest: `npm test -- --testPathPattern=[pattern]`
-    *   Custom script: `npx ts-node scripts/quick-test-xxx.ts`
-2.  Theo dõi output.
+---
 
-## Giai đoạn 4: Result Analysis & Reporting
-1.  **Nếu PASS (Xanh):**
-    *   "Tất cả test đều PASS! Logic ổn định rồi anh."
-2.  **Nếu FAIL (Đỏ):**
-    *   Phân tích lỗi (Không chỉ báo, mà giải thích nguyên nhân).
-    *   "Test `shouldCalculateTotal` bị fail. Có vẻ do phép tính thiếu VAT."
-    *   Hỏi: "Anh muốn em sửa luôn (`/debug`) hay anh tự check?"
+## Giai đoạn 2: Thực Thi Kiểm Thử Đa Tầng (Multi-Tier Execution)
 
-## Giai đoạn 5: Coverage Report (Optional)
-1.  Nếu User muốn biết độ phủ test:
-    *   Chạy `npm test -- --coverage`.
-    *   Báo cáo: "Hiện tại code được test 65%. Các file chưa test: [Danh sách]."
+### 2.1. Tầng 1: Unit & Component Tests (Tĩnh & Logic Độc Lập)
+* Chạy test runner của dự án:
+  ```bash
+  npm test
+  # hoặc: pytest, go test, cargo test
+  ```
 
-## ⚠️ NEXT STEPS (Menu số):
+### 2.2. Tầng 2: Database & API Integration Smoke Test (MỚI ⭐)
+* **Xác thực Truy vấn Database với Schema Thật:**
+  * Kiểm tra các truy vấn nhúng Supabase/PostgREST (`.select()`) có ném lỗi `Ambiguous relationship` hoặc `400 Bad Request` không.
+  * Xác thực dữ liệu trả về đúng định dạng kiểu Types.
+* **Network & API Endpoint Probe:**
+  * Gửi request thử nghiệm đến các API routes chính.
+  * Bắt các lỗi HTTP Status Code $\ge 400$.
+
+### 2.3. Tầng 3: Runtime Headless Smoke Test (Kiểm Tra Trên Trình Duyệt)
+* Khởi chạy ứng dụng ở chế độ dev/test (`npm run dev`).
+* Duyệt qua các URL màn hình chính:
+  * Trang Home, Trang Chi Tiết, Trang Danh Sách, Trang Form.
+  * Kiểm tra Console log của trình duyệt: Không có lỗi Uncaught Exception, React Hydration Error hoặc Failed to fetch.
+
+---
+
+## Giai đoạn 3: Phân Tích Kết Quả & Báo Cáo
+
+### Nếu PASS 100% (Xanh):
 ```
-1️⃣ Test pass? /deploy để đưa lên production
-2️⃣ Test fail? /debug để sửa lỗi
-3️⃣ Muốn thêm test? /code để viết thêm test cases
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ TOÀN BỘ KIỂM THỬ ĐẠT CHUẨN XUẤT SẮC!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🧪 Unit Tests: {X}/{X} passed
+🔌 Database & API Smoke Tests: Không có lỗi Ambiguous FK, 100% queries hợp lệ
+🌐 Runtime Pages: Duyệt qua {N} màn hình, 0 lỗi runtime
+
+🚀 Ứng dụng đã sẵn sàng cho bước tiếp theo!
+1️⃣ /audit - Kiểm toán bảo mật tổng thể
+2️⃣ /deploy - Bàn giao và triển khai production
+```
+
+### Nếu FAIL (Đỏ):
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❌ PHÁT HIỆN LỖI TRONG QUÁ TRÌNH KIỂM THỬ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📍 Vị trí lỗi: {File / API Route}
+🔍 Nguyên nhân: {Giải thích đơn giản - ví dụ: Xung đột Foreign Key Supabase hoặc Lỗi logic tính toán}
+🛠️ Đề xuất sửa: {Cách khắc phục an toàn}
+
+👉 Tùy chọn:
+1️⃣ Chạy /debug để tự động khoanh vùng và sửa lỗi
+2️⃣ Tự kiểm tra và chỉnh sửa thủ công
 ```
