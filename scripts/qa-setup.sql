@@ -264,6 +264,31 @@ CREATE TRIGGER on_thread_comment_inserted_deleted
     FOR EACH ROW EXECUTE FUNCTION public.handle_thread_comment_gold();
 
 
+-- E2. Thread Creation Reward: +10 Gold when user creates a thread, -10 Gold when deleted
+CREATE OR REPLACE FUNCTION public.handle_thread_creation_gold()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        UPDATE public.profiles
+        SET gold_balance = gold_balance + 10
+        WHERE id = NEW.author_id;
+        RETURN NEW;
+    ELSIF (TG_OP = 'DELETE') THEN
+        UPDATE public.profiles
+        SET gold_balance = GREATEST(0, gold_balance - 10)
+        WHERE id = OLD.author_id;
+        RETURN OLD;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_thread_created_deleted ON public.threads;
+CREATE TRIGGER on_thread_created_deleted
+    AFTER INSERT OR DELETE ON public.threads
+    FOR EACH ROW EXECUTE FUNCTION public.handle_thread_creation_gold();
+
+
 -- F. Thread Comment Likes Gold: +1 Gold when comment is liked, -1 when unliked (Anti-self-like)
 CREATE OR REPLACE FUNCTION public.handle_thread_comment_like_gold()
 RETURNS TRIGGER AS $$

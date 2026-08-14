@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/utils/supabase';
+import { formatCompactDate } from '@/utils/qa-api';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import Image from 'next/image';
@@ -765,8 +766,8 @@ export default function PostClient({ initialPost, slug }) {
                     <div className="comment-item__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
                         <span className="comment-item__name">{c.author_name}</span>
-                        <time className="comment-item__date" dateTime={c.created_at}>
-                          {formatDate(c.created_at)}
+                        <time className="comment-item__date" dateTime={c.created_at} style={{ fontSize: '0.8rem', color: 'var(--muted)', fontWeight: 500 }}>
+                          {formatCompactDate(c.created_at)}
                         </time>
                       </div>
                       {!isEditing && (isCommentAuthor || isAdmin) && (

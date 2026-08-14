@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
-import { getThreads, createThread, RANK_BADGES, RANK_COLORS } from '@/utils/qa-api';
+import { getThreads, createThread, RANK_BADGES, RANK_COLORS, formatCompactDate } from '@/utils/qa-api';
 
 export default function QAHomeClient() {
   const [qaThreads, setQaThreads] = useState([]);
@@ -62,44 +62,63 @@ export default function QAHomeClient() {
     }
   };
 
-  function formatDate(dateStr) {
-    return new Date(dateStr).toLocaleDateString('vi-VN', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-  }
-
   return (
-    <main id="main-content" className="home-container" style={{ maxWidth: '800px', margin: '0 auto', padding: '0 20px' }}>
+    <main 
+      id="main-content" 
+      className="home-container" 
+      style={{ 
+        maxWidth: '800px', 
+        margin: '0 auto', 
+        padding: '0 16px',
+        width: '100%',
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'stretch'
+      }}
+    >
       {/* Title Header */}
-      <div style={{ marginBottom: '32px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '2.25rem', fontWeight: 800, marginBottom: '8px', color: 'var(--text)' }}>
+      <div style={{ marginBottom: '28px', textAlign: 'center', width: '100%' }}>
+        <h1 style={{ fontSize: 'clamp(1.6rem, 5vw, 2.25rem)', fontWeight: 800, marginBottom: '8px', color: 'var(--text)', lineHeight: 1.2 }}>
           💬 Cộng Đồng Hỏi Đáp & Thảo Luận
         </h1>
-        <p style={{ color: 'var(--muted)', fontSize: '1.05rem', margin: 0 }}>
+        <p style={{ color: 'var(--muted)', fontSize: 'clamp(0.9rem, 2.5vw, 1.05rem)', margin: 0 }}>
           Đặt câu hỏi, giải đáp thắc mắc, tích lũy điểm Gold và nâng cấp Rank của bạn.
         </p>
       </div>
 
-      {/* Q&A Header & Search */}
-      <div className="qa-search-header" style={{ display: 'flex', gap: '12px', marginBottom: '32px', alignItems: 'center' }}>
+      {/* Q&A Header & Search (Responsive Centered) */}
+      <div 
+        className="qa-search-header" 
+        style={{ 
+          display: 'flex', 
+          gap: '10px', 
+          marginBottom: '28px', 
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexWrap: 'wrap',
+          width: '100%',
+          boxSizing: 'border-box'
+        }}
+      >
         <input
           type="text"
-          placeholder="Tìm kiếm câu hỏi của người dùng realtime..."
+          placeholder="Tìm kiếm câu hỏi realtime..."
           value={qaSearchQuery}
           onChange={(e) => setQaSearchQuery(e.target.value)}
           style={{
-            flex: 1,
-            padding: '14px 18px',
+            flex: '1 1 240px',
+            minWidth: '0',
+            padding: '12px 16px',
             borderRadius: '8px',
             border: '1px solid var(--border)',
             backgroundColor: 'var(--surface)',
             color: 'var(--text)',
-            fontSize: '1rem',
+            fontSize: '0.95rem',
             outline: 'none',
             transition: 'border-color 0.2s',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
+            boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+            boxSizing: 'border-box'
           }}
           onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
           onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
@@ -108,7 +127,7 @@ export default function QAHomeClient() {
           <button
             onClick={() => setIsQAOpen(true)}
             style={{
-              padding: '14px 24px',
+              padding: '12px 20px',
               backgroundColor: 'var(--accent)',
               color: 'white',
               border: 'none',
@@ -117,7 +136,8 @@ export default function QAHomeClient() {
               cursor: 'pointer',
               whiteSpace: 'nowrap',
               transition: 'background-color 0.2s',
-              fontSize: '1rem'
+              fontSize: '0.95rem',
+              flexShrink: 0
             }}
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--accent-hover)'}
             onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--accent)'}
@@ -125,35 +145,46 @@ export default function QAHomeClient() {
             ➕ Đặt câu hỏi
           </button>
         ) : (
-          <div style={{ fontSize: '0.9rem', color: 'var(--muted)', padding: '12px 16px', border: '1px solid var(--border)', borderRadius: '8px', backgroundColor: 'rgba(0,0,0,0.02)', whiteSpace: 'nowrap' }}>
-            Đăng nhập ở góc phải để hỏi
+          <div style={{ fontSize: '0.85rem', color: 'var(--muted)', padding: '10px 14px', border: '1px solid var(--border)', borderRadius: '8px', backgroundColor: 'rgba(0,0,0,0.02)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+            Đăng nhập góc phải để hỏi
           </div>
         )}
       </div>
 
       {/* Q&A Threads List */}
-      <div className="posts-grid" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div className="posts-grid" style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', boxSizing: 'border-box' }}>
         {qaLoading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: 'var(--muted)', width: '100%' }}>Đang tìm kiếm câu hỏi...</div>
         ) : qaThreads.length === 0 ? (
-          <div className="no-results" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '40px 20px', border: '1px dashed var(--border)', borderRadius: '12px', backgroundColor: 'var(--surface)' }}>
+          <div className="no-results" style={{ display: 'block', width: '100%', textAlign: 'center', padding: '40px 20px', border: '1px dashed var(--border)', borderRadius: '12px', backgroundColor: 'var(--surface)', boxSizing: 'border-box' }}>
             <span className="no-results__icon" style={{ fontSize: '2.5rem', display: 'block', marginBottom: '12px' }}>💬</span>
             <p className="no-results__title" style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 8px 0' }}>Không tìm thấy câu hỏi nào</p>
             <p className="no-results__text" style={{ color: 'var(--muted)', margin: 0 }}>Hãy thử tìm từ khóa khác hoặc đăng câu hỏi mới để bắt đầu thảo luận!</p>
           </div>
         ) : (
           qaThreads.map((thread) => (
-            <article className="blog-card" key={thread.id} style={{ backgroundColor: 'var(--surface)', padding: '28px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-              <a href={`/thread/${thread.id}`} className="blog-card__link" aria-label={thread.title} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <span className="blog-card__meta" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', fontSize: '0.85rem' }}>
+            <article 
+              className="blog-card" 
+              key={thread.id} 
+              style={{ 
+                backgroundColor: 'var(--surface)', 
+                padding: '20px 18px', 
+                borderRadius: '12px', 
+                border: '1px solid var(--border)',
+                width: '100%',
+                boxSizing: 'border-box'
+              }}
+            >
+              <a href={`/thread/${thread.id}`} className="blog-card__link" aria-label={thread.title} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                <span className="blog-card__meta" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', fontSize: '0.8rem' }}>
                   {thread.author?.avatar_url ? (
                     <img 
                       src={thread.author.avatar_url} 
                       alt="avatar" 
-                      style={{ width: '20px', height: '20px', borderRadius: '50%' }}
+                      style={{ width: '20px', height: '20px', borderRadius: '50%', flexShrink: 0 }}
                     />
                   ) : (
-                    <span style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'inline-block' }} />
+                    <span style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'inline-block', flexShrink: 0 }} />
                   )}
                   <span>
                     Bởi <strong>{thread.author?.display_name || 'Người dùng'}</strong>
@@ -163,24 +194,24 @@ export default function QAHomeClient() {
                       src={RANK_BADGES[thread.author.rank]} 
                       alt={thread.author.rank} 
                       style={{ 
-                        width: '24px', 
-                        height: '24px', 
+                        width: '20px', 
+                        height: '20px', 
                         objectFit: 'contain',
                         backgroundColor: '#f8fafc',
                         borderRadius: '50%',
-                        padding: '3px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.12)',
+                        padding: '2px',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                         border: '1px solid rgba(0,0,0,0.06)',
-                        marginLeft: '4px',
-                        marginRight: '2px'
+                        marginLeft: '2px',
+                        marginRight: '1px'
                       }} 
                     />
                   )}
                   <span 
                     style={{ 
-                      padding: '2px 6px', 
+                      padding: '1px 5px', 
                       borderRadius: '4px', 
-                      fontSize: '0.7rem', 
+                      fontSize: '0.68rem', 
                       fontWeight: 600,
                       backgroundColor: RANK_COLORS[thread.author?.rank] || '#4b5563',
                       color: 'white'
@@ -189,25 +220,28 @@ export default function QAHomeClient() {
                     {thread.author?.rank || 'Kim Ngư'}
                   </span>
                   <span style={{ color: 'var(--accent)', fontWeight: 600 }}>
-                    🪙 {thread.author?.gold_balance || 0} Gold
+                    🪙 {thread.author?.gold_balance || 0}
                   </span>
                   <span style={{ color: 'var(--border)' }}>·</span>
-                  <time dateTime={thread.created_at} style={{ color: 'var(--muted)' }}>{formatDate(thread.created_at)}</time>
+                  <time dateTime={thread.created_at} style={{ color: 'var(--muted)', fontWeight: 500 }}>
+                    {formatCompactDate(thread.created_at)}
+                  </time>
                 </span>
                 
-                <h2 className="blog-card__title" style={{ marginTop: '12px', fontSize: '1.4rem', fontWeight: 800, color: 'var(--text)' }}>
+                <h2 className="blog-card__title" style={{ marginTop: '10px', fontSize: 'clamp(1.1rem, 3vw, 1.35rem)', fontWeight: 800, color: 'var(--text)', lineHeight: 1.35 }}>
                   {thread.title}
                   {thread.is_resolved && (
                     <span 
                       style={{ 
-                        marginLeft: '8px', 
-                        fontSize: '0.75rem', 
-                        padding: '2px 8px', 
+                        marginLeft: '6px', 
+                        fontSize: '0.7rem', 
+                        padding: '2px 6px', 
                         backgroundColor: 'rgba(15, 118, 110, 0.1)', 
                         color: 'var(--accent)', 
-                        borderRadius: '12px',
-                        fontWeight: 500,
-                        verticalAlign: 'middle'
+                        borderRadius: '10px', 
+                        fontWeight: 600,
+                        verticalAlign: 'middle',
+                        display: 'inline-block'
                       }}
                     >
                       ✓ Đã giải đáp
@@ -216,20 +250,20 @@ export default function QAHomeClient() {
                 </h2>
                 <p className="blog-card__excerpt" style={{
                   display: '-webkit-box',
-                  WebkitLineClamp: 3,
+                  WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  fontSize: '0.95rem',
-                  lineHeight: '1.6',
+                  fontSize: '0.9rem',
+                  lineHeight: '1.5',
                   color: 'var(--muted)',
-                  marginTop: '8px',
-                  marginBottom: '16px'
+                  marginTop: '6px',
+                  marginBottom: '12px'
                 }}>
                   {thread.content}
                 </p>
                 
-                <span className="blog-card__readmore" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--accent)', fontWeight: 600, fontSize: '0.9rem' }}>
+                <span className="blog-card__readmore" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--accent)', fontWeight: 600, fontSize: '0.85rem' }}>
                   <span>Xem câu trả lời ({thread.comments_count || 0}) →</span>
                 </span>
               </a>

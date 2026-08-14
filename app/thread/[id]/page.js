@@ -14,7 +14,8 @@ import {
   unlikeComment, 
   setBestAnswer, 
   RANK_BADGES, 
-  RANK_COLORS 
+  RANK_COLORS,
+  formatCompactDate 
 } from '@/utils/qa-api';
 
 export default function ThreadDetailPage({ params }) {
@@ -214,10 +215,10 @@ export default function ThreadDetailPage({ params }) {
   const isOwner = currentUser?.id === thread.author_id;
 
   return (
-    <div style={{ maxWidth: '800px', margin: '40px auto', padding: '0 20px', color: 'var(--text)' }}>
+    <div style={{ maxWidth: '800px', margin: '24px auto', padding: '0 16px', color: 'var(--text)', width: '100%', boxSizing: 'border-box' }}>
       {/* Back to Home & Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-        <a href="/" style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', width: '100%' }}>
+        <a href="/" style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem' }}>
           ← Quay lại trang chủ Q&A
         </a>
 
@@ -235,7 +236,7 @@ export default function ThreadDetailPage({ params }) {
               border: '1px solid #fca5a5',
               borderRadius: '6px',
               fontWeight: 600,
-              fontSize: '0.85rem',
+              fontSize: '0.8rem',
               cursor: 'pointer',
               transition: 'all 0.2s ease'
             }}
@@ -246,63 +247,62 @@ export default function ThreadDetailPage({ params }) {
       </div>
 
       {/* Main Question Card */}
-      <article style={{ backgroundColor: 'var(--surface)', padding: '32px', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '32px' }}>
-        <header style={{ borderBottom: '1px solid var(--border)', paddingBottom: '20px', marginBottom: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+      <article style={{ backgroundColor: 'var(--surface)', padding: '24px 20px', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '28px', width: '100%', boxSizing: 'border-box' }}>
+        <header style={{ borderBottom: '1px solid var(--border)', paddingBottom: '16px', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', flexWrap: 'wrap' }}>
             {thread.author?.avatar_url ? (
               <img 
                 src={thread.author.avatar_url} 
                 alt="avatar" 
-                style={{ width: '32px', height: '32px', borderRadius: '50%' }}
+                style={{ width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0 }}
               />
             ) : (
-              <span style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'inline-block' }} />
+              <span style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'inline-block', flexShrink: 0 }} />
             )}
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <a href={`/profile/${thread.author?.id}`} style={{ fontWeight: 700, color: 'var(--text)', textDecoration: 'none' }}>
-                  {thread.author?.display_name || 'Người dùng'}
-                </a>
-                {thread.author?.rank && RANK_BADGES[thread.author.rank] && (
-                  <img 
-                    src={RANK_BADGES[thread.author.rank]} 
-                    alt={thread.author.rank} 
-                    style={{ 
-                      width: '28px', 
-                      height: '28px', 
-                      objectFit: 'contain',
-                      backgroundColor: '#f8fafc',
-                      borderRadius: '50%',
-                      padding: '3px',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.12)',
-                      border: '1px solid rgba(0,0,0,0.06)',
-                      marginLeft: '4px',
-                      marginRight: '2px'
-                    }} 
-                  />
-                )}
-                <span 
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <a href={`/profile/${thread.author?.id}`} style={{ fontWeight: 700, color: 'var(--text)', textDecoration: 'none', fontSize: '0.95rem' }}>
+                {thread.author?.display_name || 'Người dùng'}
+              </a>
+              {thread.author?.rank && RANK_BADGES[thread.author.rank] && (
+                <img 
+                  src={RANK_BADGES[thread.author.rank]} 
+                  alt={thread.author.rank} 
                   style={{ 
-                    padding: '2px 8px', 
-                    borderRadius: '4px', 
-                    fontSize: '0.75rem', 
-                    fontWeight: 600,
-                    backgroundColor: RANK_COLORS[thread.author?.rank] || '#4b5563',
-                    color: 'white'
-                  }}
-                >
-                  {thread.author?.rank || 'Kim Ngư'}
-                </span>
-                <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
-                  🪙 {thread.author?.gold_balance || 0} Gold
-                </span>
-              </div>
-              <time style={{ fontSize: '0.85rem', color: 'var(--muted)' }} dateTime={thread.created_at}>
-                {formatDate(thread.created_at)}
+                    width: '22px', 
+                    height: '22px', 
+                    objectFit: 'contain',
+                    backgroundColor: '#f8fafc',
+                    borderRadius: '50%',
+                    padding: '2px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                    border: '1px solid rgba(0,0,0,0.06)',
+                    marginLeft: '2px',
+                    marginRight: '1px'
+                  }} 
+                />
+              )}
+              <span 
+                style={{ 
+                  padding: '1px 6px', 
+                  borderRadius: '4px', 
+                  fontSize: '0.7rem', 
+                  fontWeight: 600,
+                  backgroundColor: RANK_COLORS[thread.author?.rank] || '#4b5563',
+                  color: 'white'
+                }}
+              >
+                {thread.author?.rank || 'Kim Ngư'}
+              </span>
+              <span style={{ color: 'var(--muted)', fontSize: '0.8rem' }}>
+                🪙 {thread.author?.gold_balance || 0} Gold
+              </span>
+              <span style={{ color: 'var(--border)' }}>·</span>
+              <time style={{ fontSize: '0.8rem', color: 'var(--muted)', fontWeight: 500 }} dateTime={thread.created_at}>
+                {formatCompactDate(thread.created_at)}
               </time>
             </div>
           </div>
-          <h1 style={{ fontSize: '1.75rem', lineHeight: '1.3', fontWeight: 800, margin: '16px 0 0 0' }}>{thread.title}</h1>
+          <h1 style={{ fontSize: 'clamp(1.3rem, 4vw, 1.75rem)', lineHeight: '1.3', fontWeight: 800, margin: '12px 0 0 0' }}>{thread.title}</h1>
         </header>
         <section style={{ whiteSpace: 'pre-wrap', fontSize: '1.05rem', lineHeight: '1.6' }}>
           {thread.content}
@@ -448,8 +448,8 @@ export default function ThreadDetailPage({ params }) {
                       🪙 {comment.author?.gold_balance || 0} Gold
                     </span>
                     <span style={{ color: 'var(--border)' }}>·</span>
-                    <time style={{ fontSize: '0.8rem', color: 'var(--muted)' }} dateTime={comment.created_at}>
-                      {formatDate(comment.created_at)}
+                    <time style={{ fontSize: '0.78rem', color: 'var(--muted)', fontWeight: 500 }} dateTime={comment.created_at}>
+                      {formatCompactDate(comment.created_at)}
                     </time>
                   </div>
 
