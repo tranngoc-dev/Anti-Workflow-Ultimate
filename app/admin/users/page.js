@@ -42,10 +42,34 @@ export default function AdminUsersPage() {
   async function loadUsers() {
     setLoading(true);
     try {
+      // 1. Fetch via secure RPC first
       const { data, error } = await supabase.rpc('get_registered_users');
-      if (error) throw error;
+      
+      let userList = [];
+      if (!error && data) {
+        userList = data;
+      } else {
+        // Fallback: Fetch directly from profiles table
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      const userList = data || [];
+        if (profilesError) throw profilesError;
+
+        userList = (profilesData || []).map(p => ({
+          id: p.id,
+          email: p.email || '',
+          display_name: p.display_name || 'Thành viên',
+          avatar_url: p.avatar_url,
+          rank: p.rank || 'Kim Ngư',
+          gold_balance: p.gold_balance !== null && p.gold_balance !== undefined ? Number(p.gold_balance) : 0,
+          comment_banned_until: p.comment_banned_until,
+          created_at: p.created_at,
+          last_sign_in_at: null
+        }));
+      }
+
       setUsers(userList);
       
       // Initialize edit states for each user
@@ -53,7 +77,7 @@ export default function AdminUsersPage() {
       userList.forEach(u => {
         initialEdits[u.id] = {
           rank: u.rank || 'Kim Ngư',
-          gold_balance: u.gold_balance || 0
+          gold_balance: u.gold_balance !== null && u.gold_balance !== undefined ? u.gold_balance : 0
         };
       });
       setEditStates(initialEdits);
@@ -92,12 +116,11 @@ export default function AdminUsersPage() {
 
   // Handle local Gold change in input
   function handleLocalGoldChange(userId, val) {
-    const parsed = parseInt(val, 10);
     setEditStates(prev => ({
       ...prev,
       [userId]: {
         ...prev[userId],
-        gold_balance: isNaN(parsed) ? 0 : Math.max(0, parsed)
+        gold_balance: val === '' ? '' : Math.max(0, parseInt(val, 10) || 0)
       }
     }));
   }
@@ -107,18 +130,28 @@ export default function AdminUsersPage() {
     const currentEdit = editStates[userId];
     if (!currentEdit) return;
 
+    const finalGold = currentEdit.gold_balance === '' ? 0 : Number(currentEdit.gold_balance);
+
     setActionLoadingId(userId);
     try {
-      await adminUpdateUserRank(userId, currentEdit.rank, currentEdit.gold_balance);
+      await adminUpdateUserRank(userId, currentEdit.rank, finalGold);
       
       // Update local master user list
       setUsers(prev => prev.map(u => u.id === userId ? {
         ...u,
         rank: currentEdit.rank,
-        gold_balance: currentEdit.gold_balance
+        gold_balance: finalGold
       } : u));
 
-      setToastMessage(`✅ Đã lưu thành công Cấp bậc (${currentEdit.rank}) & Điểm (${currentEdit.gold_balance} Gold) cho "${userName}"!`);
+      setEditStates(prev => ({
+        ...prev,
+        [userId]: {
+          rank: currentEdit.rank,
+          gold_balance: finalGold
+        }
+      }));
+
+      setToastMessage(`✅ Đã lưu thành công Cấp bậc (${currentEdit.rank}) & Điểm (${finalGold} Gold) cho "${userName}"!`);
     } catch (err) {
       alert('Lỗi khi lưu thay đổi: ' + (err.message || 'Thử lại sau.'));
     } finally {
