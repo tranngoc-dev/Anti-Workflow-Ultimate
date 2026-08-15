@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/utils/supabase';
-import { formatCompactDate } from '@/utils/qa-api';
+import { formatCompactDate, renderWithLinks } from '@/utils/qa-api';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import Image from 'next/image';
@@ -835,7 +835,7 @@ export default function PostClient({ initialPost, slug }) {
                         </div>
                       </div>
                     ) : (
-                      <p className="comment-item__text">{c.content}</p>
+                      <p className="comment-item__text">{renderWithLinks(c.content)}</p>
                     )}
                   </div>
                 </div>

@@ -491,4 +491,57 @@ export function formatCompactDate(dateStr) {
   }
 }
 
+// 20. Highlight and auto-convert URLs to interactive hyperlinks
+export function renderWithLinks(text) {
+  if (!text) return null;
+  
+  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi;
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      let href = part;
+      let trailingPunctuation = '';
+      const punctMatch = part.match(/[.,)?!]+$/);
+      if (punctMatch) {
+        trailingPunctuation = punctMatch[0];
+        href = part.slice(0, -trailingPunctuation.length);
+      }
+
+      if (!href.startsWith('http://') && !href.startsWith('https://')) {
+        href = `https://${href}`;
+      }
+
+      return (
+        <span key={index}>
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              color: 'var(--accent)',
+              textDecoration: 'underline',
+              wordBreak: 'break-all',
+              fontWeight: 600,
+              padding: '1px 4px',
+              borderRadius: '3px',
+              backgroundColor: 'rgba(15, 118, 110, 0.08)',
+              transition: 'all 0.2s ease',
+              display: 'inline'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(15, 118, 110, 0.18)'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(15, 118, 110, 0.08)'}
+          >
+            🔗 {href.replace(/^https?:\/\//, '')}
+          </a>
+          {trailingPunctuation}
+        </span>
+      );
+    }
+    return part;
+  });
+}
+
+
 

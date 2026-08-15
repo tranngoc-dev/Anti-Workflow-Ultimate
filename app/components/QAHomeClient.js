@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
-import { getThreads, createThread, RANK_BADGES, RANK_COLORS, formatCompactDate } from '@/utils/qa-api';
+import { getThreads, createThread, RANK_BADGES, RANK_COLORS, formatCompactDate, renderWithLinks } from '@/utils/qa-api';
 
 export default function QAHomeClient() {
   const [qaThreads, setQaThreads] = useState([]);
@@ -260,7 +260,7 @@ export default function QAHomeClient() {
                   marginTop: '6px',
                   marginBottom: '12px'
                 }}>
-                  {thread.content}
+                  {renderWithLinks(thread.content)}
                 </p>
                 
                 <span className="blog-card__readmore" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--accent)', fontWeight: 600, fontSize: '0.85rem' }}>

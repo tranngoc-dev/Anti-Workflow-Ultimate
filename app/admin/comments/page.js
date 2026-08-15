@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
-import { deleteComment as deleteThreadComment } from '@/utils/qa-api';
+import { deleteComment as deleteThreadComment, renderWithLinks } from '@/utils/qa-api';
 
 export default function AdminCommentsPage() {
   const [blogComments, setBlogComments] = useState([]);
@@ -283,7 +283,7 @@ export default function AdminCommentsPage() {
               </div>
 
               <p className="admin-comment-card__content" style={{ fontSize: '0.95rem', lineHeight: '1.6', margin: '12px 0' }}>
-                {item.content}
+                {renderWithLinks(item.content)}
               </p>
 
               <div className="admin-comment-card__footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>

@@ -15,7 +15,8 @@ import {
   setBestAnswer, 
   RANK_BADGES, 
   RANK_COLORS,
-  formatCompactDate 
+  formatCompactDate,
+  renderWithLinks 
 } from '@/utils/qa-api';
 
 export default function ThreadDetailPage({ params }) {
@@ -343,7 +344,7 @@ export default function ThreadDetailPage({ params }) {
           <h1 style={{ fontSize: 'clamp(1.3rem, 4vw, 1.75rem)', lineHeight: '1.3', fontWeight: 800, margin: '12px 0 0 0' }}>{thread.title}</h1>
         </header>
         <section style={{ whiteSpace: 'pre-wrap', fontSize: '1.05rem', lineHeight: '1.6' }}>
-          {thread.content}
+          {renderWithLinks(thread.content)}
         </section>
       </article>
 
@@ -595,7 +596,7 @@ export default function ThreadDetailPage({ params }) {
                   </div>
                 ) : (
                   <div style={{ fontSize: '0.98rem', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginBottom: '14px' }}>
-                    {comment.content}
+                    {renderWithLinks(comment.content)}
                   </div>
                 )}
 
@@ -868,7 +869,7 @@ export default function ThreadDetailPage({ params }) {
                             </div>
                           ) : (
                             <div style={{ fontSize: '0.9rem', lineHeight: '1.5', whiteSpace: 'pre-wrap', color: 'var(--text)' }}>
-                              {reply.content}
+                              {renderWithLinks(reply.content)}
                             </div>
                           )}
 
