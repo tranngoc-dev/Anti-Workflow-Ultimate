@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS public.thread_comments (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     thread_id UUID REFERENCES public.threads(id) ON DELETE CASCADE NOT NULL,
     author_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    parent_id UUID REFERENCES public.thread_comments(id) ON DELETE CASCADE DEFAULT NULL,
     content TEXT NOT NULL,
     is_best_answer BOOLEAN DEFAULT false NOT NULL,
     likes_count INTEGER DEFAULT 0 CHECK (likes_count >= 0) NOT NULL,

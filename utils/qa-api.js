@@ -67,7 +67,7 @@ export async function getThreadById(id) {
   }
 }
 
-// 3. Fetch comments for a thread (ordered: best answer first, then created_at asc)
+// 3. Fetch comments for a thread with nested replies
 export async function getComments(threadId, currentUserId = null) {
   try {
     const { data, error } = await supabase
@@ -77,10 +77,11 @@ export async function getComments(threadId, currentUserId = null) {
         author:profiles!thread_comments_author_id_fkey(id, display_name, avatar_url, rank, gold_balance)
       `)
       .eq('thread_id', threadId)
-      .order('is_best_answer', { ascending: false })
       .order('created_at', { ascending: true });
 
     if (error) throw error;
+
+    let enrichedData = (data || []).map(c => ({ ...c, is_liked: false }));
 
     // If current user is logged in, check which comments they liked
     if (currentUserId && data && data.length > 0) {
@@ -93,14 +94,44 @@ export async function getComments(threadId, currentUserId = null) {
 
       if (!likedError && likedData) {
         const likedSet = new Set(likedData.map(item => item.comment_id));
-        return data.map(c => ({
+        enrichedData = enrichedData.map(c => ({
           ...c,
           is_liked: likedSet.has(c.id)
         }));
       }
     }
 
-    return (data || []).map(c => ({ ...c, is_liked: false }));
+    // Organize into nested structure (Root comments + replies)
+    const rootComments = [];
+    const commentMap = {};
+
+    enrichedData.forEach(item => {
+      item.replies = [];
+      commentMap[item.id] = item;
+    });
+
+    enrichedData.forEach(item => {
+      if (item.parent_id && commentMap[item.parent_id]) {
+        commentMap[item.parent_id].replies.push(item);
+      } else {
+        rootComments.push(item);
+      }
+    });
+
+    // Sort root comments: Best Answer first, then created_at asc
+    rootComments.sort((a, b) => {
+      if (b.is_best_answer !== a.is_best_answer) {
+        return (b.is_best_answer ? 1 : 0) - (a.is_best_answer ? 1 : 0);
+      }
+      return new Date(a.created_at) - new Date(b.created_at);
+    });
+
+    // Sort replies inside each root comment: created_at asc
+    rootComments.forEach(root => {
+      root.replies.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    });
+
+    return rootComments;
   } catch (err) {
     console.error(`[QA-API] getComments for thread ${threadId} error:`, err);
     return [];
@@ -124,8 +155,8 @@ export async function createThread(title, content, authorId) {
   }
 }
 
-// 5. Create a comment
-export async function createComment(threadId, content, authorId) {
+// 5. Create a comment (supports top-level and nested reply)
+export async function createComment(threadId, content, authorId, parentId = null) {
   try {
     // Check if user is comment banned
     const { data: profile } = await supabase
@@ -143,7 +174,12 @@ export async function createComment(threadId, content, authorId) {
 
     const { data, error } = await supabase
       .from('thread_comments')
-      .insert([{ thread_id: threadId, author_id: authorId, content }])
+      .insert([{ 
+        thread_id: threadId, 
+        author_id: authorId, 
+        content,
+        parent_id: parentId || null 
+      }])
       .select()
       .single();
 

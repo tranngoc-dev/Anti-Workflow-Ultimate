@@ -128,7 +128,8 @@ export default function AdminCommentsPage() {
   const normalizedThread = threadComments.map(c => ({
     id: c.id,
     type: 'thread',
-    typeName: 'Hỏi đáp Q&A',
+    typeName: c.parent_id ? '💬 Phản hồi Q&A' : '💬 Câu trả lời Q&A',
+    isReply: !!c.parent_id,
     authorName: c.author?.display_name || 'Thành viên',
     authorMeta: `Rank: ${c.author?.rank || 'Kim Ngư'}`,
     avatar: c.author?.avatar_url || null,

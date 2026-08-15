@@ -36,6 +36,11 @@ export default function ThreadDetailPage({ params }) {
   const [editingContent, setEditingContent] = useState('');
   const [editLoading, setEditLoading] = useState(false);
 
+  // State phản hồi (reply)
+  const [replyingToCommentId, setReplyingToCommentId] = useState(null);
+  const [replyContent, setReplyContent] = useState('');
+  const [submittingReply, setSubmittingReply] = useState(false);
+
   const isAdmin = currentUser?.user_metadata?.is_admin === true || currentUser?.email === 'vutrongvtv24@gmail.com';
 
   // Load initial data
@@ -85,6 +90,39 @@ export default function ThreadDetailPage({ params }) {
       alert(err.message || 'Có lỗi xảy ra khi gửi bình luận. Vui lòng thử lại!');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleStartReply = (commentId) => {
+    if (!currentUser) {
+      alert('Vui lòng đăng nhập ở góc phải để gửi phản hồi!');
+      return;
+    }
+    setReplyingToCommentId(commentId);
+    setReplyContent('');
+  };
+
+  const handleCancelReply = () => {
+    setReplyingToCommentId(null);
+    setReplyContent('');
+  };
+
+  const handlePostReply = async (parentId) => {
+    if (!currentUser || !replyContent.trim() || submittingReply) return;
+
+    setSubmittingReply(true);
+    try {
+      await createComment(threadId, replyContent.trim(), currentUser.id, parentId);
+      setReplyContent('');
+      setReplyingToCommentId(null);
+
+      // Reload comments
+      const commentsData = await getComments(threadId, currentUser.id);
+      setComments(commentsData);
+    } catch (err) {
+      alert(err.message || 'Có lỗi xảy ra khi gửi phản hồi. Vui lòng thử lại!');
+    } finally {
+      setSubmittingReply(false);
     }
   };
 
@@ -311,7 +349,9 @@ export default function ThreadDetailPage({ params }) {
 
       {/* Answer/Comment Section */}
       <section>
-        <h3 style={{ fontSize: '1.25rem', marginBottom: '20px' }}>Câu trả lời ({comments.length})</h3>
+        <h3 style={{ fontSize: '1.25rem', marginBottom: '20px' }}>
+          Câu trả lời ({comments.reduce((acc, c) => acc + 1 + (c.replies?.length || 0), 0)})
+        </h3>
 
         {/* Post new comment form */}
         {currentUser ? (
@@ -333,7 +373,8 @@ export default function ThreadDetailPage({ params }) {
                 backgroundColor: 'var(--surface)',
                 color: 'var(--text)',
                 resize: 'vertical',
-                marginBottom: '12px'
+                marginBottom: '12px',
+                boxSizing: 'border-box'
               }}
             />
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -364,7 +405,7 @@ export default function ThreadDetailPage({ params }) {
         )}
 
         {/* Comment list */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           {comments.map((comment) => {
             const isCommentAuthor = currentUser?.id === comment.author_id;
             const isEditing = editingCommentId === comment.id;
@@ -374,24 +415,25 @@ export default function ThreadDetailPage({ params }) {
                 key={comment.id}
                 style={{
                   backgroundColor: 'var(--surface)',
-                  padding: '24px',
+                  padding: '20px',
                   borderRadius: '12px',
                   border: comment.is_best_answer ? '2px solid var(--accent)' : '1px solid var(--border)',
                   boxShadow: comment.is_best_answer ? '0 4px 6px -1px rgba(15, 118, 110, 0.05)' : 'none',
                   position: 'relative',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  boxSizing: 'border-box'
                 }}
               >
                 {comment.is_best_answer && (
                   <div style={{
                     position: 'absolute',
                     top: '-12px',
-                    right: '24px',
+                    right: '20px',
                     backgroundColor: 'var(--accent)',
                     color: 'white',
                     padding: '2px 10px',
                     borderRadius: '12px',
-                    fontSize: '0.8rem',
+                    fontSize: '0.78rem',
                     fontWeight: 700,
                     boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                   }}>
@@ -400,18 +442,18 @@ export default function ThreadDetailPage({ params }) {
                 )}
 
                 {/* Comment Meta */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                     {comment.author?.avatar_url ? (
                       <img 
                         src={comment.author.avatar_url} 
                         alt="avatar" 
-                        style={{ width: '24px', height: '24px', borderRadius: '50%' }}
+                        style={{ width: '24px', height: '24px', borderRadius: '50%', flexShrink: 0 }}
                       />
                     ) : (
-                      <span style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'inline-block' }} />
+                      <span style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'inline-block', flexShrink: 0 }} />
                     )}
-                    <a href={`/profile/${comment.author?.id}`} style={{ fontWeight: 700, color: 'var(--text)', fontSize: '0.95rem', textDecoration: 'none' }}>
+                    <a href={`/profile/${comment.author?.id}`} style={{ fontWeight: 700, color: 'var(--text)', fontSize: '0.92rem', textDecoration: 'none' }}>
                       {comment.author?.display_name || 'Người dùng'}
                     </a>
                     {comment.author?.rank && RANK_BADGES[comment.author.rank] && (
@@ -419,16 +461,16 @@ export default function ThreadDetailPage({ params }) {
                         src={RANK_BADGES[comment.author.rank]} 
                         alt={comment.author.rank} 
                         style={{ 
-                          width: '24px', 
-                          height: '24px', 
+                          width: '20px', 
+                          height: '20px', 
                           objectFit: 'contain',
                           backgroundColor: '#f8fafc',
                           borderRadius: '50%',
-                          padding: '3px',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.12)',
+                          padding: '2px',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                           border: '1px solid rgba(0,0,0,0.06)',
-                          marginLeft: '4px',
-                          marginRight: '2px'
+                          marginLeft: '2px',
+                          marginRight: '1px'
                         }} 
                       />
                     )}
@@ -436,7 +478,7 @@ export default function ThreadDetailPage({ params }) {
                       style={{ 
                         padding: '1px 5px', 
                         borderRadius: '3px', 
-                        fontSize: '0.7rem', 
+                        fontSize: '0.68rem', 
                         fontWeight: 600,
                         backgroundColor: RANK_COLORS[comment.author?.rank] || '#4b5563',
                         color: 'white'
@@ -444,7 +486,7 @@ export default function ThreadDetailPage({ params }) {
                     >
                       {comment.author?.rank || 'Kim Ngư'}
                     </span>
-                    <span style={{ color: 'var(--muted)', fontSize: '0.8rem' }}>
+                    <span style={{ color: 'var(--muted)', fontSize: '0.78rem' }}>
                       🪙 {comment.author?.gold_balance || 0} Gold
                     </span>
                     <span style={{ color: 'var(--border)' }}>·</span>
@@ -463,10 +505,10 @@ export default function ThreadDetailPage({ params }) {
                             background: 'none',
                             border: 'none',
                             color: 'var(--accent)',
-                            fontSize: '0.85rem',
+                            fontSize: '0.82rem',
                             fontWeight: 600,
                             cursor: 'pointer',
-                            padding: '4px 8px',
+                            padding: '3px 6px',
                             borderRadius: '4px'
                           }}
                         >
@@ -480,10 +522,10 @@ export default function ThreadDetailPage({ params }) {
                             background: 'none',
                             border: 'none',
                             color: '#ef4444',
-                            fontSize: '0.85rem',
+                            fontSize: '0.82rem',
                             fontWeight: 600,
                             cursor: 'pointer',
-                            padding: '4px 8px',
+                            padding: '3px 6px',
                             borderRadius: '4px'
                           }}
                         >
@@ -496,14 +538,14 @@ export default function ThreadDetailPage({ params }) {
 
                 {/* Comment Content or Inline Edit Form */}
                 {isEditing ? (
-                  <div style={{ marginBottom: '16px' }}>
+                  <div style={{ marginBottom: '14px' }}>
                     <textarea
                       rows={3}
                       value={editingContent}
                       onChange={(e) => setEditingContent(e.target.value)}
                       style={{
                         width: '100%',
-                        padding: '12px',
+                        padding: '10px 12px',
                         borderRadius: '8px',
                         border: '1px solid var(--accent)',
                         outline: 'none',
@@ -512,7 +554,8 @@ export default function ThreadDetailPage({ params }) {
                         backgroundColor: 'var(--surface)',
                         color: 'var(--text)',
                         resize: 'vertical',
-                        marginBottom: '8px'
+                        marginBottom: '8px',
+                        boxSizing: 'border-box'
                       }}
                     />
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
@@ -521,11 +564,11 @@ export default function ThreadDetailPage({ params }) {
                         onClick={handleCancelEdit}
                         disabled={editLoading}
                         style={{
-                          padding: '6px 14px',
+                          padding: '6px 12px',
                           background: 'none',
                           border: '1px solid var(--border)',
                           borderRadius: '6px',
-                          fontSize: '0.85rem',
+                          fontSize: '0.82rem',
                           cursor: 'pointer'
                         }}
                       >
@@ -541,7 +584,7 @@ export default function ThreadDetailPage({ params }) {
                           color: 'white',
                           border: 'none',
                           borderRadius: '6px',
-                          fontSize: '0.85rem',
+                          fontSize: '0.82rem',
                           fontWeight: 600,
                           cursor: editLoading ? 'not-allowed' : 'pointer'
                         }}
@@ -551,51 +594,81 @@ export default function ThreadDetailPage({ params }) {
                     </div>
                   </div>
                 ) : (
-                  <div style={{ fontSize: '1rem', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
+                  <div style={{ fontSize: '0.98rem', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginBottom: '14px' }}>
                     {comment.content}
                   </div>
                 )}
 
-                {/* Actions */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(0,0,0,0.03)', paddingTop: '12px' }}>
-                  {/* Likes button */}
-                  <button
-                    onClick={() => handleLikeToggle(comment)}
-                    disabled={isCommentAuthor}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      background: 'none',
-                      border: 'none',
-                      cursor: isCommentAuthor ? 'not-allowed' : 'pointer',
-                      fontSize: '0.9rem',
-                      color: comment.is_liked ? '#ef4444' : 'var(--muted)',
-                      fontWeight: comment.is_liked ? 600 : 500,
-                      transition: 'all 0.1s ease',
-                      opacity: isCommentAuthor ? 0.6 : 1
-                    }}
-                    title={isCommentAuthor ? 'Bạn không thể tự thích câu trả lời của mình' : ''}
-                  >
-                    <span style={{ fontSize: '1.1rem' }}>{comment.is_liked ? '❤️' : '🤍'}</span>
-                    <span>Thích ({comment.likes_count || 0})</span>
-                  </button>
+                {/* Actions Bar */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(0,0,0,0.04)', paddingTop: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    {/* Likes button */}
+                    <button
+                      onClick={() => handleLikeToggle(comment)}
+                      disabled={isCommentAuthor}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        background: 'none',
+                        border: 'none',
+                        cursor: isCommentAuthor ? 'not-allowed' : 'pointer',
+                        fontSize: '0.85rem',
+                        color: comment.is_liked ? '#ef4444' : 'var(--muted)',
+                        fontWeight: comment.is_liked ? 600 : 500,
+                        transition: 'all 0.1s ease',
+                        opacity: isCommentAuthor ? 0.6 : 1,
+                        padding: 0
+                      }}
+                      title={isCommentAuthor ? 'Bạn không thể tự thích câu trả lời của mình' : ''}
+                    >
+                      <span style={{ fontSize: '1rem' }}>{comment.is_liked ? '❤️' : '🤍'}</span>
+                      <span>Thích ({comment.likes_count || 0})</span>
+                    </button>
+
+                    {/* Reply button */}
+                    <button
+                      onClick={() => {
+                        if (replyingToCommentId === comment.id) {
+                          handleCancelReply();
+                        } else {
+                          handleStartReply(comment.id);
+                        }
+                      }}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.85rem',
+                        color: replyingToCommentId === comment.id ? 'var(--accent)' : 'var(--muted)',
+                        fontWeight: 600,
+                        padding: 0,
+                        transition: 'color 0.15s ease'
+                      }}
+                    >
+                      <span>💬</span>
+                      <span>Trả lời {comment.replies?.length > 0 ? `(${comment.replies.length})` : ''}</span>
+                    </button>
+                  </div>
 
                   {/* Best Answer selection (only for thread owner) */}
                   {isOwner && !isCommentAuthor && (
                     <button
                       onClick={() => handleToggleBestAnswer(comment)}
                       style={{
-                        display: 'flex',
+                        display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '6px',
+                        gap: '5px',
                         backgroundColor: comment.is_best_answer ? 'transparent' : 'rgba(15, 118, 110, 0.05)',
                         border: comment.is_best_answer ? '1px solid var(--border)' : 'none',
-                        padding: '6px 12px',
+                        padding: '4px 10px',
                         borderRadius: '6px',
                         color: comment.is_best_answer ? 'var(--muted)' : 'var(--accent)',
                         fontWeight: 600,
-                        fontSize: '0.85rem',
+                        fontSize: '0.8rem',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease'
                       }}
@@ -605,6 +678,228 @@ export default function ThreadDetailPage({ params }) {
                     </button>
                   )}
                 </div>
+
+                {/* Reply Input Form */}
+                {replyingToCommentId === comment.id && (
+                  <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed var(--border)' }}>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                      {currentUser?.user_metadata?.avatar_url ? (
+                        <img src={currentUser.user_metadata.avatar_url} alt="avatar" style={{ width: '24px', height: '24px', borderRadius: '50%', flexShrink: 0, marginTop: '2px' }} />
+                      ) : (
+                        <span style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'inline-block', flexShrink: 0, marginTop: '2px' }} />
+                      )}
+                      <div style={{ flex: 1 }}>
+                        <textarea
+                          autoFocus
+                          rows={2}
+                          placeholder={`Viết phản hồi cho ${comment.author?.display_name || 'thành viên'}...`}
+                          value={replyContent}
+                          onChange={(e) => setReplyContent(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            border: '1px solid var(--accent)',
+                            outline: 'none',
+                            fontFamily: 'inherit',
+                            fontSize: '0.9rem',
+                            backgroundColor: 'var(--bg)',
+                            color: 'var(--text)',
+                            resize: 'vertical',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '6px' }}>
+                          <button
+                            type="button"
+                            onClick={handleCancelReply}
+                            disabled={submittingReply}
+                            style={{
+                              padding: '5px 12px',
+                              background: 'none',
+                              border: '1px solid var(--border)',
+                              borderRadius: '5px',
+                              fontSize: '0.8rem',
+                              cursor: 'pointer',
+                              color: 'var(--muted)'
+                            }}
+                          >
+                            Hủy
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handlePostReply(comment.id)}
+                            disabled={submittingReply || !replyContent.trim()}
+                            style={{
+                              padding: '5px 14px',
+                              backgroundColor: 'var(--accent)',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '5px',
+                              fontSize: '0.8rem',
+                              fontWeight: 600,
+                              cursor: (submittingReply || !replyContent.trim()) ? 'not-allowed' : 'pointer'
+                            }}
+                          >
+                            {submittingReply ? 'Đang gửi...' : 'Gửi phản hồi'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Nested Replies List */}
+                {comment.replies && comment.replies.length > 0 && (
+                  <div style={{ 
+                    marginTop: '14px', 
+                    marginLeft: '8px',
+                    paddingLeft: '12px', 
+                    borderLeft: '2px solid var(--border)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px'
+                  }}>
+                    {comment.replies.map((reply) => {
+                      const isReplyAuthor = currentUser?.id === reply.author_id;
+                      const isEditingReply = editingCommentId === reply.id;
+
+                      return (
+                        <div 
+                          key={reply.id} 
+                          style={{ 
+                            backgroundColor: 'rgba(0,0,0,0.02)', 
+                            padding: '10px 12px', 
+                            borderRadius: '8px',
+                            border: '1px solid rgba(0,0,0,0.04)',
+                            boxSizing: 'border-box'
+                          }}
+                        >
+                          {/* Reply Header */}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
+                              {reply.author?.avatar_url ? (
+                                <img src={reply.author.avatar_url} alt="avatar" style={{ width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0 }} />
+                              ) : (
+                                <span style={{ width: '18px', height: '18px', borderRadius: '50%', backgroundColor: 'var(--border)', display: 'inline-block', flexShrink: 0 }} />
+                              )}
+                              <a href={`/profile/${reply.author?.id}`} style={{ fontWeight: 700, color: 'var(--text)', fontSize: '0.85rem', textDecoration: 'none' }}>
+                                {reply.author?.display_name || 'Người dùng'}
+                              </a>
+                              {reply.author?.rank && RANK_BADGES[reply.author.rank] && (
+                                <img 
+                                  src={RANK_BADGES[reply.author.rank]} 
+                                  alt={reply.author.rank} 
+                                  style={{ width: '16px', height: '16px', objectFit: 'contain', backgroundColor: '#f8fafc', borderRadius: '50%', padding: '1px', boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }} 
+                                />
+                              )}
+                              <span style={{ padding: '1px 4px', borderRadius: '3px', fontSize: '0.62rem', fontWeight: 600, backgroundColor: RANK_COLORS[reply.author?.rank] || '#4b5563', color: 'white' }}>
+                                {reply.author?.rank || 'Kim Ngư'}
+                              </span>
+                              <span style={{ color: 'var(--muted)', fontSize: '0.72rem' }}>🪙 {reply.author?.gold_balance || 0}</span>
+                              <span style={{ color: 'var(--border)' }}>·</span>
+                              <time style={{ fontSize: '0.72rem', color: 'var(--muted)', fontWeight: 500 }} dateTime={reply.created_at}>
+                                {formatCompactDate(reply.created_at)}
+                              </time>
+                            </div>
+
+                            {/* Actions sửa / xóa reply */}
+                            {!isEditingReply && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {isReplyAuthor && (
+                                  <button
+                                    onClick={() => handleStartEdit(reply)}
+                                    style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', padding: '1px 4px' }}
+                                  >
+                                    ✏️ Sửa
+                                  </button>
+                                )}
+                                {(isReplyAuthor || isAdmin) && (
+                                  <button
+                                    onClick={() => handleDeleteComment(reply.id)}
+                                    style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', padding: '1px 4px' }}
+                                  >
+                                    🗑️ Xóa {isAdmin && !isReplyAuthor && '(Admin)'}
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Reply Content or Edit Inline */}
+                          {isEditingReply ? (
+                            <div style={{ marginBottom: '6px' }}>
+                              <textarea
+                                rows={2}
+                                value={editingContent}
+                                onChange={(e) => setEditingContent(e.target.value)}
+                                style={{
+                                  width: '100%',
+                                  padding: '8px 10px',
+                                  borderRadius: '6px',
+                                  border: '1px solid var(--accent)',
+                                  outline: 'none',
+                                  fontFamily: 'inherit',
+                                  fontSize: '0.85rem',
+                                  backgroundColor: 'var(--surface)',
+                                  color: 'var(--text)',
+                                  resize: 'vertical',
+                                  boxSizing: 'border-box'
+                                }}
+                              />
+                              <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', marginTop: '4px' }}>
+                                <button
+                                  type="button"
+                                  onClick={handleCancelEdit}
+                                  disabled={editLoading}
+                                  style={{ padding: '3px 8px', background: 'none', border: '1px solid var(--border)', borderRadius: '4px', fontSize: '0.75rem', cursor: 'pointer' }}
+                                >
+                                  Hủy
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSaveEdit(reply.id)}
+                                  disabled={editLoading}
+                                  style={{ padding: '3px 10px', backgroundColor: 'var(--accent)', color: 'white', border: 'none', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, cursor: editLoading ? 'not-allowed' : 'pointer' }}
+                                >
+                                  {editLoading ? 'Đang lưu...' : 'Lưu'}
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div style={{ fontSize: '0.9rem', lineHeight: '1.5', whiteSpace: 'pre-wrap', color: 'var(--text)' }}>
+                              {reply.content}
+                            </div>
+                          )}
+
+                          {/* Like action for reply */}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', marginTop: '6px' }}>
+                            <button
+                              onClick={() => handleLikeToggle(reply)}
+                              disabled={isReplyAuthor}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                background: 'none',
+                                border: 'none',
+                                cursor: isReplyAuthor ? 'not-allowed' : 'pointer',
+                                fontSize: '0.78rem',
+                                color: reply.is_liked ? '#ef4444' : 'var(--muted)',
+                                fontWeight: reply.is_liked ? 600 : 500,
+                                opacity: isReplyAuthor ? 0.6 : 1,
+                                padding: 0
+                              }}
+                            >
+                              <span>{reply.is_liked ? '❤️' : '🤍'}</span>
+                              <span>Thích ({reply.likes_count || 0})</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })}
