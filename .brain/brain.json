@@ -1,40 +1,41 @@
 {
   "meta": {
-    "schema_version": "1.2.0",
+    "schema_version": "1.3.0",
     "awf_version": "4.0.2",
-    "last_updated": "2026-08-14T15:12:00Z"
+    "last_updated": "2026-08-15T12:05:00Z"
   },
   "project": {
     "name": "Tulanh",
     "type": "Web Application (Next.js App Router)",
     "status": "Production & Development",
-    "repository": "tranngoc-dev/tulanh_simple"
+    "repository": "tranngoc-dev/tulanh_simple",
+    "secondary_repository": "tranngoc-dev/Anti-Workflow-Ultimate"
   },
   "tech_stack": {
     "frontend": "Next.js 16 (App Router), React 19, CSS thuần (Design Tokens, không Tailwind), Lucide Icons, DOMPurify, Marked",
-    "backend": "Next.js API Routes, Next.js Middleware",
+    "backend": "Next.js API Routes, Next.js Middleware, Supabase PostgreSQL Functions (RPC)",
     "database": "PostgreSQL via Supabase (Project ID: xywmdsieytqsxqpqvcwj, Region: ap-northeast-2)",
     "auth": "Supabase Auth (Google OAuth & Email/Password hybrid), RLS (Row Level Security)",
     "testing": "Playwright, Python Guardrails"
   },
   "database_schema": {
-    "summary": "Hệ thống CSDL toàn diện gồm: Quản lý người dùng & Gamification (Gold/Rank), Diễn đàn Q&A, Blog bài viết & Bình luận, Thống kê lượt xem & Nhật ký IP, Không gian làm việc cá nhân (Workspace).",
+    "summary": "Hệ thống CSDL toàn diện gồm: Quản lý người dùng & Gamification (Gold/Rank), Diễn đàn Q&A có phản hồi phân cấp, Blog bài viết & Bình luận, Thống kê lượt xem & Nhật ký IP, Không gian làm việc cá nhân (Workspace).",
     "tables": [
       {
         "name": "profiles",
-        "description": "Hồ sơ người dùng liên kết auth.users, lưu số dư Vàng (gold_balance) và Cấp bậc (rank: Kim Ngư -> Thiên Long)."
+        "description": "Hồ sơ người dùng liên kết auth.users, lưu số dư Vàng (gold_balance), Cấp bậc (rank: Kim Ngư -> Thiên Long), và thời hạn cấm bình luận (comment_banned_until)."
       },
       {
         "name": "threads",
-        "description": "Bài đăng hỏi đáp trong diễn đàn Q&A."
+        "description": "Bài đăng hỏi đáp trong diễn đàn Q&A. Tạo bài tự động thưởng +10 Gold cho tác giả."
       },
       {
         "name": "thread_comments",
-        "description": "Bình luận trả lời trong Q&A, đánh dấu câu trả lời hay nhất (is_best_answer) để nhận Vàng."
+        "description": "Bình luận và câu trả lời trong Q&A. Hỗ trợ trường parent_id để trả lời phân cấp (Nested Replies) như Facebook, đánh dấu câu trả lời hay nhất (is_best_answer) nhận +10 Gold."
       },
       {
         "name": "thread_comment_likes",
-        "description": "Lưu lượt thả tim bình luận Q&A."
+        "description": "Lưu lượt thả tim câu trả lời Q&A. Tác giả được like tự động nhận +1 Gold."
       },
       {
         "name": "site_settings",
@@ -73,37 +74,49 @@
         "description": "Lịch sử các phiên tập trung Pomodoro hoàn thành."
       }
     ],
-    "relationships_explained": "Người dùng đăng ký qua auth.users tự động tạo profile; bài viết liên kết với comments; threads liên kết với thread_comments; visit_logs và page_views phục vụ các hàm RPC thống kê."
+    "relationships_explained": "auth.users liên kết 1-1 với profiles; threads chứa nhiều thread_comments; thread_comments có khóa ngoại tự tham chiếu parent_id để tạo nhánh reply con; visit_logs và page_views phục vụ các hàm RPC thống kê."
   },
   "api_endpoints": [
     {
       "path": "/api/track",
       "method": "POST/GET",
       "explained": "Theo dõi lượt truy cập (visit) và xem bài viết (post_view), tự động lọc bỏ các IP nằm trong danh sách loại trừ."
+    },
+    {
+      "path": "RPC: public.admin_update_user_rank_and_gold",
+      "method": "POST",
+      "explained": "Hàm bảo mật cho Admin điều chỉnh Level và điểm Gold của thành viên."
+    },
+    {
+      "path": "RPC: public.get_registered_users",
+      "method": "POST",
+      "explained": "Hàm bảo mật cho Admin lấy danh sách toàn bộ người dùng kèm avatar, email, rank, gold_balance và trạng thái cấm."
     }
   ],
   "business_rules": [
     "Tài khoản Admin đặc quyền vutrongvtv24@gmail.com có toàn quyền quản trị trên cả FE và BE.",
-    "Khi tài khoản vutrongvtv24@gmail.com đăng nhập, tự động hiển thị nút shortcut 'Admin' trên Taskbar chính.",
-    "Khóa xác thực Admin: Kiểm tra trực tiếp trường session.user.user_metadata.is_admin === true để tránh độ trễ mạng và lỗi bất đồng bộ của RPC.",
-    "Trang /admin/login chỉ chuyển hướng khi người dùng submit form thành công, không tự động redirect để chống vòng lặp F5 loop.",
-    "Nội dung HTML động (bài viết, ghi chú) bắt buộc phải qua màng lọc DOMPurify.sanitize() trước khi render."
+    "Cơ chế điểm Gold: +10 Gold khi tạo Thread mới, +1 Gold cho mỗi bình luận/câu trả lời, +1 Gold cho mỗi like nhận được, +10 Gold khi được chọn là Best Answer.",
+    "Cơ chế Cấp bậc Rank: Kim Ngư (0+), Linh Long (50+), Đế Long (200+), Hỏa Long (500+), Thiên Long (1000+ hoặc Admin).",
+    "Admin có thể set Level và điều chỉnh điểm Gold trực tiếp tại /admin/users và bấm '💾 LƯU NGAY' để lưu vào Supabase.",
+    "Admin có thể cấm thành viên bình luận trong 24h hoặc mở khóa ngay lập tức.",
+    "Tất cả các URL xuất hiện trong bài viết, trích đoạn, câu hỏi, bình luận và reply con đều được tự động highlight và tạo hyperlink target=_blank."
   ],
   "features": [
-    "Trang chủ Blog & Đọc bài viết (Markdown/HTML)",
-    "Hệ thống Quản trị Admin Dashboard (/admin, /admin/posts, /admin/comments, /admin/settings, /admin/visit-logs)",
-    "Diễn đàn Hỏi đáp Q&A có thưởng Vàng & Thăng hạng",
+    "Trang chủ Blog & Đọc bài viết (Markdown/HTML có nhận diện Hyperlink)",
+    "Hệ thống Quản trị Admin Dashboard (/admin, /admin/posts, /admin/comments, /admin/users, /admin/settings, /admin/visit-logs)",
+    "Diễn đàn Hỏi đáp Q&A có phân cấp Nested Replies, thưởng Gold tự động & Thăng hạng",
     "Không gian làm việc Focus Workspace (/working: Pomodoro, Todo, Ghi chú)",
     "Bộ lọc IP loại trừ tự động đếm view"
   ],
   "knowledge_items": {
     "patterns": [
       "Sử dụng window.location.href để điều hướng an toàn trong Admin, làm sạch router cache Next.js.",
-      "Gán RPC và RLS bảo mật cấp cơ sở dữ liệu trên Supabase với security definer cho các hàm thống kê."
+      "Gán RPC và RLS bảo mật cấp cơ sở dữ liệu trên Supabase với SECURITY DEFINER cho các hàm thống kê và admin overrides.",
+      "Hàm renderWithLinks sử dụng Regex tách URL an toàn, xử lý dấu câu ở đuôi và stopPropagation tránh click xuyên qua thẻ cha."
     ],
     "gotchas": [
-      "Next.js Middleware chạy ở Edge runtime cần đồng bộ chuẩn URL và Anon Key của project Supabase mới.",
-      "Tài khoản đăng ký qua Google OAuth cần identity 'email' trong auth.identities để có thể đăng nhập bằng mật khẩu."
+      "Không dùng trigger chặn UPDATE trên profiles cho authenticated client mà không loại trừ trigger nội bộ, thay vào đó dùng RPC SECURITY DEFINER cho Admin.",
+      "Next.js Middleware chạy ở Edge runtime cần đồng bộ chuẩn URL và Anon Key của project Supabase mới."
     ],
     "conventions": [
       "Mọi quy trình sửa đổi tuân thủ nghiêm ngặt AWF v4.0.2 và Guardrails CI/CD trước khi push."
