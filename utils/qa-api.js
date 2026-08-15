@@ -382,13 +382,25 @@ export async function deleteThread(threadId) {
 // 16. Admin update user rank and gold
 export async function adminUpdateUserRank(userId, newRank, newGold = null) {
   try {
+    const parsedGold = newGold !== null && !isNaN(newGold) ? parseInt(newGold, 10) : 0;
+    
+    // Call secure RPC function
+    const { data: rpcData, error: rpcError } = await supabase.rpc('admin_update_user_rank_and_gold', {
+      target_user_id: userId,
+      new_rank: newRank,
+      new_gold: parsedGold
+    });
+
+    if (!rpcError && rpcData) {
+      return rpcData;
+    }
+
+    // Direct fallback
     const updateData = { 
       rank: newRank,
+      gold_balance: parsedGold,
       updated_at: new Date().toISOString()
     };
-    if (newGold !== null && !isNaN(newGold)) {
-      updateData.gold_balance = parseInt(newGold, 10);
-    }
 
     const { data, error } = await supabase
       .from('profiles')

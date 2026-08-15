@@ -14,11 +14,13 @@ const RANKS = ['Kim Ngư', 'Linh Long', 'Đế Long', 'Hỏa Long', 'Thiên Long
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
+  const [editStates, setEditStates] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [rankFilter, setRankFilter] = useState('all');
   const [banFilter, setBanFilter] = useState('all');
   const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [toastMessage, setToastMessage] = useState(null);
 
   // Stats
   const [totalCount, setTotalCount] = useState(0);
@@ -29,6 +31,14 @@ export default function AdminUsersPage() {
     loadUsers();
   }, []);
 
+  // Auto hide toast message after 3 seconds
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => setToastMessage(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
+
   async function loadUsers() {
     setLoading(true);
     try {
@@ -37,6 +47,17 @@ export default function AdminUsersPage() {
 
       const userList = data || [];
       setUsers(userList);
+      
+      // Initialize edit states for each user
+      const initialEdits = {};
+      userList.forEach(u => {
+        initialEdits[u.id] = {
+          rank: u.rank || 'Kim Ngư',
+          gold_balance: u.gold_balance || 0
+        };
+      });
+      setEditStates(initialEdits);
+
       calculateStats(userList);
     } catch (err) {
       console.error('[AdminUsers] Lỗi tải danh sách người dùng:', err);
@@ -58,38 +79,48 @@ export default function AdminUsersPage() {
     setActiveCount(active.length);
   }
 
-  // Handle update rank
-  async function handleRankChange(userId, newRank) {
-    setActionLoadingId(userId);
-    try {
-      await adminUpdateUserRank(userId, newRank);
-      // Cập nhật state local
-      setUsers(prev => prev.map(u => u.id === userId ? { ...u, rank: newRank } : u));
-    } catch (err) {
-      alert('Lỗi cập nhật Cấp bậc Rank: ' + (err.message || 'Thử lại sau.'));
-    } finally {
-      setActionLoadingId(null);
-    }
+  // Handle local Rank change in dropdown
+  function handleLocalRankChange(userId, newRank) {
+    setEditStates(prev => ({
+      ...prev,
+      [userId]: {
+        ...prev[userId],
+        rank: newRank
+      }
+    }));
   }
 
-  // Handle adjust gold
-  async function handleGoldChange(userId, currentGold) {
-    const promptValue = prompt('Nhập số dư điểm Gold mới cho thành viên:', currentGold || 0);
-    if (promptValue === null) return;
-    
-    const parsedGold = parseInt(promptValue, 10);
-    if (isNaN(parsedGold) || parsedGold < 0) {
-      alert('Số điểm Gold phải là một số nguyên dương hợp lệ.');
-      return;
-    }
+  // Handle local Gold change in input
+  function handleLocalGoldChange(userId, val) {
+    const parsed = parseInt(val, 10);
+    setEditStates(prev => ({
+      ...prev,
+      [userId]: {
+        ...prev[userId],
+        gold_balance: isNaN(parsed) ? 0 : Math.max(0, parsed)
+      }
+    }));
+  }
+
+  // Handle SAVE button click to persist changes on Supabase
+  async function handleSaveUser(userId, userName) {
+    const currentEdit = editStates[userId];
+    if (!currentEdit) return;
 
     setActionLoadingId(userId);
     try {
-      const currentRank = users.find(u => u.id === userId)?.rank || 'Kim Ngư';
-      await adminUpdateUserRank(userId, currentRank, parsedGold);
-      setUsers(prev => prev.map(u => u.id === userId ? { ...u, gold_balance: parsedGold } : u));
+      await adminUpdateUserRank(userId, currentEdit.rank, currentEdit.gold_balance);
+      
+      // Update local master user list
+      setUsers(prev => prev.map(u => u.id === userId ? {
+        ...u,
+        rank: currentEdit.rank,
+        gold_balance: currentEdit.gold_balance
+      } : u));
+
+      setToastMessage(`✅ Đã lưu thành công Cấp bậc (${currentEdit.rank}) & Điểm (${currentEdit.gold_balance} Gold) cho "${userName}"!`);
     } catch (err) {
-      alert('Lỗi cập nhật điểm Gold: ' + (err.message || 'Thử lại sau.'));
+      alert('Lỗi khi lưu thay đổi: ' + (err.message || 'Thử lại sau.'));
     } finally {
       setActionLoadingId(null);
     }
@@ -104,6 +135,7 @@ export default function AdminUsersPage() {
       const updated = await adminBanUserComments(userId, 24);
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, comment_banned_until: updated.comment_banned_until } : u));
       calculateStats(users);
+      setToastMessage(`🚫 Đã khóa quyền bình luận 24h của "${userName}".`);
     } catch (err) {
       alert('Lỗi khi cấm bình luận: ' + (err.message || 'Thử lại sau.'));
     } finally {
@@ -120,6 +152,7 @@ export default function AdminUsersPage() {
       await adminUnbanUserComments(userId);
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, comment_banned_until: null } : u));
       calculateStats(users);
+      setToastMessage(`✅ Đã mở khóa quyền bình luận cho "${userName}".`);
     } catch (err) {
       alert('Lỗi khi mở khóa bình luận: ' + (err.message || 'Thử lại sau.'));
     } finally {
@@ -150,15 +183,12 @@ export default function AdminUsersPage() {
 
   // Filter users
   const filteredUsers = users.filter((u) => {
-    // Search query
     const emailMatch = (u.email || '').toLowerCase().includes(searchQuery.toLowerCase());
     const nameMatch = (u.display_name || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchSearch = emailMatch || nameMatch;
 
-    // Rank filter
     const matchRank = rankFilter === 'all' || (u.rank || 'Kim Ngư') === rankFilter;
 
-    // Ban filter
     const isBanned = isUserCommentBanned(u.comment_banned_until);
     let matchBan = true;
     if (banFilter === 'banned') matchBan = isBanned;
@@ -169,113 +199,146 @@ export default function AdminUsersPage() {
 
   return (
     <>
-      <div className="admin-page__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          backgroundColor: '#0f766e',
+          color: '#ffffff',
+          padding: '12px 20px',
+          borderRadius: '8px',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+          zIndex: 9999,
+          fontWeight: 600,
+          fontSize: '0.9rem',
+          animation: 'fadeIn 0.2s ease-in-out'
+        }}>
+          {toastMessage}
+        </div>
+      )}
+
+      <div className="admin-page__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 className="admin-page__title" style={{ margin: 0 }}>Quản lý Thành viên & Cấp bậc Rank</h1>
           <p style={{ color: 'var(--muted)', marginTop: '4px', fontSize: '0.95rem' }}>
-            Phân cấp bậc Rank, cấp điểm Gold và quản lý quyền bình luận của thành viên trên toàn hệ thống.
+            Chỉ định Cấp bậc Rank, cấp điểm Gold (kèm nút SAVE) và quản lý quyền bình luận của thành viên.
           </p>
         </div>
         <button
           onClick={loadUsers}
           className="admin-btn admin-btn--secondary"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
         >
-          🔄 Làm mới
+          🔄 Tải lại dữ liệu
         </button>
       </div>
 
       {/* Stats Grid */}
       <div className="admin-stats-grid" style={{ marginBottom: '24px' }}>
-        <div className="stat-card stat-card--accent">
-          <div className="stat-card__title">Tổng thành viên</div>
-          <div className="stat-card__value">{totalCount.toLocaleString('vi-VN')}</div>
+        <div className="admin-stat-card">
+          <span className="admin-stat-card__label">Tổng thành viên</span>
+          <strong className="admin-stat-card__value">{totalCount}</strong>
         </div>
-        <div className="stat-card">
-          <div className="stat-card__title">Đang bị cấm bình luận</div>
-          <div className="stat-card__value" style={{ color: bannedCount > 0 ? '#ef4444' : 'inherit' }}>
-            {bannedCount.toLocaleString('vi-VN')}
-          </div>
+        <div className="admin-stat-card">
+          <span className="admin-stat-card__label">Hoạt động (30 ngày)</span>
+          <strong className="admin-stat-card__value" style={{ color: 'var(--accent)' }}>{activeCount}</strong>
         </div>
-        <div className="stat-card">
-          <div className="stat-card__title">Hoạt động (30 ngày qua)</div>
-          <div className="stat-card__value">{activeCount.toLocaleString('vi-VN')}</div>
+        <div className="admin-stat-card">
+          <span className="admin-stat-card__label">Đang bị cấm bình luận</span>
+          <strong className="admin-stat-card__value" style={{ color: bannedCount > 0 ? '#ef4444' : 'var(--muted)' }}>
+            {bannedCount}
+          </strong>
         </div>
       </div>
 
-      {/* Toolbar & Search & Filters */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '20px', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', flex: 1 }}>
-          {/* Search Box */}
+      {/* Filters Toolbar */}
+      <div style={{
+        display: 'flex',
+        gap: '12px',
+        marginBottom: '20px',
+        flexWrap: 'wrap',
+        backgroundColor: 'var(--surface)',
+        padding: '16px',
+        borderRadius: '12px',
+        border: '1px solid var(--border)',
+        alignItems: 'center'
+      }}>
+        {/* Search */}
+        <div style={{ flex: '1 1 240px' }}>
           <input
             type="text"
-            className="logs-search-input"
-            placeholder="Tìm kiếm thành viên theo Tên hoặc Email..."
+            placeholder="🔍 Tìm theo Tên hoặc Email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
-              padding: '10px 16px',
+              width: '100%',
+              padding: '10px 14px',
               borderRadius: '8px',
               border: '1px solid var(--border)',
-              backgroundColor: 'var(--surface)',
+              backgroundColor: 'var(--bg)',
               color: 'var(--text)',
               fontSize: '0.9rem',
-              minWidth: '280px'
+              outline: 'none',
+              boxSizing: 'border-box'
             }}
           />
+        </div>
 
-          {/* Filter Rank */}
+        {/* Filter by Rank */}
+        <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '0.85rem', color: 'var(--muted)', fontWeight: 600 }}>Rank:</span>
           <select
             value={rankFilter}
             onChange={(e) => setRankFilter(e.target.value)}
             style={{
-              padding: '10px 14px',
+              padding: '10px 12px',
               borderRadius: '8px',
               border: '1px solid var(--border)',
-              backgroundColor: 'var(--surface)',
+              backgroundColor: 'var(--bg)',
               color: 'var(--text)',
-              fontSize: '0.9rem',
+              fontSize: '0.85rem',
               outline: 'none'
             }}
           >
-            <option value="all">Tất cả Cấp bậc Rank</option>
+            <option value="all">Tất cả Cấp bậc</option>
             {RANKS.map(r => (
               <option key={r} value={r}>{r}</option>
             ))}
           </select>
+        </div>
 
-          {/* Filter Ban status */}
+        {/* Filter by Ban Status */}
+        <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '0.85rem', color: 'var(--muted)', fontWeight: 600 }}>Bình luận:</span>
           <select
             value={banFilter}
             onChange={(e) => setBanFilter(e.target.value)}
             style={{
-              padding: '10px 14px',
+              padding: '10px 12px',
               borderRadius: '8px',
               border: '1px solid var(--border)',
-              backgroundColor: 'var(--surface)',
+              backgroundColor: 'var(--bg)',
               color: 'var(--text)',
-              fontSize: '0.9rem',
+              fontSize: '0.85rem',
               outline: 'none'
             }}
           >
             <option value="all">Tất cả trạng thái</option>
-            <option value="normal">Bình thường</option>
-            <option value="banned">🚫 Đang bị cấm bình luận</option>
+            <option value="normal">✅ Bình thường</option>
+            <option value="banned">🚫 Đang bị cấm</option>
           </select>
         </div>
-
-        {searchQuery && (
-          <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
-            Tìm thấy <strong>{filteredUsers.length}</strong> thành viên
-          </span>
-        )}
       </div>
 
-      {/* User Table content */}
+      {/* Users Table */}
       {loading ? (
-        <p style={{ color: 'var(--muted)', marginTop: '2rem' }}>Đang tải danh sách thành viên...</p>
+        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)' }}>
+          Đang tải dữ liệu thành viên...
+        </div>
       ) : filteredUsers.length === 0 ? (
-        <div className="admin-empty" style={{
+        <div style={{
           textAlign: 'center',
           padding: '3rem 1rem',
           background: 'var(--surface)',
@@ -293,6 +356,7 @@ export default function AdminUsersPage() {
                 <th>Thành viên</th>
                 <th>Cấp bậc Rank (Set Level)</th>
                 <th>Điểm Gold</th>
+                <th style={{ textAlign: 'center' }}>Lưu thay đổi</th>
                 <th>Quyền Bình luận</th>
                 <th>Ngày tham gia</th>
                 <th>Thao tác</th>
@@ -301,11 +365,14 @@ export default function AdminUsersPage() {
             <tbody>
               {filteredUsers.map((user) => {
                 const isBanned = isUserCommentBanned(user.comment_banned_until);
-                const userRank = user.rank || 'Kim Ngư';
+                const currentEdit = editStates[user.id] || { rank: user.rank || 'Kim Ngư', gold_balance: user.gold_balance || 0 };
                 const isBusy = actionLoadingId === user.id;
 
+                // Kiểm tra xem user có dữ liệu đang sửa đổi chưa lưu không
+                const isDirty = (currentEdit.rank !== (user.rank || 'Kim Ngư')) || (Number(currentEdit.gold_balance) !== Number(user.gold_balance || 0));
+
                 return (
-                  <tr key={user.id}>
+                  <tr key={user.id} style={{ backgroundColor: isDirty ? 'rgba(15, 118, 110, 0.04)' : 'transparent' }}>
                     {/* Thành viên */}
                     <td data-label="Thành viên">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -346,10 +413,10 @@ export default function AdminUsersPage() {
                     {/* Cấp bậc Rank Dropdown */}
                     <td data-label="Cấp bậc Rank">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {RANK_BADGES[userRank] && (
+                        {RANK_BADGES[currentEdit.rank] && (
                           <img 
-                            src={RANK_BADGES[userRank]} 
-                            alt={userRank} 
+                            src={RANK_BADGES[currentEdit.rank]} 
+                            alt={currentEdit.rank} 
                             style={{ 
                               width: '28px', 
                               height: '28px', 
@@ -363,16 +430,16 @@ export default function AdminUsersPage() {
                         )}
                         <select
                           disabled={isBusy}
-                          value={userRank}
-                          onChange={(e) => handleRankChange(user.id, e.target.value)}
+                          value={currentEdit.rank}
+                          onChange={(e) => handleLocalRankChange(user.id, e.target.value)}
                           style={{
-                            padding: '4px 8px',
+                            padding: '6px 10px',
                             borderRadius: '6px',
                             fontSize: '0.85rem',
                             fontWeight: 600,
-                            backgroundColor: RANK_COLORS[userRank] || '#4b5563',
+                            backgroundColor: RANK_COLORS[currentEdit.rank] || '#4b5563',
                             color: 'white',
-                            border: 'none',
+                            border: isDirty ? '2px solid var(--accent)' : 'none',
                             cursor: isBusy ? 'not-allowed' : 'pointer',
                             outline: 'none'
                           }}
@@ -386,30 +453,56 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
 
-                    {/* Điểm Gold */}
+                    {/* Điểm Gold Input */}
                     <td data-label="Điểm Gold">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontWeight: 700, color: '#d97706', fontSize: '0.95rem' }}>
-                          🪙 {user.gold_balance || 0}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleGoldChange(user.id, user.gold_balance)}
+                        <span style={{ fontSize: '1rem' }}>🪙</span>
+                        <input
+                          type="number"
+                          min="0"
                           disabled={isBusy}
+                          value={currentEdit.gold_balance}
+                          onChange={(e) => handleLocalGoldChange(user.id, e.target.value)}
                           style={{
-                            padding: '2px 6px',
-                            fontSize: '0.75rem',
-                            border: '1px solid var(--border)',
-                            borderRadius: '4px',
-                            background: 'none',
-                            cursor: 'pointer',
-                            color: 'var(--muted)'
+                            width: '90px',
+                            padding: '6px 8px',
+                            borderRadius: '6px',
+                            border: isDirty ? '2px solid var(--accent)' : '1px solid var(--border)',
+                            backgroundColor: 'var(--bg)',
+                            color: '#d97706',
+                            fontWeight: 700,
+                            fontSize: '0.95rem',
+                            outline: 'none'
                           }}
-                          title="Chỉnh sửa số Gold"
-                        >
-                          ✏️
-                        </button>
+                        />
                       </div>
+                    </td>
+
+                    {/* Nút SAVE Lưu thay đổi */}
+                    <td data-label="Lưu thay đổi" style={{ textAlign: 'center' }}>
+                      <button
+                        type="button"
+                        disabled={isBusy || !isDirty}
+                        onClick={() => handleSaveUser(user.id, user.display_name || user.email)}
+                        style={{
+                          padding: '6px 14px',
+                          borderRadius: '6px',
+                          border: 'none',
+                          backgroundColor: isDirty ? 'var(--accent)' : 'rgba(0,0,0,0.06)',
+                          color: isDirty ? '#ffffff' : 'var(--muted)',
+                          cursor: (isBusy || !isDirty) ? 'not-allowed' : 'pointer',
+                          fontWeight: 700,
+                          fontSize: '0.82rem',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          boxShadow: isDirty ? '0 2px 6px rgba(15, 118, 110, 0.3)' : 'none',
+                          transition: 'all 0.2s ease',
+                          transform: isDirty ? 'scale(1.02)' : 'none'
+                        }}
+                      >
+                        {isBusy ? '⏳ Đang lưu...' : isDirty ? '💾 LƯU NGAY' : '✓ Đã lưu'}
+                      </button>
                     </td>
 
                     {/* Quyền Bình luận */}
@@ -463,7 +556,7 @@ export default function AdminUsersPage() {
                         <button
                           type="button"
                           disabled={isBusy}
-                          onClick={() => handleUnbanComments(user.id, user.display_name)}
+                          onClick={() => handleUnbanComments(user.id, user.display_name || user.email)}
                           className="admin-btn admin-btn--sm admin-btn--success"
                           style={{ fontSize: '0.8rem', padding: '4px 10px' }}
                         >
@@ -473,7 +566,7 @@ export default function AdminUsersPage() {
                         <button
                           type="button"
                           disabled={isBusy}
-                          onClick={() => handleBanComments(user.id, user.display_name)}
+                          onClick={() => handleBanComments(user.id, user.display_name || user.email)}
                           className="admin-btn admin-btn--sm admin-btn--warning"
                           style={{ fontSize: '0.8rem', padding: '4px 10px' }}
                         >
@@ -491,4 +584,3 @@ export default function AdminUsersPage() {
     </>
   );
 }
-

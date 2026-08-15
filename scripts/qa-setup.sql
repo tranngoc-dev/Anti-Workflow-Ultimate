@@ -170,14 +170,27 @@ CREATE TRIGGER on_auth_user_created
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 
--- C. Protect Profile Score (Gold/Rank) from direct Client manipulation
+-- C. Protect Profile Score (Gold/Rank) from direct unauthorized Client manipulation
 CREATE OR REPLACE FUNCTION public.protect_profile_score()
 RETURNS TRIGGER AS $$
+DECLARE
+    caller_email TEXT;
+    is_admin BOOLEAN := FALSE;
 BEGIN
-    -- Reset score to old score if updated by authenticated client without system bypass
     IF auth.role() = 'authenticated' THEN
-        NEW.gold_balance = OLD.gold_balance;
-        NEW.rank = OLD.rank;
+        SELECT email INTO caller_email FROM auth.users WHERE id = auth.uid();
+        IF caller_email = 'vutrongvtv24@gmail.com' THEN
+            is_admin := TRUE;
+        ELSE
+            SELECT (raw_user_meta_data->>'is_admin')::boolean INTO is_admin 
+            FROM auth.users 
+            WHERE id = auth.uid();
+        END IF;
+
+        IF NOT COALESCE(is_admin, FALSE) THEN
+            NEW.gold_balance = OLD.gold_balance;
+            NEW.rank = OLD.rank;
+        END IF;
     END IF;
     RETURN NEW;
 END;
@@ -199,6 +212,9 @@ BEGIN
 
     IF user_email = 'vutrongvtv24@gmail.com' THEN
         NEW.rank := 'Thiên Long';
+    ELSIF TG_OP = 'UPDATE' AND NEW.rank IS DISTINCT FROM OLD.rank THEN
+        -- Giữ nguyên rank do Admin chỉ định thủ công
+        NEW.rank := NEW.rank;
     ELSE
         NEW.rank = CASE
             WHEN NEW.gold_balance >= 1000 THEN 'Thiên Long'
@@ -216,6 +232,52 @@ DROP TRIGGER IF EXISTS before_profile_gold_update ON public.profiles;
 CREATE TRIGGER before_profile_gold_update
     BEFORE UPDATE OF gold_balance ON public.profiles
     FOR EACH ROW EXECUTE FUNCTION public.update_user_rank();
+
+
+-- D2. Secure RPC for Admin to update Member Rank and Gold balance
+CREATE OR REPLACE FUNCTION public.admin_update_user_rank_and_gold(
+    target_user_id UUID,
+    new_rank TEXT,
+    new_gold INTEGER
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    caller_email TEXT;
+    is_admin BOOLEAN := FALSE;
+    res JSONB;
+BEGIN
+    SELECT email INTO caller_email FROM auth.users WHERE id = auth.uid();
+    
+    IF caller_email = 'vutrongvtv24@gmail.com' THEN
+        is_admin := TRUE;
+    ELSE
+        SELECT (raw_user_meta_data->>'is_admin')::boolean INTO is_admin 
+        FROM auth.users 
+        WHERE id = auth.uid();
+    END IF;
+
+    IF NOT COALESCE(is_admin, FALSE) THEN
+        RAISE EXCEPTION 'Chỉ có Quản trị viên (Admin) mới có quyền cập nhật Level và điểm Gold của thành viên.';
+    END IF;
+
+    IF new_rank NOT IN ('Kim Ngư', 'Linh Long', 'Đế Long', 'Hỏa Long', 'Thiên Long') THEN
+        RAISE EXCEPTION 'Cấp bậc Rank không hợp lệ: %', new_rank;
+    END IF;
+
+    UPDATE public.profiles
+    SET 
+        rank = new_rank,
+        gold_balance = GREATEST(0, new_gold),
+        updated_at = timezone('utc'::text, now())
+    WHERE id = target_user_id;
+
+    SELECT to_jsonb(p) INTO res FROM public.profiles p WHERE id = target_user_id;
+    RETURN res;
+END;
+$$;
 
 
 -- E. Thread Commment Interaction Gold: +1 Gold on FIRST comment in a thread
