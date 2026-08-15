@@ -170,36 +170,8 @@ CREATE TRIGGER on_auth_user_created
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 
--- C. Protect Profile Score (Gold/Rank) from direct unauthorized Client manipulation
-CREATE OR REPLACE FUNCTION public.protect_profile_score()
-RETURNS TRIGGER AS $$
-DECLARE
-    caller_email TEXT;
-    is_admin BOOLEAN := FALSE;
-BEGIN
-    IF auth.role() = 'authenticated' THEN
-        SELECT email INTO caller_email FROM auth.users WHERE id = auth.uid();
-        IF caller_email = 'vutrongvtv24@gmail.com' THEN
-            is_admin := TRUE;
-        ELSE
-            SELECT (raw_user_meta_data->>'is_admin')::boolean INTO is_admin 
-            FROM auth.users 
-            WHERE id = auth.uid();
-        END IF;
-
-        IF NOT COALESCE(is_admin, FALSE) THEN
-            NEW.gold_balance = OLD.gold_balance;
-            NEW.rank = OLD.rank;
-        END IF;
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-DROP TRIGGER IF EXISTS z_protect_profile_score_trigger ON public.profiles;
-CREATE TRIGGER z_protect_profile_score_trigger
-    BEFORE UPDATE ON public.profiles
-    FOR EACH ROW EXECUTE FUNCTION public.protect_profile_score();
+-- C. Trigger & RPC configurations
+-- Note: Admin uses admin_update_user_rank_and_gold for secure score overrides.
 
 
 -- D. Auto-update Rank based on Gold balance
