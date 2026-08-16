@@ -67,7 +67,7 @@ if (Test-Path $sourceMcp) {
 
 # 5. Luu phien ban
 $versionFile = Join-Path $userHome ".gemini\awf_version"
-Set-Content -Path $versionFile -Value "4.9.0-ultimate" -Encoding UTF8
+Set-Content -Path $versionFile -Value "4.10.0-ultimate" -Encoding UTF8
 
 Write-Host "`n==============================================================================" -ForegroundColor Cyan
 Write-Host "  [OK] CAI DAT HOAN TAT THANH CONG!" -ForegroundColor Yellow

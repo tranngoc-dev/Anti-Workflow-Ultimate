@@ -37,16 +37,18 @@ description: 💻 Thực thi viết code theo chuẩn Smart TDD & Cổng Targete
 
 ---
 
-## Giai đoạn 1: Điều Phối Subagent & Vòng Lặp Smart TDD
+## Giai đoạn 1: Điều Phối Subagent & Vòng Lặp Smart TDD (Hybrid Code-Intelligence)
 
-Áp dụng quy tắc **Kim Tự Tháp Kiểm Thử (Test Pyramid)** trong từng Task:
+Áp dụng quy tắc **Kim Tự Tháp Kiểm Thử (Test Pyramid)** kết hợp **CodeGraph Live Auto-Sync** trong từng Task:
 
 ```mermaid
 flowchart TD
     A["Đọc Task N từ Plan File (task-brief)"] --> B["Dispatch Implementer Subagent"]
-    B --> C["1. RED: Viết Smallest Scoped Unit Test Fail (< 1s)"]
+    B --> B1["🔍 CodeGraph Single-Shot Explore (Trích xuất code + call paths trong 1 nốt nhạc)"]
+    B1 --> C["1. RED: Viết Smallest Scoped Unit Test Fail (< 1s)"]
     C --> D["2. GREEN: Viết Code tối thiểu để Unit Test Pass"]
-    D --> E["3. REFACTOR: Tối ưu code & Thêm Explicit FK Hints"]
+    D --> D1["⚡ CodeGraph Live Watcher tự động cập nhật đồ thị (Debounce 2s, Staleness Banner Guard)"]
+    D1 --> E["3. REFACTOR: Tối ưu code & Thêm Explicit FK Hints"]
     E --> F{"Đã xong toàn bộ Tasks của Feature?"}
     F -->|Chưa xong| G["Commit Task N qua Guardrail ➔ Làm tiếp Task N+1"]
     G --> A

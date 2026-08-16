@@ -36,9 +36,10 @@ Tiếp tục [/code] hoặc [/test]
   * *Triệu chứng:* HTTP 400 Bad Request, Ambiguous Foreign Key PostgREST, Lỗi cú pháp/Type, Lỗi Logic, HTTP 401/403.
   * *Hành động:* **CẤM RETRY MÙ QUÁNG.** Dừng ngay lập tức để điều tra nguyên nhân cốt lõi.
 
-### 🔹 1.2. Truy vết chuỗi gọi qua GitNexus:
-* Dùng `gitnexus:trace` để tìm đường dẫn gọi giữa điểm nổ lỗi và nguồn input.
-* Dùng `gitnexus:impact` để liệt kê toàn bộ các component/hàm liên đới.
+### 🔹 1.2. Truy vết chuỗi gọi & Trích xuất mã nguồn phẫu thuật (Hybrid Trace & Explore):
+* **GitNexus:** Dùng `gitnexus:trace` để tìm đường dẫn gọi giữa điểm nổ lỗi và nguồn input, và `gitnexus:impact` để kiểm tra vùng ảnh hưởng.
+* **CodeGraph:** Dùng `codegraph explore <vấn đề>` để lấy ngay mã nguồn thực tế (verbatim line-numbered source) của các điểm nút nghi vấn mà không cần duyệt từng file.
+* **Staleness Guard:** Kiểm tra cảnh báo `⚠️` của CodeGraph để đảm bảo không phân tích trên mã nguồn cũ đang sửa dở.
 * Hình thành tối đa 3 giả thuyết xếp hạng được chứng minh bằng log runtime.
 
 ---

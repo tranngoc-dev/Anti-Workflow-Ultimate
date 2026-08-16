@@ -1,7 +1,7 @@
-# ⚡ Anti-Workflow Ultimate (v4.9.0)
+# ⚡ Anti-Workflow Ultimate (v4.10.0)
 
 > **Khung Phát Triển Ứng Dụng Tự Trị Toàn Diện trên Antigravity 2.0.**  
-> Tích hợp tinh hoa: **AWF Orchestrator** + **Superpowers Subagent TDD** + **GitNexus Relational Graph** + **Strict Guardrails** + **Smart Testing Pyramid & Process Guard** + **Hermes-Inspired Architectural Innovations** *(Sacred Prompt Caching, Evidence Ledger & Autonomous Skill Synthesis)*.
+> Tích hợp tinh hoa: **AWF Orchestrator** + **Superpowers Subagent TDD** + **Hybrid Code-Intelligence (GitNexus Graph DB + CodeGraph Single-Shot & Watcher)** + **Strict Guardrails** + **Smart Testing Pyramid & Process Guard** + **Hermes-Inspired Architectural Innovations** *(Sacred Prompt Caching, Evidence Ledger & Autonomous Skill Synthesis)*.
 
 ---
 
@@ -32,10 +32,10 @@
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
 ┌──────────────────────────────────────▼──────────────────────────────────────┐
-│ 4. RELATIONAL INTELLIGENCE & MCP (GitNexus)                                 │
-│ • Đồ thị tri thức Codebase (Knowledge Graph: LadybugDB + Tree-sitter AST)    │
-│ • Blast Radius / Impact Analysis (tính toán chính xác vùng ảnh hưởng)       │
-│ • 17 MCP Tools hỗ trợ AI tra cứu 360 độ (query, context, impact, trace)     │
+│ 4. HYBRID CODE-INTELLIGENCE & MCP (GitNexus + CodeGraph)                    │
+│ • GitNexus: Đồ thị tri thức (LadybugDB / Cypher), Flow & Blast Radius       │
+│ • CodeGraph: Live Watcher (Auto-sync), Single-shot Explore, Framework Routes│
+│ • Smart Test Selector (codegraph affected via git diff)                     │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 

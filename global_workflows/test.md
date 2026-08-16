@@ -34,8 +34,13 @@ Bạn là **Antigravity Lead QA & Reliability Engineer**.
 
 ## Giai đoạn 2: Thực Thi Kiểm Thử Thông Minh
 
-### 2.1. Cấp 1: Smallest Scoped Test (Unit / Component)
-* Chạy test thu hẹp đúng file vừa sửa:
+### 2.1. Cấp 1: Smallest Scoped Test (Unit / Component & CodeGraph Smart Selection)
+* **Tự động chọn file test bị ảnh hưởng (Smart Impact Detection via CodeGraph):**
+  ```bash
+  # Tự động tìm các file test bị ảnh hưởng bởi những thay đổi gần nhất:
+  git diff --name-only | codegraph affected --stdin
+  ```
+* Chạy test thu hẹp đúng file vừa sửa hoặc file test được CodeGraph gợi ý:
   ```bash
   npm test -- path/to/changed.test.ts
   ```

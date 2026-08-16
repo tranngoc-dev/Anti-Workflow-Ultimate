@@ -181,6 +181,15 @@ Anh thấy luồng này tự nhiên không? Có chỗ nào thấy lủng củng?
 
 ---
 
+## Giai đoạn 4.5: Khảo Sát Kiến Trúc Kỹ Thuật (Technical Mode - Hybrid Graph) 🆕
+
+Khi dự án đã có sẵn codebase hoặc nâng cấp từ hệ thống cũ:
+* **CodeGraph Framework Routes:** Tự động quét 17 Web Frameworks (`codegraph explore`) để liệt kê toàn bộ API Endpoints ➔ Controller Handlers.
+* **GitNexus Community Clusters:** Quét các cụm nghiệp vụ (`gitnexus status`, `gitnexus context`) để nhận diện ranh giới module (Bounded Contexts) và phát hiện các rủi ro phụ thuộc vòng (circular dependencies).
+* **Mobile / Native Bridges:** Nếu có React Native / iOS, kiểm tra các cầu nối Native Modules (`Expo / Fabric / TurboModules / Swift-ObjC`).
+
+---
+
 ## Giai đoạn 5: Quy Tắc Kiểm Tra (Acceptance Criteria)
 
 ### 5.1. Giải thích đơn giản
