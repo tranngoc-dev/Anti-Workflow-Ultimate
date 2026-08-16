@@ -1,11 +1,11 @@
 ---
-description: 💻 Thực thi viết code theo chuẩn TDD & Cổng E2E Bắt Buộc
+description: 💻 Thực thi viết code theo chuẩn Smart TDD & Cổng Targeted E2E
 ---
 
-# WORKFLOW: /code - Cỗ Máy Lập Trình Subagent TDD & Cổng E2E Bắt Buộc
+# WORKFLOW: /code - Cỗ Máy Lập Trình Subagent TDD & Cổng Kiểm Thử Thông Minh
 
 **Vai trò:** Senior Technical Lead & Subagent Controller (Tuấn)  
-**Mục tiêu:** Thực thi kế hoạch lập trình tự trị bằng Subagents, cô lập nhánh qua Git Worktree, ép kỷ luật Strict TDD (RED-GREEN-REFACTOR) và **bắt buộc vượt qua Cổng Test E2E Thật Sự (E2E Pass-to-Proceed Gate)** trước khi chuyển sang task tiếp theo.
+**Mục tiêu:** Thực thi kế hoạch lập trình tự trị bằng Subagents, cô lập nhánh qua Git Worktree, áp dụng **Smart TDD (Smallest Scoped Test cho từng task $< 2$s)** và **Targeted E2E Smoke Test (có auto-cleanup tiến trình)** khi hoàn thành Feature.
 
 ---
 
@@ -14,7 +14,7 @@ description: 💻 Thực thi viết code theo chuẩn TDD & Cổng E2E Bắt Bu�
 ```
 [/plan] ➔ [MODULAR HANDOVER]
    ↓
-[/code] ← BẠN ĐANG Ở ĐÂY (Subagents TDD + CỔNG TEST E2E THẬT SỰ)
+[/code] ← BẠN ĐANG Ở ĐÂY (Smart TDD + CỔNG TARGETED E2E)
    ↓
 [/review] (Task Reviewer 2 Lớp + GitNexus AST Shape Check)
    ↓
@@ -37,49 +37,44 @@ description: 💻 Thực thi viết code theo chuẩn TDD & Cổng E2E Bắt Bu�
 
 ---
 
-## Giai đoạn 1: Điều Phối Subagent & Vòng Lặp TDD + E2E Gate
+## Giai đoạn 1: Điều Phối Subagent & Vòng Lặp Smart TDD
 
-Áp dụng quy trình **4 Bước Bắt Buộc Mỗi Task (RED ➔ GREEN ➔ REFACTOR ➔ E2E GATE)**:
+Áp dụng quy tắc **Kim Tự Tháp Kiểm Thử (Test Pyramid)** trong từng Task:
 
 ```mermaid
 flowchart TD
     A["Đọc Task N từ Plan File (task-brief)"] --> B["Dispatch Implementer Subagent"]
-    B --> C["1. RED: Viết Unit Test Fail"]
+    B --> C["1. RED: Viết Smallest Scoped Unit Test Fail (< 1s)"]
     C --> D["2. GREEN: Viết Code tối thiểu để Unit Test Pass"]
     D --> E["3. REFACTOR: Tối ưu code & Thêm Explicit FK Hints"]
-    E --> F["🚨 4. CỔNG TEST E2E THẬT SỰ (E2E GATE)"]
-    F --> G["Khởi chạy Server & Chạy Playwright / Real API Test"]
-    G --> H{"E2E Pass 100% & 0 Lỗi Network $\ge 400$?"}
-    H -->|❌ FAIL| I["Khóa lại ➔ Vào Fix Loop (Tối đa 5 lần)"]
-    I --> B
-    H -->|✅ PASS| J["Cổng Guardrail pre-commit duyệt Commit"]
-    J --> K["Dispatch Task Reviewer Subagent (Spec + Quality)"]
-    K --> L["Đánh dấu Task Xong ➔ Chuyển Task tiếp theo"]
+    E --> F{"Đã xong toàn bộ Tasks của Feature?"}
+    F -->|Chưa xong| G["Commit Task N qua Guardrail ➔ Làm tiếp Task N+1"]
+    G --> A
+    F -->|Đã xong hết| H["🚨 4. CỔNG TARGETED E2E SMOKE TEST"]
+    H --> I["Chạy Server ngầm + Playwright / API Probe (Timeout 30s)"]
+    I --> J["Tự động Kill Background Process (Auto-Cleanup)"]
+    J --> K{"E2E Pass 100% & 0 Lỗi Network $\ge 400$?"}
+    K -->|❌ FAIL| L["Vào Fix Loop (Tối đa 3 lần, Failed-First-Fix)"]
+    L --> B
+    K -->|✅ PASS| M["Dispatch Task Reviewer Subagent (Spec + Quality)"]
 ```
 
 ---
 
-## Giai đoạn 2: Chi Tiết Thực Thi Cổng E2E Bắt Buộc (E2E Verification)
+## Giai đoạn 2: Chi Tiết Cổng Targeted E2E & Bảo Vệ Tiến Trình (Process Guard)
 
-Sau khi code đã pass Unit Test, AI **tự động thực hiện**:
+Khi toàn bộ tasks của Feature đã hoàn thành, AI thực hiện bước nghiệm thu:
 
-1. **Khởi động server cục bộ:**
-   * Kích hoạt dev server ở chế độ background: `npm run dev` (hoặc API server).
-2. **Chạy kịch bản E2E Test tương ứng với Task vừa làm:**
-   * Sử dụng **Playwright / Headless Browser** hoặc **API Integration Probe**:
-     ```bash
-     # Web UI E2E
-     npx playwright test tests/e2e/{feature}.spec.ts
-     # hoặc API E2E
-     npm run test:e2e
-     ```
-3. **Tiêu Chí Đạt Cổng E2E (E2E Acceptance Criteria):**
-   * ✅ Trình duyệt load trang thành công, DOM render đúng dữ liệu từ Database.
-   * ✅ Các thao tác Click, Input, Submit form hoạt động trơn tru.
-   * ✅ **Zero Network Errors:** Không có bất kỳ request API nào trả về HTTP status $\ge 400$ (bắt dính ngay lỗi PostgREST Ambiguous Foreign Key hay CORS).
-   * ✅ Browser Console hoàn toàn sạch (0 Uncaught Exceptions).
-
-> ⚠️ **QUY TẮC BẤT BIẾN:** Nếu E2E Test bị FAIL hoặc ném lỗi 400/500, AI **tuyệt đối không được chuyển sang task tiếp theo**. Phải sửa dứt điểm lỗi E2E cho đến khi PASS 100%.
+1. **Chỉ Test Đúng Tính Năng Vừa Làm (Targeted E2E):**
+   * Không chạy lại toàn bộ test suite khổng lồ của cả hệ thống. Chỉ chạy kịch bản E2E kiểm tra đúng màn hình/API vừa phát triển.
+   * **Quy tắc Smart Test:** Chỉ test logic nghiệp vụ của ứng dụng, không test lại framework/database primitives (như trùng UUID hay ACID isolation).
+2. **Kiểm soát Timeout & Tự Động Dọn Dẹp Tiến Trình (Process Guard):**
+   * Thiết lập **Hard Timeout (30s)** cho kịch bản E2E.
+   * **Bắt buộc Cleanup:** Dù test PASS hay FAIL, script phải tự động kill dev server và headless chrome, không để lại tiến trình ma gây ngốn CPU/RAM.
+3. **Tiêu Chí Đạt Cổng E2E (Acceptance Criteria):**
+   * ✅ DOM render đúng dữ liệu từ Database.
+   * ✅ **Zero Network Errors:** Không có bất kỳ request API nào trả về HTTP status $\ge 400$ (bắt dính lỗi Ambiguous FK hay CORS).
+   * ✅ Browser Console sạch (0 Uncaught Exceptions).
 
 ---
 
@@ -94,10 +89,10 @@ Nếu một lần fix E2E thất bại:
 
 ## Giai đoạn 4: Đóng Gói Checkpoint & Handover Phase Tiếp Theo
 
-Khi toàn bộ tasks trong Phase hoàn thành và **100% E2E tests đều PASS**:
+Khi toàn bộ Feature hoàn thành và **Targeted E2E đã PASS**:
 1. Append vào `.brain/session_log.txt`:
    ```
-   [HH:MM] PHASE_COMPLETE: {phase_name} (All {N} tasks passed, E2E Verified ✅)
+   [HH:MM] FEATURE_COMPLETE: {feature_name} (All tasks passed, Targeted E2E Verified ✅)
    ```
 2. Cập nhật `.brain/session.json`.
 3. Chạy `npx gitnexus analyze` để cập nhật lại đồ thị quan hệ codebase.
@@ -106,12 +101,12 @@ Khi toàn bộ tasks trong Phase hoàn thành và **100% E2E tests đều PASS**
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎉 PHASE {X} ĐÃ HOÀN THÀNH XUẤT SẮC!
+🎉 FEATURE {X} ĐÃ HOÀN THÀNH XUẤT SẮC!
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ Tasks: {N}/{N} tasks hoàn thành
-✅ Unit Tests: 100% Passed
-🌐 E2E Tests: 100% Passed (Đã xác thực hành vi thật trên trình duyệt & Database)
+✅ Tasks: {N}/{N} tasks hoàn thành (Smart TDD Unit Tests $< 1$s)
+🌐 Targeted E2E: PASSED (Đã xác thực hành vi thật trên trình duyệt & Database)
+🧹 Tiến trình: Đã dọn dẹp sạch sẽ (CPU/RAM mát rượi)
 📁 Files: {số files tạo mới/chỉnh sửa}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

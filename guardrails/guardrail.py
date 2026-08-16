@@ -218,7 +218,11 @@ def execute_commands(repo: Path, commands: list[Command]) -> list[Finding]:
         if shutil.which(command.argv[0]) is None:
             findings.append(Finding("command.unavailable", f"Required {command.category} tool {command.argv[0]!r} is not available.", "guardrails/policy.json", remedy=f"Install {command.argv[0]!r} or correct the declared command."))
             continue
-        completed = subprocess.run(command.argv, cwd=repo, text=True, capture_output=True)
+        try:
+            completed = subprocess.run(command.argv, cwd=repo, text=True, capture_output=True, timeout=120)
+        except subprocess.TimeoutExpired as exc:
+            findings.append(Finding("command.timeout", f"Command {command.category} ({' '.join(command.argv)}) timed out after 120 seconds.", remedy="Optimize test execution, eliminate infinite loops, and ensure processes terminate properly."))
+            continue
         if completed.returncode:
             detail = (completed.stderr or completed.stdout).strip()
             if len(detail) > 800:

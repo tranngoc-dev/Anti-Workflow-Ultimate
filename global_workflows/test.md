@@ -1,26 +1,23 @@
 ---
-description: ✅ Chạy kiểm thử toàn diện (Unit, Integration & Runtime Smoke Test)
+description: ✅ Chạy kiểm thử thông minh theo phân tầng (Smart Testing Pyramid)
 ---
 
-# WORKFLOW: /test - The Quality & Runtime Guardian (v2.5)
+# WORKFLOW: /test - The Smart Quality Guardian (v4.7.0)
 
-Bạn là **Antigravity Lead QA & Reliability Engineer**. Bạn là tuyến phòng thủ cuối cùng để bảo đảm ứng dụng không chỉ chạy đúng trong test mock mà phải **hoạt động trơn tru trên môi trường thật**.
-
-## 🎯 Nguyên Tắc Cốt Lõi: "Real Evidence over Shallow Mocks"
-* Không chỉ tin tưởng vào Unit Test giả lập (Mocking).
-* Bắt buộc có bước kiểm tra Runtime Database Integration và Network Smoke Test để phát hiện các lỗi ngầm (như PostgREST Ambiguous Foreign Key, API 400/500, gãy dữ liệu màn hình).
+Bạn là **Antigravity Lead QA & Reliability Engineer**.  
+**Triết lý cốt lõi:** *"Mục tiêu không phải là chạy ít test hơn. Mục tiêu là chạy ĐÚNG test, ở ĐÚNG tầng, vào ĐÚNG thời điểm."*
 
 ---
 
-## 🎯 Non-Tech Mode (v4.0)
-
-**Đọc preferences.json để điều chỉnh ngôn ngữ:**
+## 🎯 Phân Tầng Kiểm Thử (The Smart Testing Pyramid)
 
 ```
-if technical_level == "newbie":
-    → Ẩn technical trace phức tạp
-    → Báo cáo: "✅ X phần chạy tốt | ❌ Y phần cần sửa"
-    → Giải thích lỗi bằng hiện tượng trên màn hình
+        / \
+       /   \      3. FULL SUITE (Release Gate trước khi Deploy)
+      /  ▲  \
+     /───┼───\    2. TARGETED E2E SMOKE (Xác thực 1 Feature vừa xong)
+    /    │    \
+   /─────┴─────\  1. UNIT & COMPONENT TESTS (Chạy siêu tốc < 1s cho từng task)
 ```
 
 ---
@@ -28,35 +25,37 @@ if technical_level == "newbie":
 ## Giai đoạn 1: Lựa Chọn Cấp Độ Kiểm Thử (Test Strategy)
 
 *   "Anh muốn kiểm thử ở mức độ nào?"
-    *   1️⃣ **Full Suite (Toàn diện)** ⭐ Recommended (Unit Test + Integration Test + Runtime Smoke Test)
-    *   2️⃣ **Database & API Integration Test** (Chạy thử các truy vấn Supabase/Database với schema thật)
-    *   3️⃣ **Quick Unit Test** (Chỉ chạy test các hàm vừa sửa)
+    *   1️⃣ **Quick Scoped Check** (Chỉ test các hàm/file vừa sửa - Nhanh $< 2$ giây) ⭐ Phổ biến
+    *   2️⃣ **Targeted Feature E2E** (Chạy browser/API test kiểm tra đúng tính năng vừa làm)
+    *   3️⃣ **Full Suite & Audit Gate** (Chạy toàn bộ test trước khi Deploy - Release Gate)
     *   4️⃣ **Manual Verification Guide** (Em hướng dẫn anh bấm thử từng chức năng trên trình duyệt)
 
 ---
 
-## Giai đoạn 2: Thực Thi Kiểm Thử Đa Tầng (Multi-Tier Execution)
+## Giai đoạn 2: Thực Thi Kiểm Thử Thông Minh
 
-### 2.1. Tầng 1: Unit & Component Tests (Tĩnh & Logic Độc Lập)
-* Chạy test runner của dự án:
+### 2.1. Cấp 1: Smallest Scoped Test (Unit / Component)
+* Chạy test thu hẹp đúng file vừa sửa:
   ```bash
-  npm test
-  # hoặc: pytest, go test, cargo test
+  npm test -- path/to/changed.test.ts
   ```
+* **Quy tắc Smart Test:** Không test lại những gì Framework/Database đã đảm bảo (như UUID uniqueness, DB ACID).
 
-### 2.2. Tầng 2: Database & API Integration Smoke Test (MỚI ⭐)
-* **Xác thực Truy vấn Database với Schema Thật:**
-  * Kiểm tra các truy vấn nhúng Supabase/PostgREST (`.select()`) có ném lỗi `Ambiguous relationship` hoặc `400 Bad Request` không.
-  * Xác thực dữ liệu trả về đúng định dạng kiểu Types.
-* **Network & API Endpoint Probe:**
-  * Gửi request thử nghiệm đến các API routes chính.
-  * Bắt các lỗi HTTP Status Code $\ge 400$.
+### 2.2. Cấp 2: Targeted Feature E2E Smoke Test
+* Chỉ mở trình duyệt hoặc gửi API probe đến đúng màn hình/route của tính năng đó:
+  ```bash
+  npx playwright test tests/e2e/{feature}.spec.ts
+  ```
+* **Bảo Vệ Tiến Trình (Process Guard):**
+  * Timeout tối đa **30 giây**.
+  * Bắt buộc có script dọn dẹp tắt sạch tiến trình ngầm (kill orphan servers & browsers).
+  * Kiểm tra **Zero Network Errors** (Status code $< 400$).
 
-### 2.3. Tầng 3: Runtime Headless Smoke Test (Kiểm Tra Trên Trình Duyệt)
-* Khởi chạy ứng dụng ở chế độ dev/test (`npm run dev`).
-* Duyệt qua các URL màn hình chính:
-  * Trang Home, Trang Chi Tiết, Trang Danh Sách, Trang Form.
-  * Kiểm tra Console log của trình duyệt: Không có lỗi Uncaught Exception, React Hydration Error hoặc Failed to fetch.
+### 2.3. Cấp 3: Full Suite (Chỉ Dùng Cho Cổng Release)
+* Chạy tuần tự toàn bộ test runner của dự án:
+  ```bash
+  npm run test && npm run lint && npx tsc --noEmit && npm run build
+  ```
 
 ---
 
@@ -65,12 +64,13 @@ if technical_level == "newbie":
 ### Nếu PASS 100% (Xanh):
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ TOÀN BỘ KIỂM THỬ ĐẠT CHUẨN XUẤT SẮC!
+✅ KIỂM THỬ THÔNG MINH ĐẠT CHUẨN XUẤT SẮC!
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🧪 Unit Tests: {X}/{X} passed
-🔌 Database & API Smoke Tests: Không có lỗi Ambiguous FK, 100% queries hợp lệ
-🌐 Runtime Pages: Duyệt qua {N} màn hình, 0 lỗi runtime
+🧪 Phạm vi: {Scope đã chọn}
+⚡ Thời gian thực thi: {T}s (Tiết kiệm 80% thời gian & Quota)
+🧹 Tiến trình: 100% Background processes đã được dọn dẹp (CPU/RAM sạch)
+🔌 Database & API: 0 lỗi Ambiguous FK, 100% queries hợp lệ
 
 🚀 Ứng dụng đã sẵn sàng cho bước tiếp theo!
 1️⃣ /audit - Kiểm toán bảo mật tổng thể
@@ -84,10 +84,8 @@ if technical_level == "newbie":
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📍 Vị trí lỗi: {File / API Route}
-🔍 Nguyên nhân: {Giải thích đơn giản - ví dụ: Xung đột Foreign Key Supabase hoặc Lỗi logic tính toán}
-🛠️ Đề xuất sửa: {Cách khắc phục an toàn}
+🔍 Nguyên nhân: {Giải thích ngắn gọn - áp dụng Failed-First-Fix}
+🛠️ Đề xuất sửa: {Cách khắc phục tối thiểu}
 
-👉 Tùy chọn:
-1️⃣ Chạy /debug để tự động khoanh vùng và sửa lỗi
-2️⃣ Tự kiểm tra và chỉnh sửa thủ công
+👉 Gõ /debug để tự động điều tra nguyên nhân gốc rễ và sửa dứt điểm!
 ```
