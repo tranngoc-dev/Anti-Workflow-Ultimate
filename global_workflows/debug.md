@@ -1,11 +1,11 @@
 ---
-description: 🐛 Sửa lỗi theo phương pháp Điều tra Gốc rễ, Cổng E2E & Tự động Đúc kết Bài học
+description: 🐛 Sửa lỗi theo phân loại lỗi hệ thống, Cổng E2E, Sổ cái bằng chứng & Tự động Đúc kết Bài học
 ---
 
-# WORKFLOW: /debug - Sửa Lỗi Khoa Học, Cổng E2E & Tự Động Học Hỏi (v4.8.0)
+# WORKFLOW: /debug - Sửa Lỗi Khoa Học & Phân Loại Lỗi Hệ Thống (v4.9.0)
 
-**Vai trò:** Root-Cause Investigator & Continuous Learning Lead  
-**Mục tiêu:** Định vị chính xác nguyên nhân gốc rễ (Root Cause) bằng chứng cứ qua **GitNexus Trace**, bắt buộc viết kịch bản E2E tái hiện lỗi, bắt buộc E2E PASS THỰC TẾ mới được coi là sửa xong, và **TỰ ĐỘNG ĐÚC KẾT BÀI HỌC VÀO BỘ NHỚ VĨNH CỬU (`.brain/learnings.md`)**.
+**Vai trò:** Root-Cause Investigator & Reliability Lead  
+**Mục tiêu:** Phân loại lỗi chính xác (Transient vs Deterministic), định vị nguyên nhân gốc rễ qua **GitNexus Trace**, bắt buộc viết kịch bản E2E tái hiện lỗi, ghi bằng chứng vào **Sổ Cái Kiểm Thử (`.brain/verification_ledger.json`)**, và **TỰ ĐỘNG ĐÚC KẾT BÀI HỌC HOẶC TỔNG HỢP SKILL MỚI**.
 
 ---
 
@@ -14,91 +14,96 @@ description: 🐛 Sửa lỗi theo phương pháp Điều tra Gốc rễ, Cổng
 ```
 Khi phát hiện Bug trong [/code], [/test], E2E Gate hoặc Live-Test
    ↓
-[/debug] ← BẠN ĐANG Ở ĐÂY (4 Phase Debugging ➔ E2E Gate ➔ Phase 5: Auto-Reflection)
+[/debug] ← BẠN ĐANG Ở ĐÂY
+   ├── Phase A: Phân loại lỗi (Transient vs Deterministic)
+   ├── Phase B: Khóa lỗi bằng Targeted E2E Test (FAIL)
+   ├── Phase C: Sửa tối thiểu & Failed-First-Fix
+   ├── Phase D: Xác minh E2E & Ghi sổ cái (.brain/verification_ledger.json)
+   └── Phase E: Tự động đúc kết (.brain/learnings.md & Custom Skill)
    ↓
-Tự động lưu vào .brain/learnings.md ➔ Tiếp tục [/code] hoặc [/test]
+Tiếp tục [/code] hoặc [/test]
 ```
 
 ---
 
-## Giai đoạn 1: Tái Hiện & Lập Giả Thuyết (Phase A - Investigate)
+## Giai đoạn 1: Phân Loại Lỗi & Truy Vết Gốc Rễ (Phase A - Investigate)
 
-1. **Tái hiện triệu chứng lỗi:**
-   * Thu thập log lỗi, input gây lỗi, request API trả về status code $\ge 400$, hoặc ảnh chụp màn hình lỗi.
-2. **Truy vết chuỗi gọi qua GitNexus:**
-   * Sử dụng công cụ `gitnexus:trace` để tìm đường dẫn gọi giữa hàm phát sinh lỗi và nguồn dữ liệu đầu vào.
-   * Sử dụng `gitnexus:impact` để kiểm tra các hàm/module liên đới.
-3. **Hình thành tối đa 3 giả thuyết xếp hạng:**
-   * Đưa ra nguyên nhân khả dĩ nhất và chứng minh bằng log runtime hoặc debug tracer.
-   * **CẤM:** Tuyệt đối không thay đổi mã nguồn production trong giai đoạn này.
+### 🔹 1.1. Phân loại lỗi theo Taxonomy (Học hỏi từ Hermes):
+* **Nhóm 1: Lỗi tạm thời (Transient Errors):**
+  * *Triệu chứng:* Timeout kết nối, HTTP 503 Overloaded, HTTP 429 Rate limit.
+  * *Hành động:* Tự động kích hoạt Exponential Backoff & Retry (tối đa 3 lần).
+* **Nhóm 2: Lỗi hệ thống / Logic (Deterministic Errors):**
+  * *Triệu chứng:* HTTP 400 Bad Request, Ambiguous Foreign Key PostgREST, Lỗi cú pháp/Type, Lỗi Logic, HTTP 401/403.
+  * *Hành động:* **CẤM RETRY MÙ QUÁNG.** Dừng ngay lập tức để điều tra nguyên nhân cốt lõi.
+
+### 🔹 1.2. Truy vết chuỗi gọi qua GitNexus:
+* Dùng `gitnexus:trace` để tìm đường dẫn gọi giữa điểm nổ lỗi và nguồn input.
+* Dùng `gitnexus:impact` để liệt kê toàn bộ các component/hàm liên đới.
+* Hình thành tối đa 3 giả thuyết xếp hạng được chứng minh bằng log runtime.
 
 ---
 
 ## Giai đoạn 2: Khóa Lỗi Bằng Kịch Bản Test E2E Thật (Phase B - Lock Regression)
 
-* Viết một **Kịch bản E2E Test (Playwright / API Integration Probe)** tái hiện chính xác thao tác của người dùng dẫn đến lỗi:
-  * Ví dụ: Mở trang `/questions/123` $\to$ Gửi request embed query $\to$ Chứng minh lỗi PostgREST 400 Ambiguous FK xuất hiện (Test FAIL).
-* Tuyệt đối không dùng Unit Test mock để tái hiện lỗi nếu lỗi đó phát sinh từ tầng giao tiếp Database / API.
+* Viết một **Kịch bản Targeted E2E Test (Playwright / API Integration Probe)** tái hiện chính xác thao tác gây lỗi:
+  * Ví dụ: Gọi query embed `questions` $\to$ Chứng minh lỗi PostgREST 400 Ambiguous FK xuất hiện (**Test FAIL**).
+* Tuyệt đối không dùng Unit Test mock để tái hiện lỗi liên quan đến Database/API.
 
 ---
 
 ## Giai đoạn 3: Thực Thi Bản Vá Tối Thiểu (Phase C - Minimal Fix)
 
-* Sửa đúng các file/hàm liên quan trực tiếp đến root cause đã được chứng minh (ví dụ: thêm explicit FK hint `profiles!author_id(...)`).
-* Không refactor diện rộng, không thêm thư viện mới, không tạo các nhánh fallback che giấu lỗi.
+* Sửa đúng các file/hàm liên quan trực tiếp đến root cause (ví dụ: thêm explicit FK hint `profiles!author_id(...)`).
+* Tuân thủ nguyên tắc "Thay đổi tối thiểu (Minimal Change Principle)".
 
 ### 🚨 QUY TẮC BẮT BUỘC: Failed-First-Fix Rule
-Nếu bản vá đầu tiên không giải quyết được lỗi hoặc làm hỏng test khác:
-1. **DỪNG LẠI NGAY LẬP TỨC.**
-2. Revert bản vá thử nghiệm về trạng thái ban đầu.
-3. Quay lại Giai đoạn 1 với bằng chứng mới thu thập được.
-4. **CẤM:** Không được đắp thêm bản vá suy đoán thứ 2, thứ 3 chồng lên bản vá hỏng.
+Nếu bản vá đầu tiên không pass hoặc làm gãy test khác:
+1. **DỪNG LẠI NGAY LẬP TỨC.** Rollback về trạng thái ban đầu.
+2. Quay lại Giai đoạn 1 với bằng chứng mới.
+3. **CẤM:** Không được đắp thêm bản vá suy đoán thứ 2, thứ 3 chồng lên bản vá hỏng.
 
 ---
 
-## Giai đoạn 4: Xác Minh Qua Cổng E2E Bắt Buộc (Phase D - E2E Verification Gate)
+## Giai đoạn 4: Xác Minh Qua Cổng E2E & Ghi Sổ Cái Bằng Chứng (Phase D)
 
 1. **Chạy Lại Kịch Bản E2E Test:**
-   * Khởi động server và chạy lại kịch bản E2E vừa viết ở Giai đoạn 2 (Timeout 30s).
-   * **Yêu cầu:** Test phải chuyển từ **FAIL ➔ PASS 100%**.
-2. **Kiểm tra Zero Network Errors:**
-   * Xác nhận request API trả về status code `200 OK`, không còn lỗi 400 Ambiguous FK hay 500.
-   * Xác nhận dữ liệu hiển thị hoàn hảo trên DOM.
-3. **Chạy Toàn Bộ Test Suite & Dọn Dẹp Tiến Trình:**
-   * Chạy lại test suite để đảm bảo không phát sinh regression.
-   * Xóa bỏ debug markers (`DEBUG_ONLY`, `console.log`).
-   * Tắt toàn bộ background test processes (Process Guard).
+   * Khởi động server và chạy lại kịch bản E2E (Timeout 30s).
+   * **Yêu cầu:** Test chuyển từ **FAIL ➔ PASS 100%**, Zero Network Status $\ge 400$.
+2. **Ghi nhận vào Sổ Cái Bằng Chứng (`.brain/verification_ledger.json`):**
+   ```json
+   {
+     "type": "bugfix_verification",
+     "bug_id": "{BUG_ID}",
+     "command": "npx playwright test tests/e2e/{bug_spec}.spec.ts",
+     "status": "PASSED",
+     "exit_code": 0,
+     "timestamp": "{ISO_UTC_TIMESTAMP}"
+   }
+   ```
+3. **Chạy Test Suite & Dọn dẹp tiến trình (Process Guard):**
+   * Tắt toàn bộ dev server và headless chrome ngầm.
 4. **Commit thay đổi qua cổng kiểm tra `guardrails/hooks/pre-commit`.**
 
 ---
 
-## Giai đoạn 5: Tự Động Học Hỏi & Đúc Kết Bài Học (Phase E - Auto-Reflection) ⭐ MỚI
+## Giai đoạn 5: Tự Động Học Hỏi & Tổng Hợp Kỹ Năng (Phase E - Auto-Reflection & Skill Synthesis)
 
-Ngay sau khi commit thành công, AI **TỰ ĐỘNG** thực hiện các bước sau mà không cần người dùng nhắc:
+Ngay sau khi commit thành công, AI **TỰ ĐỘNG** thực hiện:
 
 1. **Tạo / Append vào file `.brain/learnings.md`:**
    ```markdown
    ### 📝 [LEARNING-{YYYYMMDD}-{INDEX}] {Tên lỗi & Phân loại}
-   - 📍 **Triệu chứng & Mã lỗi:** {Mô tả hiện tượng và error log/HTTP status}
+   - 📍 **Triệu chứng & Phân loại:** {Transient / Deterministic} - {Mã lỗi/HTTP status}
    - 🔍 **Nguyên nhân gốc rễ (Root Cause):** {Bản chất kỹ thuật gây ra lỗi}
    - 💡 **Giải pháp chuẩn (Proven Fix):** {Cách sửa chính xác và an toàn nhất}
    - 🚫 **Anti-Pattern cần tránh:** {Những điều TUYỆT ĐỐI KHÔNG làm trong tương lai}
-   - 🛡️ **Tiến hóa Quy trình:** {Đề xuất rule bổ sung vào AI_CODE_WORKFLOW.md hoặc audit.md nếu là lỗi nghiêm trọng}
+   - 🛡️ **Tiến hóa Quy trình:** {Đề xuất rule bổ sung nếu là lỗi nghiêm trọng}
    ```
 
-2. **Ghi log tiến trình vào `.brain/session_log.txt`:**
-   ```
-   [HH:MM] BUG_RESOLVED_AND_LEARNED: {Tên lỗi} -> Saved to .brain/learnings.md
-   ```
+2. **Tổng Hợp Kỹ Năng Tái Sử Dụng (Autonomous Skill Synthesis - Nếu Cần):**
+   * Nếu giải pháp giải quyết một bài toán kiến trúc lớn có tính tái sử dụng cao $\to$ AI tự động đóng gói thành một file `skills/custom/[skill-name]/SKILL.md` chuẩn `agentskills.io`.
 
-3. **Thông Báo Hoàn Tất Cho Người Dùng:**
+3. **Ghi log tiến trình vào `.brain/session_log.txt`:**
    ```
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🎉 BUG ĐÃ ĐƯỢC KHẮC PHỤC TRIỆT ĐỂ & ĐÚC KẾT BÀI HỌC!
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-   ✅ Nguyên nhân: {Tóm tắt ngắn gọn Root Cause}
-   ✅ Xác minh: E2E Test đã chuyển sang PASS 100% (0 Lỗi Network)
-   🧠 Trí nhớ vĩnh cửu: Đã lưu bài học vào `.brain/learnings.md`
-   🛡️ Hệ thống tự động ghi nhớ để không bao giờ lặp lại lỗi này trong các task sau!
+   [HH:MM] BUG_RESOLVED_AND_LEARNED: {Tên lỗi} -> Logged to .brain/learnings.md & verification_ledger.json
    ```

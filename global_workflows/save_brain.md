@@ -1,11 +1,11 @@
 ---
-description: 🧠 Đóng gói kiến thức dự án & Chuẩn bị Bàn giao Session mới
+description: 🧠 Đóng gói kiến thức dự án, Tổng hợp Custom Skill & Chuẩn bị Bàn giao Session mới
 ---
 
-# WORKFLOW: /save-brain - Đóng Gói Bộ Nhớ Vĩnh Cửu & Handover Checkpoint
+# WORKFLOW: /save-brain - Đóng Gói Bộ Nhớ Vĩnh Cửu & Tổng Hợp Kỹ Năng (v4.9.0)
 
 **Vai trò:** Knowledge Archivist & Eternal Context Manager  
-**Mục tiêu:** Lưu trữ toàn bộ quyết định kiến trúc, bài học kỹ thuật, snapshot tiến độ vào `.brain/`, chuẩn bị dữ liệu tinh gọn cho phiên làm việc tiếp theo.
+**Mục tiêu:** Lưu trữ toàn bộ quyết định kiến trúc, bài học kỹ thuật, sổ cái bằng chứng kiểm thử vào `.brain/`, **tổng hợp Custom Skills tái sử dụng**, và chuẩn bị dữ liệu tinh gọn cho phiên làm việc tiếp theo.
 
 ---
 
@@ -14,7 +14,7 @@ description: 🧠 Đóng gói kiến thức dự án & Chuẩn bị Bàn giao Se
 ```
 Sau khi hoàn thành [/init], [/plan], hoặc 1 Phase trong [/code]
    ↓
-[/save-brain] ← BẠN ĐANG Ở ĐÂY (Đóng gói Eternal Context)
+[/save-brain] ← BẠN ĐANG Ở ĐÂY (Đóng gói Eternal Context & Custom Skills)
    ↓
 🔄 [MỞ CHAT SESSION MỚI ➔ Gõ /recap]
 ```
@@ -24,11 +24,15 @@ Sau khi hoàn thành [/init], [/plan], hoặc 1 Phase trong [/code]
 ## Giai đoạn 1: Thu Thập & Đóng Gói Dữ Liệu
 
 1. **Ghi nhận Quyết định Kỹ thuật (Decisions):**
-   * Công nghệ mới chọn lựa, lý do tại sao chọn (Trade-offs).
-2. **Cập nhật Tiến độ & Checkpoint:**
+   * Công nghệ mới chọn lựa, lý do tại sao chọn (Trade-offs) lưu vào `.brain/decisions.json`.
+2. **Tổng Hợp Custom Skills Tái Sử Dụng (Autonomous Skill Synthesis):** ⭐ MỚI
+   * Rà soát các bài toán phức tạp vừa giải quyết trong Phase vừa qua.
+   * Nếu có một module hoặc kỹ thuật đặc thù có giá trị tái sử dụng cao cho tương lai $\to$ Tự động trích xuất thành file `skills/custom/[skill-name]/SKILL.md` theo chuẩn mở `agentskills.io`.
+3. **Cập nhật Tiến độ & Checkpoint:**
    * Ghi nhận trạng thái hoàn thành của Phase hiện tại vào `.brain/session.json`.
    * Ghi nhận các file đã thay đổi, commit hash gần nhất vào `.brain/session_log.txt`.
-3. **Tạo Snapshot Bàn giao (Handover Snapshot):**
+   * Đồng bộ Sổ Cái Bằng Chứng Kiểm Thử `.brain/verification_ledger.json`.
+4. **Tạo Snapshot Bàn giao (Handover Snapshot):**
    * Lưu snapshot tóm tắt vào `.brain/handovers/handover-phase-{X}.json`.
 
 ---
@@ -37,11 +41,13 @@ Sau khi hoàn thành [/init], [/plan], hoặc 1 Phase trong [/code]
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🧠 BỘ NHỚ VĨNH CỬU ĐÃ ĐƯỢC LƯU AN TOÀN!
+🧠 BỘ NHỚ VĨNH CỬU & SKILLS ĐÃ ĐƯỢC LƯU AN TOÀN!
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📁 Trạng thái: .brain/session.json (Updated)
 📝 Tiến độ: .brain/session_log.txt (Logged)
+📜 Sổ cái kiểm thử: .brain/verification_ledger.json (Synchronized)
+🧠 Bài học kinh nghiệm: .brain/learnings.md ({N} learnings active)
 📦 Snapshot bàn giao: .brain/handovers/handover-latest.json
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

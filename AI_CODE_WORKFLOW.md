@@ -54,25 +54,30 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
      * Mọi lệnh khởi chạy server thử nghiệm hoặc headless browser **bắt buộc có Hard Timeout (30s cho E2E, 120s cho initial build)**.
      * Khi test kết thúc (dù PASS hay FAIL), script **bắt buộc phải tự động Kill toàn bộ background process** (server ngầm, headless chrome), tuyệt đối không để rò rỉ tiến trình làm ngốn CPU và RAM.
    * **5. Chạy tuần tự mặc định (Sequential Execution):** Không spawn hàng chục worker song song cướp tài nguyên máy.
-   * **6. Zero Network / Runtime Errors:** Trong kịch bản Targeted E2E, bất kỳ API nào trả về HTTP status $\ge 400$ (Ambiguous FK, CORS, 500) đều tính là FAIL.
-   * **7. Không hạ tiêu chuẩn test:** Tuyệt đối không làm suy yếu assertion hoặc xóa test chỉ để cho CI xanh.
-5. **Quy Chuẩn Toàn Vẹn Cơ Sở Dữ Liệu & Explicit FK Hints (Database & PostgREST Integrity Policy):**
+   * **6. Sổ Cái Bằng Chứng Kiểm Thử (Verification Evidence Ledger):** ⭐ MỚI (Học hỏi từ Hermes)
+     * Kết quả kiểm thử được tóm tắt và ghi vào `.brain/verification_ledger.json` (TaskID, Command, Status, ExitCode, ErrorCount). **Tuyệt đối không dump hàng trăm dòng stdout/stderr thô ra chat context** để bảo vệ Token và tránh context rot.
+   * **7. Zero Network / Runtime Errors:** Trong kịch bản Targeted E2E, bất kỳ API nào trả về HTTP status $\ge 400$ (Ambiguous FK, CORS, 500) đều tính là FAIL.
+   * **8. Không hạ tiêu chuẩn test:** Tuyệt đối không làm suy yếu assertion hoặc xóa test chỉ để cho CI xanh.
+5. **⚡ NGUYÊN TẮC BẢO VỆ PROMPT CACHE (SACRED PROMPT CACHING):** ⭐ MỚI (Học hỏi từ Hermes)
+   * Giữ nguyên vẹn tính **byte-stable** cho System Prompts, Core Rules (`GEMINI.md`, `AI_CODE_WORKFLOW.md`), và Tool Schemas trên mọi lượt chat.
+   * Tuyệt đối không thay đổi ngẫu nhiên cấu trúc prompt tiền tố giữa các turn hội thoại, giúp LLM (Gemini, Claude, OpenAI) kích hoạt **Prompt Caching đạt 90%+**, tiết kiệm 70–85% chi phí token và tăng tốc độ phản hồi tối đa.
+6. **Quy Chuẩn Toàn Vẹn Cơ Sở Dữ Liệu & Explicit FK Hints (Database & PostgREST Integrity Policy):**
    * **Bắt buộc Explicit FK Hint:** Khi viết truy vấn Supabase / PostgREST nhúng (Embedded Query), **LUÔN LUÔN** chỉ định rõ Foreign Key Constraint (ví dụ: `supabase.from('questions').select('*, profiles!author_id(*)')`), **tuyệt đối không dùng dạng ngầm định `profiles(*)`** khi bảng đích có $>1$ Foreign Key.
    * **Database Migration Impact Analysis:** Mỗi khi tạo bảng mới hoặc sửa Foreign Key trong SQL $\to$ **BẮT BUỘC** quét lại toàn bộ file gọi API trong codebase để phát hiện và sửa các câu query embed bị ảnh hưởng.
-6. **Quy tắc Sửa lỗi Lần đầu Thất bại (Failed-First-Fix Rule):**
-   * Khi fix bug, phải tìm ra nguyên nhân gốc rễ (Root Cause) bằng chứng cứ (`systematic-debugging` + `gitnexus trace`).
-   * Phải viết kịch bản test nhỏ tái hiện chính xác lỗi trước khi sửa.
+7. **Phân Loại Lỗi Có Hệ Thống & Sửa Lỗi Lần Đầu Thất Bại (Error Classification & Failed-First-Fix):** ⭐ MỚI
+   * **Lỗi tạm thời (Transient Errors - 503, 429, Network Timeout):** Tự động retry với Exponential Backoff (tối đa 3 lần).
+   * **Lỗi xác định (Deterministic Errors - Ambiguous FK, Logic, Type Error, 400, 401/403):** **CẤM retry mù quáng.** Dừng lại ngay lập tức, dùng `gitnexus trace` để tìm nguyên nhân gốc rễ và sửa code có bằng chứng.
    * Nếu lần sửa đầu tiên thất bại $\to$ **DỪNG LẠI NGAY LẬP TỨC**, rollback thay đổi và quay lại bước điều tra. Cấm đắp thêm các tầng vá lỗi suy đoán (speculative patching) hoặc fallback che giấu lỗi.
-7. **🧠 HỌC HỎI VÀ TIẾN HÓA LIÊN TỤC SAU MỖI BUG FIX (CONTINUOUS LEARNING & REFLECTION):** ⭐ MỚI
-   * **Tự động trích xuất bài học:** Sau mỗi lần fix bug thành công và E2E pass trong `/debug`, AI **bắt buộc phải tự động đúc kết nguyên nhân, giải pháp chuẩn và anti-pattern vào `.brain/learnings.md`**.
+8. **🧠 HỌC HỎI, ĐÚC KẾT & TỔNG HỢP KỸ NĂNG (CONTINUOUS LEARNING & SKILL SYNTHESIS):** ⭐ MỚI
+   * **Tự động trích xuất bài học:** Sau mỗi lần fix bug thành công và E2E pass trong `/debug`, AI tự động đúc kết nguyên nhân, giải pháp chuẩn và anti-pattern vào `.brain/learnings.md`.
+   * **Đóng gói Kỹ năng Tái sử dụng (Autonomous Skill Synthesis):** Nếu giải pháp đại diện cho một kỹ thuật phức tạp có tính tái sử dụng cao, AI tự động đóng gói thành file `skills/custom/[skill-name]/SKILL.md` chuẩn `agentskills.io` để dùng lại cho các dự án sau.
    * **Đối chiếu trước khi lập plan mới:** Trước khi lập `/plan` cho tính năng mới, AI bắt buộc đọc lại `.brain/learnings.md` để không lặp lại lỗi kiến trúc cũ.
-   * **Tiến hóa Guardrail:** Nếu một lỗi nghiêm trọng lặp lại, AI tự động đề xuất đưa rule kiểm tra vào `guardrails/policy.json` và `global_workflows/audit.md`.
-8. **Cổng Gác Vật lý (Strict Physical Guardrails):**
+9. **Cổng Gác Vật lý (Strict Physical Guardrails):**
    * Cài đặt và kích hoạt hook `guardrails/guardrail.py`.
    * Cấm commit trực tiếp lên nhánh được bảo vệ (`main`, `master`).
    * Cấm commit khi chưa vượt qua các kiểm tra thật: `tests`, `lint`, `typecheck`, `build`, và `e2e` (nếu có).
    * Tuyệt đối không dùng `git commit --no-verify` để lách cổng.
-9. **Cổng Triển Khai (Live-Test Deployment Gate):**
+10. **Cổng Triển Khai (Live-Test Deployment Gate):**
    * Tuyệt đối không tự ý deploy lên production khi chưa có sự xác nhận rõ ràng của người dùng sau khi đã kiểm thử trực tiếp (Live-test) và 100% targeted tests đạt chuẩn.
 
 ---
@@ -87,7 +92,7 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
    │                              [Modular Handover / New Session]       ▼
 [/save-brain] ◄── [/deploy] ◄── [/audit] ◄── [/review] ◄── [/code (Smart TDD + E2E)]
    ▲                                                                     │
-   └─────────────── [Tự Động Đúc Kết Bài Học: /debug] ───────────────────┘
+   └─────────────── [Tự Động Đúc Kết Bài Học & Skill: /debug] ───────────┘
 ```
 
 ### 4.1. Giai đoạn 1: Khởi tạo & Cài Guardrail (`/init`)
@@ -109,15 +114,17 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
 * Kích hoạt `using-git-worktrees` tạo nhánh làm việc cô lập.
 * Subagents thực thi Strict TDD trên từng task (Smallest Scoped Unit Test $< 1$–$2$s).
 * Khi xong toàn bộ feature: Chạy **Targeted E2E Smoke Test** (có auto-cleanup process).
+* Cập nhật kết quả vào Sổ cái Bằng chứng `.brain/verification_ledger.json`.
 * Cổng `guardrail.py` tự động thẩm định mỗi commit.
 
 ### 4.6. Giai đoạn 6: Review Độc lập 2 Lớp (`/review`)
 * Task Reviewer kiểm tra Spec Compliance + Code Quality + GitNexus shape check.
 
 ### 4.7. Giai đoạn 7: Xử lý Lỗi Chuyên sâu & Tự Động Đúc Kết Bài Học (`/debug`)
+* Phân loại lỗi (Transient vs Deterministic).
 * Áp dụng `systematic-debugging` 4 bước kết hợp `gitnexus trace`.
 * Viết test tái hiện đúng lỗi $\to$ Fix lỗi $\to$ Chạy lại test E2E chứng minh lỗi đã biến mất.
-* **Tự động lưu bài học vào `.brain/learnings.md`** để không bao giờ lặp lại.
+* **Tự động lưu bài học vào `.brain/learnings.md`** và tổng hợp Custom Skill nếu là kỹ thuật phức tạp.
 
 ### 4.8. Giai đoạn 8: Nghiệm thu, Kiểm toán Toàn vẹn, Triển khai & Lưu Trí nhớ
 * Merge nhánh worktree an toàn (`finishing-a-development-branch`).
