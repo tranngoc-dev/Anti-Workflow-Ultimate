@@ -26,7 +26,7 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
 2. **Quy tắc Bàn giao Session (Handover Checkpoint):**
    * Sau khi hoàn thành một Phase lớn, AI **bắt buộc** xuất thông báo đề xuất người dùng mở Session mới:
      > *"🎉 Phase [X] đã hoàn tất và vượt qua 100% test hợp lệ! Để AI giữ 100% sức mạnh suy luận và không bị tràn bộ nhớ, anh hãy mở một Session Chat mới và gõ `/recap` để bắt đầu Phase tiếp theo."*
-   * Khi mở Session mới và gõ `/recap`, AI áp dụng **Tiered Context Hydration** (chỉ nạp ~800 tokens ngữ cảnh thiết yếu, không nạp lại toàn bộ lịch sử trò chuyện cũ).
+   * Khi mở Session mới và gõ `/recap`, AI áp dụng **Tiered Context Hydration** (chỉ nạp ~800 tokens ngữ cảnh thiết yếu, bao gồm các bài học kinh nghiệm từ `.brain/learnings.md`).
 
 ---
 
@@ -40,7 +40,7 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
    * Viết test fail trước $\to$ Xác nhận test fail $\to$ Viết code tối thiểu để pass test $\to$ Refactor $\to$ Commit.
    * Bất kỳ code nào viết trước test đều vi phạm quy chuẩn.
    * Không bao giờ sửa hoặc xóa test hợp lệ chỉ để làm cho một implementation sai vượt qua kiểm tra.
-4. **🛡️ KỶ LUẬT KIỂM THỬ THÔNG MINH & TIẾN TRÌNH AN TOÀN (SMART TESTING & PROCESS GUARD):** ⭐ MỚI
+4. **🛡️ KỶ LUẬT KIỂM THỬ THÔNG MINH & TIẾN TRÌNH AN TOÀN (SMART TESTING & PROCESS GUARD):**
    > *"Mục tiêu không phải là chạy ít test hơn. Mục tiêu là chạy ĐÚNG test, ở ĐÚNG tầng, vào ĐÚNG thời điểm."*
    * **1. Chỉ test hành vi thuộc quyền sở hữu của ứng dụng (Test what your app owns):** AI chỉ test logic nghiệp vụ do chính ứng dụng viết. **TUYỆT ĐỐI KHÔNG** test lại các cơ chế mà framework hoặc database đã đảm bảo (ví dụ: test xác suất trùng UUID, test tính chất ACID của Postgres, test React render thẻ HTML).
    * **2. Phân tầng kiểm thử (Test Pyramid Discipline):**
@@ -63,12 +63,16 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
    * Khi fix bug, phải tìm ra nguyên nhân gốc rễ (Root Cause) bằng chứng cứ (`systematic-debugging` + `gitnexus trace`).
    * Phải viết kịch bản test nhỏ tái hiện chính xác lỗi trước khi sửa.
    * Nếu lần sửa đầu tiên thất bại $\to$ **DỪNG LẠI NGAY LẬP TỨC**, rollback thay đổi và quay lại bước điều tra. Cấm đắp thêm các tầng vá lỗi suy đoán (speculative patching) hoặc fallback che giấu lỗi.
-7. **Cổng Gác Vật lý (Strict Physical Guardrails):**
+7. **🧠 HỌC HỎI VÀ TIẾN HÓA LIÊN TỤC SAU MỖI BUG FIX (CONTINUOUS LEARNING & REFLECTION):** ⭐ MỚI
+   * **Tự động trích xuất bài học:** Sau mỗi lần fix bug thành công và E2E pass trong `/debug`, AI **bắt buộc phải tự động đúc kết nguyên nhân, giải pháp chuẩn và anti-pattern vào `.brain/learnings.md`**.
+   * **Đối chiếu trước khi lập plan mới:** Trước khi lập `/plan` cho tính năng mới, AI bắt buộc đọc lại `.brain/learnings.md` để không lặp lại lỗi kiến trúc cũ.
+   * **Tiến hóa Guardrail:** Nếu một lỗi nghiêm trọng lặp lại, AI tự động đề xuất đưa rule kiểm tra vào `guardrails/policy.json` và `global_workflows/audit.md`.
+8. **Cổng Gác Vật lý (Strict Physical Guardrails):**
    * Cài đặt và kích hoạt hook `guardrails/guardrail.py`.
    * Cấm commit trực tiếp lên nhánh được bảo vệ (`main`, `master`).
    * Cấm commit khi chưa vượt qua các kiểm tra thật: `tests`, `lint`, `typecheck`, `build`, và `e2e` (nếu có).
    * Tuyệt đối không dùng `git commit --no-verify` để lách cổng.
-8. **Cổng Triển Khai (Live-Test Deployment Gate):**
+9. **Cổng Triển Khai (Live-Test Deployment Gate):**
    * Tuyệt đối không tự ý deploy lên production khi chưa có sự xác nhận rõ ràng của người dùng sau khi đã kiểm thử trực tiếp (Live-test) và 100% targeted tests đạt chuẩn.
 
 ---
@@ -77,10 +81,13 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
 
 ```
 [/init] ──► [/brainstorm] ──► [/visualize] ──► [gitnexus analyze] ──► [/plan]
-   ▲                                                                     │
-   │                              [Modular Handover / New Session]       │
-   │                                             ▼                       │
+   ▲                                                  │                  │
+   │                                           [Đọc .brain/learnings.md] │
+   │                                                                     │
+   │                              [Modular Handover / New Session]       ▼
 [/save-brain] ◄── [/deploy] ◄── [/audit] ◄── [/review] ◄── [/code (Smart TDD + E2E)]
+   ▲                                                                     │
+   └─────────────── [Tự Động Đúc Kết Bài Học: /debug] ───────────────────┘
 ```
 
 ### 4.1. Giai đoạn 1: Khởi tạo & Cài Guardrail (`/init`)
@@ -94,9 +101,9 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
 * Quét AST và lập bản đồ quan hệ toàn dự án vào LadybugDB.
 
 ### 4.4. Giai đoạn 4: Lập Kế hoạch TDD & Scenarios (`/plan`)
-* Sử dụng GitNexus `impact` để tính toán Blast Radius.
+* Đối chiếu bài học cũ từ `.brain/learnings.md` + Tính Blast Radius bằng GitNexus `impact`.
 * Phân rã công việc thành các task nhỏ (2–5 phút) với Unit Test tương ứng và 1 kịch bản Targeted E2E cho cả feature.
-* Lưu vào `docs/superpowers/plans/<feature>.md` $\to$ Đóng gói Session 1 bằng `/save-brain`.
+* Lưu vào `docs/superpowers/plans/<feature-name>.md` $\to$ Đóng gói Session 1 bằng `/save-brain`.
 
 ### 4.5. Giai đoạn 5: Thực thi Độc lập & Cổng Kiểm Thử Thông Minh (`/code`)
 * Kích hoạt `using-git-worktrees` tạo nhánh làm việc cô lập.
@@ -107,9 +114,10 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
 ### 4.6. Giai đoạn 6: Review Độc lập 2 Lớp (`/review`)
 * Task Reviewer kiểm tra Spec Compliance + Code Quality + GitNexus shape check.
 
-### 4.7. Giai đoạn 7: Xử lý Lỗi Chuyên sâu (`/debug`)
-* Khi gặp lỗi: Áp dụng `systematic-debugging` 4 bước kết hợp `gitnexus trace`.
-* Viết test tái hiện đúng lỗi $\to$ Fix lỗi $\to$ Chạy lại test chứng minh lỗi đã biến mất.
+### 4.7. Giai đoạn 7: Xử lý Lỗi Chuyên sâu & Tự Động Đúc Kết Bài Học (`/debug`)
+* Áp dụng `systematic-debugging` 4 bước kết hợp `gitnexus trace`.
+* Viết test tái hiện đúng lỗi $\to$ Fix lỗi $\to$ Chạy lại test E2E chứng minh lỗi đã biến mất.
+* **Tự động lưu bài học vào `.brain/learnings.md`** để không bao giờ lặp lại.
 
 ### 4.8. Giai đoạn 8: Nghiệm thu, Kiểm toán Toàn vẹn, Triển khai & Lưu Trí nhớ
 * Merge nhánh worktree an toàn (`finishing-a-development-branch`).

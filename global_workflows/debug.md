@@ -1,11 +1,11 @@
 ---
-description: 🐛 Sửa lỗi theo phương pháp Điều tra Gốc rễ & Cổng Test E2E Bắt Buộc
+description: 🐛 Sửa lỗi theo phương pháp Điều tra Gốc rễ, Cổng E2E & Tự động Đúc kết Bài học
 ---
 
-# WORKFLOW: /debug - Sửa Lỗi Khoa Học & Cổng Xác Minh E2E Bắt Buộc
+# WORKFLOW: /debug - Sửa Lỗi Khoa Học, Cổng E2E & Tự Động Học Hỏi (v4.8.0)
 
-**Vai trò:** Root-Cause Investigator & Debugging Lead  
-**Mục tiêu:** Định vị chính xác nguyên nhân gốc rễ (Root Cause) bằng chứng cứ, sử dụng công cụ truy vết đồ thị **GitNexus Trace**, bắt buộc viết kịch bản E2E tái hiện lỗi và **bắt buộc E2E PASS THỰC TẾ mới được coi là sửa xong**.
+**Vai trò:** Root-Cause Investigator & Continuous Learning Lead  
+**Mục tiêu:** Định vị chính xác nguyên nhân gốc rễ (Root Cause) bằng chứng cứ qua **GitNexus Trace**, bắt buộc viết kịch bản E2E tái hiện lỗi, bắt buộc E2E PASS THỰC TẾ mới được coi là sửa xong, và **TỰ ĐỘNG ĐÚC KẾT BÀI HỌC VÀO BỘ NHỚ VĨNH CỬU (`.brain/learnings.md`)**.
 
 ---
 
@@ -14,9 +14,9 @@ description: 🐛 Sửa lỗi theo phương pháp Điều tra Gốc rễ & Cổn
 ```
 Khi phát hiện Bug trong [/code], [/test], E2E Gate hoặc Live-Test
    ↓
-[/debug] ← BẠN ĐANG Ở ĐÂY (4 Phase Root-Cause Debugging + E2E Verification)
+[/debug] ← BẠN ĐANG Ở ĐÂY (4 Phase Debugging ➔ E2E Gate ➔ Phase 5: Auto-Reflection)
    ↓
-E2E TEST PASS 100% ➔ Quay lại [/code] hoặc [/test]
+Tự động lưu vào .brain/learnings.md ➔ Tiếp tục [/code] hoặc [/test]
 ```
 
 ---
@@ -59,14 +59,46 @@ Nếu bản vá đầu tiên không giải quyết được lỗi hoặc làm h�
 ## Giai đoạn 4: Xác Minh Qua Cổng E2E Bắt Buộc (Phase D - E2E Verification Gate)
 
 1. **Chạy Lại Kịch Bản E2E Test:**
-   * Khởi động server và chạy lại kịch bản E2E vừa viết ở Giai đoạn 2.
+   * Khởi động server và chạy lại kịch bản E2E vừa viết ở Giai đoạn 2 (Timeout 30s).
    * **Yêu cầu:** Test phải chuyển từ **FAIL ➔ PASS 100%**.
 2. **Kiểm tra Zero Network Errors:**
    * Xác nhận request API trả về status code `200 OK`, không còn lỗi 400 Ambiguous FK hay 500.
    * Xác nhận dữ liệu hiển thị hoàn hảo trên DOM.
-3. **Chạy Toàn Bộ Test Suite & Guardrails:**
-   * Chạy lại toàn bộ test suite để đảm bảo không phát sinh regression.
-   * Xóa bỏ toàn bộ debug logs, debug markers (`DEBUG_ONLY`, `console.log`).
+3. **Chạy Toàn Bộ Test Suite & Dọn Dẹp Tiến Trình:**
+   * Chạy lại test suite để đảm bảo không phát sinh regression.
+   * Xóa bỏ debug markers (`DEBUG_ONLY`, `console.log`).
+   * Tắt toàn bộ background test processes (Process Guard).
 4. **Commit thay đổi qua cổng kiểm tra `guardrails/hooks/pre-commit`.**
 
-> ⚠️ **LƯU Ý:** Chỉ khi kịch bản E2E kiểm tra thực tế PASS 100%, bug mới được coi là đã được giải quyết dứt điểm!
+---
+
+## Giai đoạn 5: Tự Động Học Hỏi & Đúc Kết Bài Học (Phase E - Auto-Reflection) ⭐ MỚI
+
+Ngay sau khi commit thành công, AI **TỰ ĐỘNG** thực hiện các bước sau mà không cần người dùng nhắc:
+
+1. **Tạo / Append vào file `.brain/learnings.md`:**
+   ```markdown
+   ### 📝 [LEARNING-{YYYYMMDD}-{INDEX}] {Tên lỗi & Phân loại}
+   - 📍 **Triệu chứng & Mã lỗi:** {Mô tả hiện tượng và error log/HTTP status}
+   - 🔍 **Nguyên nhân gốc rễ (Root Cause):** {Bản chất kỹ thuật gây ra lỗi}
+   - 💡 **Giải pháp chuẩn (Proven Fix):** {Cách sửa chính xác và an toàn nhất}
+   - 🚫 **Anti-Pattern cần tránh:** {Những điều TUYỆT ĐỐI KHÔNG làm trong tương lai}
+   - 🛡️ **Tiến hóa Quy trình:** {Đề xuất rule bổ sung vào AI_CODE_WORKFLOW.md hoặc audit.md nếu là lỗi nghiêm trọng}
+   ```
+
+2. **Ghi log tiến trình vào `.brain/session_log.txt`:**
+   ```
+   [HH:MM] BUG_RESOLVED_AND_LEARNED: {Tên lỗi} -> Saved to .brain/learnings.md
+   ```
+
+3. **Thông Báo Hoàn Tất Cho Người Dùng:**
+   ```
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🎉 BUG ĐÃ ĐƯỢC KHẮC PHỤC TRIỆT ĐỂ & ĐÚC KẾT BÀI HỌC!
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   ✅ Nguyên nhân: {Tóm tắt ngắn gọn Root Cause}
+   ✅ Xác minh: E2E Test đã chuyển sang PASS 100% (0 Lỗi Network)
+   🧠 Trí nhớ vĩnh cửu: Đã lưu bài học vào `.brain/learnings.md`
+   🛡️ Hệ thống tự động ghi nhớ để không bao giờ lặp lại lỗi này trong các task sau!
+   ```

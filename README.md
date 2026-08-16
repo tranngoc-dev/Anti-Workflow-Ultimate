@@ -1,7 +1,7 @@
-# ⚡ Anti-Workflow Ultimate (v4.7.0)
+# ⚡ Anti-Workflow Ultimate (v4.8.0)
 
 > **Khung Phát Triển Ứng Dụng Tự Trị Toàn Diện trên Antigravity 2.0.**  
-> Tích hợp 5 trong 1: **AWF Orchestrator** + **Superpowers Subagent TDD Engine** + **GitNexus Relational Intelligence** + **Strict Physical Guardrails** + **Cổng Kiểm Thử Thông Minh (Smart Testing Pyramid & Process Guard)** + **Giao Thức Modular Conversation**.
+> Tích hợp 5 trong 1: **AWF Orchestrator** + **Superpowers Subagent TDD Engine** + **GitNexus Relational Intelligence** + **Strict Physical Guardrails** + **Cổng Kiểm Thử Thông Minh (Smart Testing Pyramid & Process Guard)** + **Cơ Chế Tự Học Hỏi & Đúc Kết Bài Học Vĩnh Cửu (.brain/learnings.md)**.
 
 ---
 
@@ -12,7 +12,7 @@
 │ 1. ORCHESTRATION & TRẢI NGHIỆM (AWF)                                        │
 │ • Giao tiếp tiếng Việt, Multi-persona (PM Hà, Dev Tuấn, Designer Mai, QA)   │
 │ • Vòng đời khép kín: /init, /visualize (UI Mockup), /deploy, /save-brain    │
-│ • Bộ nhớ dài hạn vĩnh cửu (.brain/ Eternal Context)                         │
+│ • Bộ nhớ vĩnh cửu: .brain/ (Lưu tiến độ & Tự học hỏi sau mỗi Bug Fix)       │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
 ┌──────────────────────────────────────▼──────────────────────────────────────┐
@@ -38,6 +38,24 @@
 │ • 17 MCP Tools hỗ trợ AI tra cứu 360 độ (query, context, impact, trace)     │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 🧠 Cơ Chế Tự Học Hỏi & Tiến Hóa Vĩnh Cửu (Self-Learning Engine)
+
+> **Bí quyết để AI không bao giờ dẫm lại vết xe đổ:**
+
+```mermaid
+flowchart LR
+    A["Sửa Bug Thành Công (/debug)"] --> B["Tự Động Đúc Kết Bài Học"]
+    B --> C[".brain/learnings.md"]
+    C --> D["Nạp Lại Ngay Khi Mở Session Mới (/recap)"]
+    D --> E["Đối Chiếu Trước Khi Lập Kế Hoạch (/plan)"]
+```
+
+* **Auto-Reflection sau mỗi Bug Fix:** Sau khi vượt qua Cổng E2E Test, AI tự động lưu lại: *Triệu chứng*, *Root Cause*, *Giải pháp chuẩn (Proven Fix)*, và *Anti-Pattern cần tránh* vào `.brain/learnings.md`.
+* **Tiêm vắc-xin cho Session mới:** Khi mở session mới (`/recap`) hoặc chuẩn bị `/plan`, AI tự động đọc các bài học cũ để không bao giờ viết code sai theo kiểu cũ.
+* **Tiến hóa Guardrail:** Tự động nâng cấp checklist `/audit` hoặc thêm rules gác cổng nếu phát hiện lỗi nguy hiểm.
 
 ---
 
@@ -97,10 +115,10 @@ bash "D:\AntiGravity\Anti-Workflow-Ultimate/install.sh"
 Thay vì giữ một cuộc trò chuyện dài hàng trăm tin nhắn, toàn bộ quá trình phát triển được cắt lát thành các Session độc lập:
 
 1. **Session 1 (Thiết kế & Lập Plan):**
-   * `/init` $\to$ `/brainstorm` $\to$ `/visualize` $\to$ `/plan`.
+   * `/init` $\to$ `/brainstorm` $\to$ `/visualize` $\to$ `/plan` (đối chiếu bài học cũ).
    * Chạy `/save-brain` $\to$ Đóng gói Spec & Plan vào `docs/superpowers/`.
 2. **Session 2 (Code Backend & DB):**
-   * **Mở Thread Chat MỚI** $\to$ Gõ `/recap` (AI chỉ nạp ~800 token ngữ cảnh tinh gọn).
+   * **Mở Thread Chat MỚI** $\to$ Gõ `/recap` (AI chỉ nạp ~800 token ngữ cảnh tinh gọn + bài học cũ).
    * Chạy `/code phase-01` $\to$ Subagent code Smart TDD + Targeted E2E $\to$ Chạy `/save-brain`.
 3. **Session 3 (Code Frontend UI):**
    * **Mở Thread Chat MỚI** $\to$ Gõ `/recap` $\to$ Chạy `/code phase-02` (Smart TDD + Targeted E2E).
@@ -118,14 +136,14 @@ Anh có thể **gõ trực tiếp Slash Command** hoặc **nói bằng ngôn ng�
 | `/init` | 🏁 Khởi tạo / Tích hợp dự án | *"Tạo dự án mới...", "Tích hợp workflow vào dự án này..."* | **Tự động nhận diện dự án mới hoặc dự án đang làm**, cài Guardrail, quét GitNexus. |
 | `/brainstorm` | 💡 Phỏng vấn ý tưởng | *"Bàn ý tưởng...", "Lên ý tưởng tính năng..."* | Phỏng vấn Socratic câu hỏi đơn, xuất bản Spec chi tiết vào `docs/superpowers/specs/`. |
 | `/visualize` | 🎨 Mockup UI/UX | *"Thiết kế giao diện...", "Dựng mockup UI..."* | Tạo prototype HTML/CSS trực quan, trích xuất bảng Design Tokens. |
-| `/plan` | 📋 Kế hoạch TDD | *"Lên kế hoạch làm...", "Phân rã task cho tính năng..."* | Gọi GitNexus tính Blast Radius $\to$ Chia nhỏ task 2–5 phút TDD & Targeted E2E. |
+| `/plan` | 📋 Kế hoạch TDD | *"Lên kế hoạch làm...", "Phân rã task cho tính năng..."* | Đối chiếu `.brain/learnings.md` $\to$ Tính Blast Radius $\to$ Chia nhỏ task 2–5 phút. |
 | `/code` | 💻 Lập trình Subagent | *"Bắt đầu code...", "Lập trình phase 1 đi em"* | Tạo Git Worktree $\to$ Subagents chạy Smart TDD $\to$ **Cổng Targeted E2E**. |
-| `/debug` | 🐛 Sửa lỗi khoa học | *"Sửa lỗi này...", "Fix bug này giúp anh"* | 4 Phase Root-Cause $\to$ Dùng GitNexus `trace` $\to$ **Targeted E2E xác minh dứt điểm**. |
+| `/debug` | 🐛 Sửa lỗi & Tự học hỏi | *"Sửa lỗi này...", "Fix bug này giúp anh"* | 4 Phase Root-Cause $\to$ Targeted E2E $\to$ **Tự động đúc kết bài học vào .brain/learnings.md**. |
 | `/test` | 🧪 Kiểm thử toàn diện | *"Chạy kiểm thử...", "Test app xem chạy ổn không"* | Chạy theo phân tầng: Quick Scoped / Feature E2E / Full Suite Release Gate. |
 | `/review` | 👀 Review 2 lớp | *"Review lại code...", "Kiểm tra chất lượng code"* | Reviewer độc lập duyệt Spec Compliance + Code Quality + GitNexus shape check. |
 | `/audit` | 🔒 Kiểm toán toàn diện | *"Khám bệnh app...", "Kiểm tra bảo mật và DB"* | Quét Bảo mật, Code Quality, Dependencies và **Database Relationship Integrity**. |
 | `/deploy` | 🚀 Triển khai Production | *"Đưa app lên mạng...", "Deploy lên Vercel/VPS"* | Vượt qua Cổng Live-Test $\to$ Deploy lên Vercel, Cloudflare, VPS, Docker. |
-| `/recap` | 📖 Khôi phục ngữ cảnh | *"Tiếp tục dự án hôm trước...", "Nhớ lại bối cảnh"* | Nạp Clean Context (< 1.000 tokens) cho Session Chat Mới theo 3 tầng. |
+| `/recap` | 📖 Khôi phục ngữ cảnh | *"Tiếp tục dự án hôm trước...", "Nhớ lại bối cảnh"* | Nạp Clean Context (< 1.000 tokens) kèm các bài học kinh nghiệm đã tích lũy. |
 | `/save-brain` | 🧠 Lưu bộ nhớ vĩnh cửu | *"Lưu lại tiến độ...", "Đóng gói bộ nhớ hôm nay"* | Lưu trữ quyết định kỹ thuật, checkpoint tiến độ và chuẩn bị Handover. |
 
 ---
@@ -144,7 +162,8 @@ Hệ thống pre-commit hook tại `guardrails/` đảm bảo:
 
 ```
 {project}/
-├── .brain/                     # Eternal Memory & Modular Checkpoints
+├── .brain/                     # Eternal Memory & Continuous Learnings
+│   ├── learnings.md            # 🧠 BÀI HỌC KINH NGHIỆM ĐÃ TÍCH LŨY
 │   ├── preferences.json        # Technical level & Persona
 │   ├── session.json            # State hiện tại
 │   └── session_log.txt         # Append-only log

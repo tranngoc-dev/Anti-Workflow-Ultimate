@@ -34,7 +34,7 @@ if [ -f "$SOURCE_DIR/.gemini/mcp_config.json" ] && [ ! -f "$ANTIGRAVITY_DIR/mcp_
     cp "$SOURCE_DIR/.gemini/mcp_config.json" "$ANTIGRAVITY_DIR/mcp_config.json"
 fi
 
-echo "4.7.0-ultimate" > "$USER_HOME/.gemini/awf_version"
+echo "4.8.0-ultimate" > "$USER_HOME/.gemini/awf_version"
 
 echo "=============================================================================="
 echo "  ✨ CÀI ĐẶT HOÀN TẤT THÀNH CÔNG!"
