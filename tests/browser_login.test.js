@@ -1,3 +1,4 @@
+/* global require */
 const { chromium } = require('playwright');
 
 (async () => {

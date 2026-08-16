@@ -54,7 +54,7 @@ export async function getThreadById(id) {
       .from('threads')
       .select(`
         *,
-        author:profiles(id, display_name, avatar_url, rank, gold_balance)
+        author:profiles!threads_author_id_fkey(id, display_name, avatar_url, rank, gold_balance)
       `)
       .eq('id', id)
       .single();
