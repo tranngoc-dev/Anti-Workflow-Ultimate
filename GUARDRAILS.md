@@ -1,29 +1,29 @@
-# Strict AI Coding Guardrails - Cổng Kiểm Soát Vật Lý
+# Strict AI Coding Guardrails - Physical Execution Gate
 
-Bộ này tạo một cổng kiểm tra bắt buộc cho mọi dự án Git. Nó chặn commit khi không chứng minh được rằng các kiểm tra cần thiết đã đạt. Nó không cài dependency bừa bãi, không gửi dữ liệu ra ngoài và **never deploys** (tuyệt đối không tự ý deploy).
+This system establishes a deterministic physical pre-commit gate for Git repositories. It prevents invalid commits by executing real verification checks (tests, linter, typechecker, and build). It enforces zero-dependency creep, prevents data leakage, and **never deploys** without explicit human authorization.
 
 ---
 
-## 1. Cài đặt trên máy (Windows & POSIX)
+## 1. Local Installation (Windows & POSIX)
 
-Mở terminal tại thư mục gốc dự án và chạy:
+Run the installer from your repository root:
 
 ```bash
 # Windows / Linux / macOS
 python guardrails/install.py
 ```
 
-*(Trên Linux/macOS, có thể chạy `python3 guardrails/install.py`).*
+*(On Linux / macOS, you can run `python3 guardrails/install.py`).*
 
-Installer cấu hình repository hiện tại sử dụng hook phiên bản tại `guardrails/hooks`. Nó ghi lại giá trị `core.hooksPath` cũ để có thể rollback an toàn bất kỳ lúc nào.
+The installer configures the repository to use versioned hooks from `guardrails/hooks` and safely records the previous `core.hooksPath` for clean rollback at any time.
 
-> ⚠️ **Lưu ý quan trọng (Branch Protection):** Luôn làm việc trên feature branch. Cơ chế branch protection sẽ chặn cứng mọi hành vi commit trực tiếp trên `main` và `master`.
+> ⚠️ **Important (Branch Protection):** Always work on dedicated feature branches. The branch protection mechanism strictly blocks direct commits to `main` and `master`.
 
 ---
 
-## 2. Khai báo Lệnh Kiểm tra trong `guardrails/policy.json`
+## 2. Declaring Verification Commands in `guardrails/policy.json`
 
-Mỗi lệnh là một mảng đối số thực thi thật (không dùng lệnh giả):
+Declare commands as arrays of argument strings (no fake/mock commands):
 
 ```json
 {
@@ -34,30 +34,32 @@ Mỗi lệnh là một mảng đối số thực thi thật (không dùng lệnh
     "typecheck": [["npx", "tsc", "--noEmit"]],
     "build": [["npm", "run", "build"]]
   },
-  "debug_markers": ["DEBUG_ONLY", "console.log"],
+  "debug_markers": ["DEBUG_ONLY"],
   "allowlist": []
 }
 ```
 
-* Đối với Python: dùng `pytest`, `ruff`, `mypy`, `build`.
-* Đối với Node/TypeScript: tự động nhận diện `test`, `lint`, `typecheck`, `build` từ `package.json`.
-* Đối với Go / Rust: dùng `go test`, `cargo test`, `cargo check`.
+* **Python:** `pytest`, `ruff`, `mypy`, `build`.
+* **Node.js / TypeScript:** auto-detects `test`, `lint`, `typecheck`, `build` from `package.json`.
+* **Go / Rust:** `go test`, `cargo test`, `cargo check`.
 
 ---
 
-## 3. Khi Bị Chặn Commit
+## 3. Handling Blocked Commits
 
-Thông báo luôn chỉ rõ rule bị vi phạm, file/dòng liên quan và giải pháp sửa chữa an toàn. 
-Tuyệt đối không dùng `git commit --no-verify` để lách cổng. Mọi lỗi gác cổng là bằng chứng kỹ thuật cần điều tra và xử lý dứt điểm.
+When a commit is blocked, the output explicitly indicates the violated rule, file/line location, and recommended remediation.
+**Never use `--no-verify`** to bypass the gate. Every guardrail failure is technical evidence that must be investigated and resolved properly.
 
 ---
 
 ## 4. Rollback Guardrails
 
-Để khôi phục thiết lập Git hook ban đầu:
+To rollback and restore previous Git hook configurations:
+
 ```bash
-# Nếu trước đó chưa có hook tùy chỉnh:
+# Reset local hooks path:
 git config --local --unset core.hooksPath
 
-# Hoặc khôi phục giá trị cũ từ .git/guardrails/previous-hooks-path
+# Or restore original value recorded at:
+# .git/guardrails/previous-hooks-path
 ```

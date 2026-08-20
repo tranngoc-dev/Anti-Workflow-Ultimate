@@ -47,17 +47,17 @@ if ($extractedLines.Count -eq 0) {
 
 $taskText = $extractedLines -join "`n"
 
-# PRE-FLIGHT TASK CONTRACT VALIDATION (Học hỏi từ Dify Pre-flight Gate)
-$hasGoal = ($taskText -match "(?i)Goal|Mục tiêu|Description|Mô tả")
-$hasCriteria = ($taskText -match "(?i)Acceptance|Tiêu chí|Nghiệm thu|Verify|Kiểm tra|Test")
+# PRE-FLIGHT TASK CONTRACT VALIDATION (Dify-Inspired Pre-flight Gate)
+$hasGoal = ($taskText -match "(?i)Goal|Objective|Description")
+$hasCriteria = ($taskText -match "(?i)Acceptance|Criteria|Verify|Verification|Test")
 $hasScope = ($taskText -match "(?i)Files|File|Scope|Path")
 
 if ($Validate -or ($hasGoal -and $hasCriteria)) {
     Write-Host "🛡️ [PRE-FLIGHT GATE] Validating Task $TaskNumber contract..." -ForegroundColor Cyan
     if (-not $hasCriteria) {
-        Write-Warning "⚠️ Task $TaskNumber thiếu Acceptance Criteria (tiêu chí nghiệm thu rõ ràng). Subagent có thể bị lạc hướng!"
+        Write-Warning "⚠️ Task $TaskNumber is missing observable Acceptance Criteria. Subagent may deviate from requirements!"
     } else {
-        Write-Host "  ✅ Contract Valid: Goal & Acceptance criteria detected." -ForegroundColor Green
+        Write-Host "  ✅ Contract Valid: Goal and Acceptance criteria detected." -ForegroundColor Green
     }
 }
 
@@ -67,4 +67,4 @@ if (-not (Test-Path $outDir)) {
 }
 
 Set-Content -Path $OutFile -Value $taskText -Encoding UTF8
-Write-Output "wrote ${OutFile}: $($extractedLines.Count) lines (Pre-flight Gate Checked ✅)"
+Write-Output "wrote ${OutFile}: $($extractedLines.Count) lines (Pre-flight Gate Verified ✅)"

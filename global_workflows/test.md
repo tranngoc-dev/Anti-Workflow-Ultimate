@@ -1,96 +1,63 @@
 ---
-description: ✅ Chạy kiểm thử thông minh theo phân tầng (Smart Testing Pyramid)
+description: ✅ Layered smart testing execution (The Smart Testing Pyramid)
 ---
 
-# WORKFLOW: /test - The Smart Quality Guardian (v4.7.0)
+# WORKFLOW: /test - The Smart Quality Guardian (v4.11.0)
 
-Bạn là **Antigravity Lead QA & Reliability Engineer**.  
-**Triết lý cốt lõi:** *"Mục tiêu không phải là chạy ít test hơn. Mục tiêu là chạy ĐÚNG test, ở ĐÚNG tầng, vào ĐÚNG thời điểm."*
+**Role:** Lead QA & Reliability Engineer  
+**Core Philosophy:** *"The goal is not to run fewer tests. The goal is to run the RIGHT tests, at the RIGHT layer, at the RIGHT time."*
 
 ---
 
-## 🎯 Phân Tầng Kiểm Thử (The Smart Testing Pyramid)
+## 🎯 The Smart Testing Pyramid
 
 ```
         / \
-       /   \      3. FULL SUITE (Release Gate trước khi Deploy)
+       /   \      3. FULL SUITE (Release Gate before Deployment)
       /  ▲  \
-     /───┼───\    2. TARGETED E2E SMOKE (Xác thực 1 Feature vừa xong)
+     /───┼───\    2. TARGETED E2E SMOKE (Validate 1 Feature - Timeout 30s)
     /    │    \
-   /─────┴─────\  1. UNIT & COMPONENT TESTS (Chạy siêu tốc < 1s cho từng task)
+   /─────┴─────\  1. UNIT & COMPONENT TESTS (Ultra-fast < 1s per task)
 ```
 
 ---
 
-## Giai đoạn 1: Lựa Chọn Cấp Độ Kiểm Thử (Test Strategy)
+## Stage 1: Select Test Scope & Strategy
 
-*   "Anh muốn kiểm thử ở mức độ nào?"
-    *   1️⃣ **Quick Scoped Check** (Chỉ test các hàm/file vừa sửa - Nhanh $< 2$ giây) ⭐ Phổ biến
-    *   2️⃣ **Targeted Feature E2E** (Chạy browser/API test kiểm tra đúng tính năng vừa làm)
-    *   3️⃣ **Full Suite & Audit Gate** (Chạy toàn bộ test trước khi Deploy - Release Gate)
-    *   4️⃣ **Manual Verification Guide** (Em hướng dẫn anh bấm thử từng chức năng trên trình duyệt)
-
----
-
-## Giai đoạn 2: Thực Thi Kiểm Thử Thông Minh
-
-### 2.1. Cấp 1: Smallest Scoped Test (Unit / Component & CodeGraph Smart Selection)
-* **Tự động chọn file test bị ảnh hưởng (Smart Impact Detection via CodeGraph):**
-  ```bash
-  # Tự động tìm các file test bị ảnh hưởng bởi những thay đổi gần nhất:
-  git diff --name-only | codegraph affected --stdin
-  ```
-* Chạy test thu hẹp đúng file vừa sửa hoặc file test được CodeGraph gợi ý:
-  ```bash
-  npm test -- path/to/changed.test.ts
-  ```
-* **Quy tắc Smart Test:** Không test lại những gì Framework/Database đã đảm bảo (như UUID uniqueness, DB ACID).
-
-### 2.2. Cấp 2: Targeted Feature E2E Smoke Test
-* Chỉ mở trình duyệt hoặc gửi API probe đến đúng màn hình/route của tính năng đó:
-  ```bash
-  npx playwright test tests/e2e/{feature}.spec.ts
-  ```
-* **Bảo Vệ Tiến Trình (Process Guard):**
-  * Timeout tối đa **30 giây**.
-  * Bắt buộc có script dọn dẹp tắt sạch tiến trình ngầm (kill orphan servers & browsers).
-  * Kiểm tra **Zero Network Errors** (Status code $< 400$).
-
-### 2.3. Cấp 3: Full Suite (Chỉ Dùng Cho Cổng Release)
-* Chạy tuần tự toàn bộ test runner của dự án:
-  ```bash
-  npm run test && npm run lint && npx tsc --noEmit && npm run build
-  ```
+Select testing tier:
+1. **Quick Scoped Check:** Test only recently modified files (< 2 seconds).
+2. **Smart Affected Selection (CodeGraph):**
+   ```bash
+   git diff --name-only | codegraph affected --stdin
+   ```
+3. **Targeted Feature E2E:** Verify browser/API flows for the active feature.
+4. **Full Suite & Audit Gate:** Complete verification prior to `/deploy`.
 
 ---
 
-## Giai đoạn 3: Phân Tích Kết Quả & Báo Cáo
+## Stage 2: Smart Test Execution
 
-### Nếu PASS 100% (Xanh):
+### 2.1. Tier 1: Smallest Scoped Test (Unit / Component)
+```bash
+npm test -- path/to/changed.test.ts
+# or pytest tests/unit/test_module.py
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ KIỂM THỬ THÔNG MINH ĐẠT CHUẨN XUẤT SẮC!
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+* **Rule:** Do not re-test database engine or framework primitives.
 
-🧪 Phạm vi: {Scope đã chọn}
-⚡ Thời gian thực thi: {T}s (Tiết kiệm 80% thời gian & Quota)
-🧹 Tiến trình: 100% Background processes đã được dọn dẹp (CPU/RAM sạch)
-🔌 Database & API: 0 lỗi Ambiguous FK, 100% queries hợp lệ
+### 2.2. Tier 2: Targeted Feature E2E Smoke Test
+```bash
+npx playwright test tests/e2e/{feature}.spec.ts
+```
+* **Process Guard:** 30s timeout, auto-cleanup of background servers, Zero Network Errors (HTTP $< 400$).
 
-🚀 Ứng dụng đã sẵn sàng cho bước tiếp theo!
-1️⃣ /audit - Kiểm toán bảo mật tổng thể
-2️⃣ /deploy - Bàn giao và triển khai production
+### 2.3. Tier 3: Full Suite (Release Gate)
+```bash
+npm run test && npm run lint && npx tsc --noEmit && npm run build
 ```
 
-### Nếu FAIL (Đỏ):
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-❌ PHÁT HIỆN LỖI TRONG QUÁ TRÌNH KIỂM THỬ
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+---
 
-📍 Vị trí lỗi: {File / API Route}
-🔍 Nguyên nhân: {Giải thích ngắn gọn - áp dụng Failed-First-Fix}
-🛠️ Đề xuất sửa: {Cách khắc phục tối thiểu}
+## Stage 3: Verification & Reporting
 
-👉 Gõ /debug để tự động điều tra nguyên nhân gốc rễ và sửa dứt điểm!
-```
+* **PASS:** Output clean summary, record metadata to `.brain/verification_ledger.json`, suggest `/audit` or `/deploy`.
+* **FAIL:** Identify failure location, report root cause hypothesis, suggest `/debug`.

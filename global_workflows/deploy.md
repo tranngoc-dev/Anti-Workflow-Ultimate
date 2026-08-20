@@ -1,82 +1,51 @@
 ---
-description: 🚀 Triển khai ứng dụng production an toàn qua Cổng Live-Test
+description: 🚀 Production deployment with mandatory user live-test approval gate
 ---
 
-# WORKFLOW: /deploy - Triển Khai Production & Cổng Live-Test An Toàn
+# WORKFLOW: /deploy - Production Deployment & Live Verification (v4.11.0)
 
-**Vai trò:** DevOps & Release Lead  
-**Mục tiêu:** Kiểm toán lần cuối, yêu cầu người dùng xác nhận đã Live-test thực tế và tiến hành triển khai ứng dụng lên môi trường Production (Vercel, Cloudflare, VPS, Docker).
+**Role:** Release Manager & Reliability Lead  
+**Core Rule:** **Never deploy** without explicit human approval after successful user live-testing and 100% green tests.
 
 ---
 
-## 🗺️ Vị Trí Trong Quy Trình Khép Kín
+## 🗺️ Position in the Closed-Loop Lifecycle
 
 ```
-[/code] ➔ [/review] ➔ [/audit]
+[/audit] (All security & test gates passed)
    ↓
-[CỔNG KIỂM THỬ TRỰC TIẾP - LIVE-TEST GATE]
+[/deploy] ← YOU ARE HERE (Live-Test & Production Release)
    ↓
-[/deploy] ← BẠN ĐANG Ở ĐÂY (Triển khai Production)
-   ↓
-[/save-brain] (Lưu lại URL và cấu hình vào .brain/)
+[/save-brain] (Eternal Memory Checkpoint)
 ```
 
 ---
 
-## 🚨 CỔNG BẮT BUỘC: LIVE-TEST DEPLOYMENT GATE
+## Stage 1: Pre-Deployment Verification
 
-Theo điều khoản tại `AI_CODE_WORKFLOW.md`, AI **tuyệt đối không được tự ý deploy lên production** mà chưa qua cổng này:
-
-### Bước 1: Kiểm Tra Điều Kiện Tiên Quyết
-1. Toàn bộ tests, lint, typecheck phải **PASS 100%**.
-2. Nhánh làm việc đã được merge sạch sẽ vào `main`/`master` qua `finishing-a-development-branch`.
-3. Không có test nào bị skip hay có lỗi bảo mật từ `/audit`.
-
-### Bước 2: Yêu Cầu Người Dùng Xác Nhận Live-Test
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🛑 CỔNG XÁC NHẬN TRIỂN KHAI (LIVE-TEST GATE)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Ứng dụng đã sẵn sàng để deploy, nhưng cần xác nhận từ anh:
-1. Anh đã chạy thử ứng dụng cục bộ (`npm run dev` hoặc `/run`) chưa?
-2. Giao diện và các chức năng quan trọng đã hoạt động đúng mong đợi?
-
-👉 Hãy chọn hành động:
-1️⃣ "Tôi đã test trực tiếp và mọi thứ OK, tiến hành Deploy ngay!"
-2️⃣ "Tôi muốn chạy /run để test thử trước."
-3️⃣ "Dừng lại để chỉnh sửa thêm."
-```
+1. Run full test suite and build verification:
+   ```bash
+   python guardrails/guardrail.py --mode all
+   ```
+2. Verify clean git working tree and up-to-date branch.
 
 ---
 
-## Giai đoạn 2: Tiến Hành Triển Khai (Sau Khi Người Dùng Xác Nhận)
+## Stage 2: User Live-Test Handoff
 
-Hỗ trợ các nền tảng triển khai phổ biến:
-
-### 1. Vercel / Cloudflare Pages (Frontend / Fullstack Next.js)
-```bash
-# Vercel
-npx vercel --prod
-
-# Cloudflare Pages
-npx wrangler pages deploy dist/
-```
-
-### 2. Cloudflare Tunnel (Cho Local Host / Home Server)
-* Tạo tunnel public an toàn không cần mở port modem.
-
-### 3. Docker & VPS Deployment
-* Build production image và khởi chạy container:
-```bash
-docker compose up -d --build
-```
+Present verification checklist and provide the user with staging URL or preview port for live verification.
 
 ---
 
-## Giai đoạn 3: Bàn Giao & Lưu Trữ
+## Stage 3: Explicit Human Approval Gate
 
-* Hiển thị Production URL công khai.
-* Lưu thông tin deployment vào `.brain/brain.json`.
-* Gợi ý chạy `/save-brain` để kết thúc toàn bộ chu kỳ dự án.
+Request confirmation:
+> *"Are you ready to proceed with production deployment?"*
+
+---
+
+## Stage 4: Execution & Eternal Checkpoint
+
+1. Trigger build/deploy pipeline.
+2. Verify production status (HTTP 200, clean logs).
+3. Save project memory: `/save-brain`.

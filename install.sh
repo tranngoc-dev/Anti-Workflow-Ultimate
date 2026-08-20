@@ -1,42 +1,62 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Anti-Workflow Ultimate - Installer cho Linux / macOS (Antigravity 2.0)
+# Anti-Workflow Ultimate - Installer for Linux & macOS (Antigravity 2.0)
 # ==============================================================================
+
 set -euo pipefail
 
 echo "=============================================================================="
-echo "  🚀 CÀI ĐẶT ANTI-WORKFLOW ULTIMATE (ANTIGRAVITY 2.0)"
+echo "  >> INSTALLING ANTI-WORKFLOW ULTIMATE (ANTIGRAVITY 2.0)"
 echo "=============================================================================="
 
-USER_HOME="$HOME"
-ANTIGRAVITY_DIR="$USER_HOME/.gemini/antigravity"
+ANTIGRAVITY_DIR="$HOME/.gemini/antigravity"
 GLOBAL_WORKFLOWS_DIR="$ANTIGRAVITY_DIR/global_workflows"
 SKILLS_DIR="$ANTIGRAVITY_DIR/skills"
 SCHEMAS_DIR="$ANTIGRAVITY_DIR/schemas"
 TEMPLATES_DIR="$ANTIGRAVITY_DIR/templates"
+SCRIPTS_DIR="$ANTIGRAVITY_DIR/scripts"
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-mkdir -p "$ANTIGRAVITY_DIR" "$GLOBAL_WORKFLOWS_DIR" "$SKILLS_DIR" "$SCHEMAS_DIR" "$TEMPLATES_DIR"
+# 1. Create directory structure
+echo "[1/6] Initializing Antigravity directory hierarchy..."
+mkdir -p "$ANTIGRAVITY_DIR" "$GLOBAL_WORKFLOWS_DIR" "$SKILLS_DIR" "$SCHEMAS_DIR" "$TEMPLATES_DIR" "$SCRIPTS_DIR"
 
-echo "[1/4] Sao chép Global Workflows..."
+# 2. Install Global Workflows
+echo "[2/6] Installing Core Workflows (/init, /plan, /code, /recap...)..."
 if [ -d "$SOURCE_DIR/global_workflows" ]; then
     cp -r "$SOURCE_DIR/global_workflows/"* "$GLOBAL_WORKFLOWS_DIR/"
+    echo "  [OK] Installed workflows to $GLOBAL_WORKFLOWS_DIR"
 fi
 
-echo "[2/4] Sao chép Kỹ năng (Superpowers, GitNexus, AWF)..."
+# 3. Install Utility Scripts
+echo "[3/6] Installing Utility Scripts..."
+if [ -d "$SOURCE_DIR/scripts" ]; then
+    cp -r "$SOURCE_DIR/scripts/"* "$SCRIPTS_DIR/"
+    chmod +x "$SCRIPTS_DIR/"* 2>/dev/null || true
+    echo "  [OK] Installed utility scripts to $SCRIPTS_DIR"
+fi
+
+# 4. Install Autonomous Skills
+echo "[4/6] Installing Autonomous Skills..."
 if [ -d "$SOURCE_DIR/skills" ]; then
     cp -r "$SOURCE_DIR/skills/"* "$SKILLS_DIR/"
+    echo "  [OK] Installed skills to $SKILLS_DIR"
 fi
 
-echo "[3/4] Cấu hình MCP Server..."
-if [ -f "$SOURCE_DIR/.gemini/mcp_config.json" ] && [ ! -f "$ANTIGRAVITY_DIR/mcp_config.json" ]; then
+# 5. MCP Server Configuration
+echo "[5/6] Configuring MCP Server settings..."
+if [ -f "$SOURCE_DIR/.gemini/mcp_config.json" ]; then
     cp "$SOURCE_DIR/.gemini/mcp_config.json" "$ANTIGRAVITY_DIR/mcp_config.json"
 fi
 
-echo "4.9.0-ultimate" > "$USER_HOME/.gemini/awf_version"
+# 6. Save Version
+echo "4.11.0-ultimate" > "$HOME/.gemini/awf_version"
 
 echo "=============================================================================="
-echo "  ✨ CÀI ĐẶT HOÀN TẤT THÀNH CÔNG!"
-echo "  Mở Antigravity 2.0 và gõ: /init"
+echo "  [OK] INSTALLATION COMPLETED SUCCESSFULLY!"
 echo "=============================================================================="
+echo ""
+echo "  Open Antigravity 2.0 and type in chat:"
+echo "      /init"
+echo ""

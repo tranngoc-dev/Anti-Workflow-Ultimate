@@ -1,111 +1,72 @@
 ---
-description: 🐛 Sửa lỗi theo phân loại lỗi hệ thống, Cổng E2E, Sổ cái bằng chứng & Tự động Đúc kết Bài học
+description: 🐛 Scientific debugging, Systematic Root-Cause Tracing & Learning Synthesis
 ---
 
-# WORKFLOW: /debug - Sửa Lỗi Khoa Học & Phân Loại Lỗi Hệ Thống (v4.9.0)
+# WORKFLOW: /debug - Scientific Debugging & Systematic Root-Cause Tracing (v4.11.0)
 
-**Vai trò:** Root-Cause Investigator & Reliability Lead  
-**Mục tiêu:** Phân loại lỗi chính xác (Transient vs Deterministic), định vị nguyên nhân gốc rễ qua **GitNexus Trace**, bắt buộc viết kịch bản E2E tái hiện lỗi, ghi bằng chứng vào **Sổ Cái Kiểm Thử (`.brain/verification_ledger.json`)**, và **TỰ ĐỘNG ĐÚC KẾT BÀI HỌC HOẶC TỔNG HỢP SKILL MỚI**.
+**Role:** Root-Cause Investigator & Reliability Lead  
+**Objective:** Classify errors (Transient vs Deterministic), trace execution paths via **GitNexus Trace**, lock regressions with targeted tests, record evidence in **Verification Ledger (`.brain/verification_ledger.json`)**, and **synthesize learnings into `.brain/learnings.md`**.
 
 ---
 
-## 🗺️ Vị Trí Trong Quy Trình Khép Kín
+## 🗺️ Position in the Closed-Loop Lifecycle
 
 ```
-Khi phát hiện Bug trong [/code], [/test], E2E Gate hoặc Live-Test
+Error Detected in [/code], [/test], or Live-Testing
    ↓
-[/debug] ← BẠN ĐANG Ở ĐÂY
-   ├── Phase A: Phân loại lỗi (Transient vs Deterministic)
-   ├── Phase B: Khóa lỗi bằng Targeted E2E Test (FAIL)
-   ├── Phase C: Sửa tối thiểu & Failed-First-Fix
-   ├── Phase D: Xác minh E2E & Ghi sổ cái (.brain/verification_ledger.json)
-   └── Phase E: Tự động đúc kết (.brain/learnings.md & Custom Skill)
+[/debug] ← YOU ARE HERE
+   ├── Phase A: Error Classification & Root Cause Tracing
+   ├── Phase B: Lock Regression with Failing Automated Test
+   ├── Phase C: Minimal Fix & Failed-First-Fix Stop Gate
+   ├── Phase D: Verification & Ledger Recording
+   └── Phase E: Autonomous Learning & Skill Synthesis
    ↓
-Tiếp tục [/code] hoặc [/test]
+Resume [/code] or [/test]
 ```
 
 ---
 
-## Giai đoạn 1: Phân Loại Lỗi & Truy Vết Gốc Rễ (Phase A - Investigate)
+## Phase A: Classify & Investigate
 
-### 🔹 1.1. Phân loại lỗi theo Taxonomy (Học hỏi từ Hermes):
-* **Nhóm 1: Lỗi tạm thời (Transient Errors):**
-  * *Triệu chứng:* Timeout kết nối, HTTP 503 Overloaded, HTTP 429 Rate limit.
-  * *Hành động:* Tự động kích hoạt Exponential Backoff & Retry (tối đa 3 lần).
-* **Nhóm 2: Lỗi hệ thống / Logic (Deterministic Errors):**
-  * *Triệu chứng:* HTTP 400 Bad Request, Ambiguous Foreign Key PostgREST, Lỗi cú pháp/Type, Lỗi Logic, HTTP 401/403.
-  * *Hành động:* **CẤM RETRY MÙ QUÁNG.** Dừng ngay lập tức để điều tra nguyên nhân cốt lõi.
-
-### 🔹 1.2. Truy vết chuỗi gọi & Trích xuất mã nguồn phẫu thuật (Hybrid Trace & Explore):
-* **Semantic Brain Query:** Chạy `.\scripts\brain-query.ps1 -Query "<Triệu chứng lỗi>"` để tra cứu nhanh xem lỗi này đã từng gặp và có giải pháp chuẩn chưa.
-* **GitNexus:** Dùng `gitnexus:trace` để tìm đường dẫn gọi giữa điểm nổ lỗi và nguồn input, và `gitnexus:impact` để kiểm tra vùng ảnh hưởng.
-* **CodeGraph:** Dùng `codegraph explore <vấn đề>` để lấy ngay mã nguồn thực tế (verbatim line-numbered source) của các điểm nút nghi vấn.
-* **Staleness Guard:** Kiểm tra cảnh báo `⚠️` của CodeGraph để đảm bảo không phân tích trên mã nguồn cũ đang sửa dở.
-* Hình thành tối đa 3 giả thuyết xếp hạng được chứng minh bằng log runtime.
+1. **Error Taxonomy:**
+   * **Transient Errors (503, 429, Timeout):** Exponential backoff with jitter (max 3 retries).
+   * **Deterministic Errors (Ambiguous FK, Logic, Type, 400, 401/403):** Stop retrying. Investigate root causes with runtime evidence.
+2. **Hybrid Trace & Code Extraction:**
+   * **Semantic Brain Query:** Run `.\scripts\brain-query.ps1 -Query "<Error Symptom>"` to check for prior proven solutions.
+   * **GitNexus:** Use `gitnexus:trace` to map call paths from input to failure, and `gitnexus:impact` for blast radius.
+   * **CodeGraph:** Use `codegraph explore <symbol>` for surgical line-numbered source.
 
 ---
 
-## Giai đoạn 2: Khóa Lỗi Bằng Kịch Bản Test E2E Thật (Phase B - Lock Regression)
+## Phase B: Lock the Regression
 
-* Viết một **Kịch bản Targeted E2E Test (Playwright / API Integration Probe)** tái hiện chính xác thao tác gây lỗi:
-  * Ví dụ: Gọi query embed `questions` $\to$ Chứng minh lỗi PostgREST 400 Ambiguous FK xuất hiện (**Test FAIL**).
-* Tuyệt đối không dùng Unit Test mock để tái hiện lỗi liên quan đến Database/API.
+* Write a minimal failing test (Unit or API Integration probe) reproducing the exact bug before altering production logic.
 
 ---
 
-## Giai đoạn 3: Thực Thi Bản Vá Tối Thiểu (Phase C - Minimal Fix)
+## Phase C: Minimal Fix & Failed-First-Fix Rule
 
-* Sửa đúng các file/hàm liên quan trực tiếp đến root cause (ví dụ: thêm explicit FK hint `profiles!author_id(...)`).
-* Tuân thủ nguyên tắc "Thay đổi tối thiểu (Minimal Change Principle)".
-
-### 🚨 QUY TẮC BẮT BUỘC: Failed-First-Fix Rule
-Nếu bản vá đầu tiên không pass hoặc làm gãy test khác:
-1. **DỪNG LẠI NGAY LẬP TỨC.** Rollback về trạng thái ban đầu.
-2. Quay lại Giai đoạn 1 với bằng chứng mới.
-3. **CẤM:** Không được đắp thêm bản vá suy đoán thứ 2, thứ 3 chồng lên bản vá hỏng.
+* Apply the smallest clean patch addressing the confirmed cause.
+* **Failed-First-Fix Rule:** If the first fix attempt fails, stop immediately, revert the patch, and return to Phase A investigation.
 
 ---
 
-## Giai đoạn 4: Xác Minh Qua Cổng E2E & Ghi Sổ Cái Bằng Chứng (Phase D)
+## Phase D: Verify & Record Ledger
 
-1. **Chạy Lại Kịch Bản E2E Test:**
-   * Khởi động server và chạy lại kịch bản E2E (Timeout 30s).
-   * **Yêu cầu:** Test chuyển từ **FAIL ➔ PASS 100%**, Zero Network Status $\ge 400$.
-2. **Ghi nhận vào Sổ Cái Bằng Chứng (`.brain/verification_ledger.json`):**
-   ```json
-   {
-     "type": "bugfix_verification",
-     "bug_id": "{BUG_ID}",
-     "command": "npx playwright test tests/e2e/{bug_spec}.spec.ts",
-     "status": "PASSED",
-     "exit_code": 0,
-     "timestamp": "{ISO_UTC_TIMESTAMP}"
-   }
-   ```
-3. **Chạy Test Suite & Dọn dẹp tiến trình (Process Guard):**
-   * Tắt toàn bộ dev server và headless chrome ngầm.
-4. **Commit thay đổi qua cổng kiểm tra `guardrails/hooks/pre-commit`.**
+1. Re-run tests to confirm status changed from **FAIL ➔ PASS**.
+2. Record evidence in `.brain/verification_ledger.json`.
+3. Auto-clean all background test processes.
 
 ---
 
-## Giai đoạn 5: Tự Động Học Hỏi & Tổng Hợp Kỹ Năng (Phase E - Auto-Reflection & Skill Synthesis)
+## Phase E: Autonomous Learning & Skill Synthesis
 
-Ngay sau khi commit thành công, AI **TỰ ĐỘNG** thực hiện:
-
-1. **Tạo / Append vào file `.brain/learnings.md`:**
-   ```markdown
-   ### 📝 [LEARNING-{YYYYMMDD}-{INDEX}] {Tên lỗi & Phân loại}
-   - 📍 **Triệu chứng & Phân loại:** {Transient / Deterministic} - {Mã lỗi/HTTP status}
-   - 🔍 **Nguyên nhân gốc rễ (Root Cause):** {Bản chất kỹ thuật gây ra lỗi}
-   - 💡 **Giải pháp chuẩn (Proven Fix):** {Cách sửa chính xác và an toàn nhất}
-   - 🚫 **Anti-Pattern cần tránh:** {Những điều TUYỆT ĐỐI KHÔNG làm trong tương lai}
-   - 🛡️ **Tiến hóa Quy trình:** {Đề xuất rule bổ sung nếu là lỗi nghiêm trọng}
-   ```
-
-2. **Tổng Hợp Kỹ Năng Tái Sử Dụng (Autonomous Skill Synthesis - Nếu Cần):**
-   * Nếu giải pháp giải quyết một bài toán kiến trúc lớn có tính tái sử dụng cao $\to$ AI tự động đóng gói thành một file `skills/custom/[skill-name]/SKILL.md` chuẩn `agentskills.io`.
-
-3. **Ghi log tiến trình vào `.brain/session_log.txt`:**
-   ```
-   [HH:MM] BUG_RESOLVED_AND_LEARNED: {Tên lỗi} -> Logged to .brain/learnings.md & verification_ledger.json
-   ```
+Append to `.brain/learnings.md`:
+```markdown
+### [LEARNING-YYYYMMDD-INDEX] {Error Title & Classification}
+- 📍 **Symptom & Category:** {Transient / Deterministic} - {Error Code / Status}
+- 🔍 **Root Cause:** {Technical root cause explanation}
+- 💡 **Proven Solution:** {Exact verified fix}
+- 🚫 **Anti-Pattern:** {Practices to strictly avoid}
+- 🛡️ **Rule Evolution:** {Proposed guardrail updates if severe}
+```

@@ -1,65 +1,42 @@
 ---
-description: 🧠 Đóng gói kiến thức dự án, Tổng hợp Custom Skill & Chuẩn bị Bàn giao Session mới
+description: 🧠 Checkpoint project state, decisions & eternal memory
 ---
 
-# WORKFLOW: /save-brain - Đóng Gói Bộ Nhớ Vĩnh Cửu & Tổng Hợp Kỹ Năng (v4.9.0)
+# WORKFLOW: /save-brain - Eternal Memory Checkpoint & Handoff (v4.11.0)
 
-**Vai trò:** Knowledge Archivist & Eternal Context Manager  
-**Mục tiêu:** Lưu trữ toàn bộ quyết định kiến trúc, bài học kỹ thuật, sổ cái bằng chứng kiểm thử vào `.brain/`, **tổng hợp Custom Skills tái sử dụng**, và chuẩn bị dữ liệu tinh gọn cho phiên làm việc tiếp theo.
+**Role:** Knowledge Archivist & Session Controller  
+**Objective:** Save current development progress, architectural decisions, and newly synthesized skills into `.brain/`, preparing a clean handoff for the next session.
 
 ---
 
-## 🗺️ Vị Trí Trong Quy Trình Khép Kín
+## 🗺️ Position in the Closed-Loop Lifecycle
 
 ```
-Sau khi hoàn thành [/init], [/plan], hoặc 1 Phase trong [/code]
+Feature Completed / End of Work Session
    ↓
-[/save-brain] ← BẠN ĐANG Ở ĐÂY (Đóng gói Eternal Context & Custom Skills)
+[/save-brain] ← YOU ARE HERE
    ↓
-🔄 [MỞ CHAT SESSION MỚI ➔ Gõ /recap]
+Open Fresh Chat Session ➔ Type [/recap]
 ```
 
 ---
 
-## Giai đoạn 1: Thu Thập & Đóng Gói Dữ Liệu
+## Stage 1: Record Milestones & State
 
-1. **Ghi nhận Quyết định Kỹ thuật (Decisions):**
-   * Công nghệ mới chọn lựa, lý do tại sao chọn (Trade-offs) lưu vào `.brain/decisions.json`.
-2. **Tổng Hợp Custom Skills Tái Sử Dụng (Autonomous Skill Synthesis):** ⭐ MỚI
-   * Rà soát các bài toán phức tạp vừa giải quyết trong Phase vừa qua.
-   * Nếu có một module hoặc kỹ thuật đặc thù có giá trị tái sử dụng cao cho tương lai $\to$ Tự động trích xuất thành file `skills/custom/[skill-name]/SKILL.md` theo chuẩn mở `agentskills.io`.
-3. **Cập nhật Tiến độ & Checkpoint:**
-   * Ghi nhận trạng thái hoàn thành của Phase hiện tại vào `.brain/session.json`.
-   * Ghi nhận các file đã thay đổi, commit hash gần nhất vào `.brain/session_log.txt`.
-   * Đồng bộ Sổ Cái Bằng Chứng Kiểm Thử `.brain/verification_ledger.json`.
-4. **Tạo Snapshot Bàn giao (Handover Snapshot):**
-   * Lưu snapshot tóm tắt vào `.brain/handovers/handover-phase-{X}.json`.
+1. Update `.brain/session.json` with active plan path and feature status.
+2. Append timestamped milestone to `.brain/session_log.txt`.
+3. Checkpoint Verification Ledger (`.brain/verification_ledger.json`).
 
 ---
 
-## Giai đoạn 2: Báo Cáo Hoàn Tất & Hướng Dẫn Bàn Giao
+## Stage 2: Archive Learnings & Synthesize Skills
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🧠 BỘ NHỚ VĨNH CỬU & SKILLS ĐÃ ĐƯỢC LƯU AN TOÀN!
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Review bug fixes and ensure proven solutions are documented in `.brain/learnings.md`.
+2. Synthesize complex reusable engineering techniques into `skills/custom/[skill-name]/SKILL.md`.
 
-📁 Trạng thái: .brain/session.json (Updated)
-📝 Tiến độ: .brain/session_log.txt (Logged)
-📜 Sổ cái kiểm thử: .brain/verification_ledger.json (Synchronized)
-🧠 Bài học kinh nghiệm: .brain/learnings.md ({N} learnings active)
-📦 Snapshot bàn giao: .brain/handovers/handover-latest.json
+---
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💡 GIAO THỨC MODULAR CONVERSATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## Stage 3: Modular Session Handoff
 
-Dữ liệu đã được lưu trữ an toàn trên ổ đĩa.
-👉 Để tiếp tục làm việc với Context Window sạch 100% và tốc độ tối đa:
-1. Mở một Thread/Session Chat mới trong Antigravity.
-2. Gõ lệnh:
-
-    /recap
-
-AI sẽ nạp lại bối cảnh trong nháy mắt và tiếp tục công việc!
-```
+Display instructions:
+> *"🎉 Project memory checkpointed! Please open a fresh chat session and type `/recap` to proceed with full AI reasoning capacity."*

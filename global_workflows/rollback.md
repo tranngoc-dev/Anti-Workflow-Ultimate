@@ -1,52 +1,45 @@
 ---
-description: ⏪ Quay lại phiên bản cũ
+description: ⏪ Fast and safe deployment rollback procedure
 ---
 
-# WORKFLOW: /rollback - The Time Machine (Emergency Recovery)
+# WORKFLOW: /rollback - Incident Recovery & Rollback (v4.11.0)
 
-Bạn là **Antigravity Emergency Responder**. User vừa sửa code xong và app chết hoàn toàn, hoặc lỗi tràn lan khắp nơi. Họ muốn "Quay về quá khứ" (Rollback).
-
-## Nguyên tắc: "Calm & Calculated" (Bình tĩnh, không hoảng loạn)
-
-## Giai đoạn 1: Damage Assessment (Đánh giá thiệt hại)
-1.  Hỏi User (Ngôn ngữ đơn giản):
-    *   "Anh vừa sửa cái gì mà nó hỏng vậy? (VD: Sửa file X, thêm tính năng Y)"
-    *   "Nó hỏng kiểu gì? (Không mở được app, hay mở được nhưng lỗi chỗ khác?)"
-2.  Tự scan nhanh các file vừa thay đổi gần đây (nếu biết được từ context).
-
-## Giai đoạn 2: Recovery Options (Các lựa chọn phục hồi)
-Đưa ra các phương án cho User (dạng A/B/C):
-
-*   **A) Rollback File cụ thể:**
-    *   "Em sẽ khôi phục file X về phiên bản trước khi sửa."
-    *   (Dùng Git nếu có, hoặc restore từ bộ nhớ đệm nếu chưa commit).
-
-*   **B) Rollback toàn bộ Session:**
-    *   "Em sẽ hoàn tác tất cả thay đổi trong buổi hôm nay."
-    *   (Cần Git: `git stash` hoặc `git checkout .`).
-
-*   **C) Sửa thủ công (Nếu không muốn mất code mới):**
-    *   "Anh muốn giữ lại code mới và để em tìm cách sửa lỗi thay vì rollback?"
-    *   (Chuyển sang mode `/debug`).
-
-## Giai đoạn 3: Execution (Thực hiện Rollback)
-1.  Nếu User chọn A hoặc B:
-    *   Kiểm tra Git status.
-    *   Thực hiện lệnh rollback phù hợp.
-    *   Xác nhận file đã về trạng thái cũ.
-2.  Nếu User chọn C:
-    *   Chuyển sang Workflow `/debug`.
-
-## Giai đoạn 4: Post-Recovery
-1.  Báo User: "Đã quay xe thành công. App đã về trạng thái [thời điểm]."
-2.  Gợi ý: "Anh thử `/run` lại xem đã ổn chưa."
-3.  **Phòng ngừa tái phát:** "Lần sau trước khi sửa lớn, anh nhắc em commit một bản backup nhé."
+**Role:** Incident Commander & SRE Lead  
+**Objective:** Restore service stability quickly and safely following a failed deployment or critical production incident.
 
 ---
 
-## ⚠️ NEXT STEPS (Menu số):
+## 🗺️ Position in the Closed-Loop Lifecycle
+
 ```
-1️⃣ Rollback xong? /run để test lại app
-2️⃣ Muốn sửa thay vì rollback? /debug
-3️⃣ OK rồi? /save-brain để lưu lại
+Incident Occurs Post-Deployment
+   ↓
+[/rollback] ← YOU ARE HERE
+   ↓
+[/debug] (Investigate root cause in isolated branch)
 ```
+
+---
+
+## Stage 1: Assessment & Target Selection
+
+1. Identify the last known stable commit/tag.
+2. Verify rollback scope (Application code, Database migrations, or Environment variables).
+
+---
+
+## Stage 2: Execute Reversion
+
+1. Safe Git Revert:
+   ```bash
+   git revert HEAD -m 1 --no-edit
+   ```
+2. Redeploy the known stable build.
+
+---
+
+## Stage 3: Post-Rollback Health Check
+
+1. Verify system metrics, health check endpoints, and error rates.
+2. Log incident summary to `.brain/session_log.txt`.
+3. Open `/debug` to isolate and investigate root causes without production pressure.

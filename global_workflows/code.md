@@ -1,125 +1,87 @@
 ---
-description: 💻 Thực thi viết code theo chuẩn Smart TDD & Cổng Targeted E2E
+description: 💻 Execute tasks via Subagents, Strict TDD & Targeted E2E Gate
 ---
 
-# WORKFLOW: /code - Cỗ Máy Lập Trình Subagent TDD & Cổng Kiểm Thử Thông Minh
+# WORKFLOW: /code - Autonomous Subagent TDD & Targeted Verification Engine (v4.11.0)
 
-**Vai trò:** Senior Technical Lead & Subagent Controller (Tuấn)  
-**Mục tiêu:** Thực thi kế hoạch lập trình tự trị bằng Subagents, cô lập nhánh qua Git Worktree, áp dụng **Smart TDD (Smallest Scoped Test cho từng task $< 2$s)** và **Targeted E2E Smoke Test (có auto-cleanup tiến trình)** khi hoàn thành Feature.
+**Role:** Senior Technical Lead & Subagent Controller  
+**Objective:** Execute implementation plans autonomously using Subagents, isolated Git Worktrees, **Smart TDD (Smallest Scoped Unit Test < 1s)**, and **Targeted E2E Smoke Tests with Process Guard** upon feature completion.
 
 ---
 
-## 🗺️ Vị Trí Trong Quy Trình Khép Kín
+## 🗺️ Position in the Closed-Loop Lifecycle
 
 ```
 [/plan] ➔ [MODULAR HANDOVER]
    ↓
-[/code] ← BẠN ĐANG Ở ĐÂY (Smart TDD + CỔNG TARGETED E2E)
+[/code] ← YOU ARE HERE (Smart TDD + Targeted E2E Gate)
    ↓
-[/review] (Task Reviewer 2 Lớp + GitNexus AST Shape Check)
+[/review] (2-Stage Review: Spec Compliance + Code Quality)
    ↓
-[/audit] ➔ [/deploy] (Cổng Live-Test & Triển khai)
+[/audit] ➔ [/deploy] (Live-Test & Production Release)
 ```
 
 ---
 
-## Giai đoạn 0: Nhận Diện Ngữ Cảnh & Kế Hoạch (Context Detection)
+## Stage 0: Context Hydration & Worktree Isolation
 
-1. **Tìm Kế hoạch Active:**
-   * Đọc `.brain/session.json` để lấy `current_plan_path`.
-   * Nếu chưa có, tìm file plan mới nhất trong `docs/superpowers/plans/`.
-2. **Khởi Tạo Môi Trường Cô Lập (Git Worktree):**
-   * Sử dụng kỹ năng `superpowers:using-git-worktrees` tạo branch mới:
-     ```bash
-     git checkout -b feature/{feature-name}
-     ```
-   * Tuyệt đối không code trực tiếp trên `main` hoặc `master`.
+1. **Locate Active Plan:** Read `.brain/session.json` to get `current_plan_path`.
+2. **Create Isolated Worktree:**
+   ```bash
+   git checkout -b feature/{feature-name}
+   ```
+   * Never code directly on `main` or `master`.
 
 ---
 
-## Giai đoạn 1: Điều Phối Subagent & Vòng Lặp Smart TDD (Hybrid Code-Intelligence)
-
-Áp dụng quy tắc **Kim Tự Tháp Kiểm Thử (Test Pyramid)** kết hợp **CodeGraph Live Auto-Sync** trong từng Task:
+## Stage 1: Subagent Coordination & Smart TDD Loop
 
 ```mermaid
 flowchart TD
-    A["Đọc Task N từ Plan File: .\scripts\task-brief.ps1 -Validate"] --> B["🛡️ Pre-flight Task Contract Check (Goal + Acceptance Criteria)"]
+    A["Read Task N from Plan: .\scripts\task-brief.ps1 -Validate"] --> B["🛡️ Pre-flight Task Contract Check (Goal + Acceptance Criteria)"]
     B --> C["Dispatch Implementer Subagent"]
-    C --> C1["🔍 CodeGraph Single-Shot Explore (Trích xuất code + call paths)"]
-    C1 --> D["1. RED: Viết Smallest Scoped Unit Test Fail (< 1s)"]
-    D --> E["2. GREEN: Viết Code tối thiểu để Unit Test Pass"]
-    E --> E1["⚡ CodeGraph Live Watcher tự động cập nhật đồ thị (Debounce 2s)"]
-    E1 --> F["3. REFACTOR: Tối ưu code & Thêm Explicit FK Hints"]
-    F --> G{"Đã xong toàn bộ Tasks của Feature?"}
-    G -->|Chưa xong| H["Commit Task N qua Guardrail ➔ Làm tiếp Task N+1"]
+    C --> C1["🔍 CodeGraph Single-Shot Explore (Extract code + call paths)"]
+    C1 --> D["1. RED: Write Smallest Scoped Unit Test Fail (< 1s)"]
+    D --> E["2. GREEN: Write minimal code to pass Unit Test"]
+    E --> E1["⚡ CodeGraph Live Watcher auto-updates graph (Debounce 2s)"]
+    E1 --> F["3. REFACTOR: Clean code & Enforce Explicit FK Hints"]
+    F --> G{"All tasks in Feature completed?"}
+    G -->|No| H["Commit Task N via Guardrail ➔ Proceed to Task N+1"]
     H --> A
-    G -->|Đã xong hết| I["🚨 4. CỔNG TARGETED E2E SMOKE TEST"]
-    I --> J["Chạy Server ngầm + Playwright / API Probe (Timeout 30s)"]
-    J --> K["Tự động Kill Background Process (Auto-Cleanup & Process Guard)"]
-    K --> L{"E2E Pass 100% & 0 Lỗi Network $\ge 400$?"}
-    L -->|❌ FAIL| M["Vào Fix Loop (Tối đa 3 lần, Failed-First-Fix)"]
+    G -->|Yes| I["🚨 4. TARGETED E2E SMOKE TEST GATE"]
+    I --> J["Run server in background + Playwright / API Probe (Timeout 30s)"]
+    J --> K["Auto-Kill Background Processes (Process Guard Cleanup)"]
+    K --> L{"E2E Pass 100% & Zero Network Errors >= 400?"}
+    L -->|FAIL| M["Enter Fix Loop (Max 3 iterations, Failed-First-Fix)"]
     M --> C
-    L -->|✅ PASS| N["Dispatch Task Reviewer Subagent (Spec + Quality)"]
+    L -->|PASS| N["Dispatch Task Reviewer Subagent (Spec + Quality)"]
 ```
 
 ---
 
-## Giai đoạn 2: Chi Tiết Cổng Targeted E2E & Bảo Vệ Tiến Trình (Process Guard)
+## Stage 2: Targeted E2E Smoke Test Gate & Process Guard
 
-Khi toàn bộ tasks của Feature đã hoàn thành, AI thực hiện bước nghiệm thu:
-
-1. **Chỉ Test Đúng Tính Năng Vừa Làm (Targeted E2E):**
-   * Không chạy lại toàn bộ test suite khổng lồ của cả hệ thống. Chỉ chạy kịch bản E2E kiểm tra đúng màn hình/API vừa phát triển.
-   * **Quy tắc Smart Test:** Chỉ test logic nghiệp vụ của ứng dụng, không test lại framework/database primitives (như trùng UUID hay ACID isolation).
-2. **Kiểm soát Timeout & Tự Động Dọn Dẹp Tiến Trình (Process Guard):**
-   * Thiết lập **Hard Timeout (30s)** cho kịch bản E2E.
-   * **Bắt buộc Cleanup:** Dù test PASS hay FAIL, script phải tự động kill dev server và headless chrome, không để lại tiến trình ma gây ngốn CPU/RAM.
-3. **Tiêu Chí Đạt Cổng E2E (Acceptance Criteria):**
-   * ✅ DOM render đúng dữ liệu từ Database.
-   * ✅ **Zero Network Errors:** Không có bất kỳ request API nào trả về HTTP status $\ge 400$ (bắt dính lỗi Ambiguous FK hay CORS).
-   * ✅ Browser Console sạch (0 Uncaught Exceptions).
+Upon completing all tasks in a feature:
+1. **Targeted Scope:** Execute only the E2E test verifying the newly built feature. Never re-run the entire monolithic test suite during task loops.
+2. **Process Guard:** Enforce Hard Timeout (30s) and guaranteed process cleanup (kill orphan dev servers/browsers).
+3. **Acceptance Gate:** DOM renders correctly, **Zero Network Errors (HTTP $\ge 400$)**, and clean console (0 uncaught exceptions).
 
 ---
 
-## Giai đoạn 3: Xử Lý Lỗi Theo Bằng Chứng (Failed-First-Fix Rule)
+## Stage 3: Evidence-Based Debugging & Failed-First-Fix
 
-Nếu một lần fix E2E thất bại:
-* **DỪNG LẠI NGAY LẬP TỨC.** Rollback thay đổi thử nghiệm.
-* Kích hoạt `systematic-debugging` kết hợp `gitnexus trace` để tìm chính xác root cause.
-* Cấm đắp thêm các tầng vá lỗi suy đoán (speculative patch) hay fallback che giấu lỗi.
+If E2E tests fail:
+* **STOP IMMEDIATELY.** Revert speculative changes.
+* Run `gitnexus trace` and `.\scripts\brain-query.ps1` to investigate root causes deterministically.
+* Never stack speculative patches on top of a failed implementation.
 
 ---
 
-## Giai đoạn 4: Đóng Gói Checkpoint & Handover Phase Tiếp Theo
+## Stage 4: Checkpoint & Session Handover
 
-Khi toàn bộ Feature hoàn thành và **Targeted E2E đã PASS**:
-1. Append vào `.brain/session_log.txt`:
-   ```
+1. Log to `.brain/session_log.txt`:
+   ```text
    [HH:MM] FEATURE_COMPLETE: {feature_name} (All tasks passed, Targeted E2E Verified ✅)
    ```
-2. Cập nhật `.brain/session.json`.
-3. Chạy `npx gitnexus analyze` để cập nhật lại đồ thị quan hệ codebase.
-
-4. **Hiển Thị Báo Cáo Bàn Giao (Modular Handover):**
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎉 FEATURE {X} ĐÃ HOÀN THÀNH XUẤT SẮC!
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-✅ Tasks: {N}/{N} tasks hoàn thành (Smart TDD Unit Tests $< 1$s)
-🌐 Targeted E2E: PASSED (Đã xác thực hành vi thật trên trình duyệt & Database)
-🧹 Tiến trình: Đã dọn dẹp sạch sẽ (CPU/RAM mát rượi)
-📁 Files: {số files tạo mới/chỉnh sửa}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💡 GIAO THỨC MODULAR CONVERSATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-👉 Để bước sang Phase tiếp theo với 100% công suất AI:
-Anh hãy MỞ MỘT CHAT SESSION MỚI và gõ:
-
-    /recap
-
-AI sẽ nạp lại ngữ cảnh tinh gọn (~800 tokens) và sẵn sàng thực thi Phase tiếp theo!
-```
+2. Update `.brain/session.json` and refresh graph index (`gitnexus analyze`).
+3. Display Modular Handover Notice: Open a fresh chat session and type `/recap`.

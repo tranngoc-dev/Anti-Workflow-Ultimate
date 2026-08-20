@@ -1,13 +1,13 @@
 <#
 .SYNOPSIS
-    Truy vấn tri thức ngữ cảnh thông minh (Micro RAG) từ .brain/learnings.md
+    Semantic / Keyword Micro RAG query for .brain/learnings.md
 .DESCRIPTION
-    Trích xuất đúng các bài học liên quan đến từ khóa/lỗi hiện tại để nạp vào context,
-    tránh đọc toàn bộ file làm phình to Context Window.
+    Extracts relevant historical learnings matching current error/topic keywords,
+    optimizing token usage and preventing context window bloat.
 .PARAMETER Query
-    Từ khóa hoặc chuỗi mô tả lỗi cần tìm (vd: "Ambiguous Foreign Key", "Rate Limit")
+    Search keywords or error description (e.g., "Ambiguous Foreign Key", "Rate Limit")
 .PARAMETER Limit
-    Số lượng bài học tối đa cần lấy (mặc định: 2)
+    Maximum number of learnings to return (default: 2)
 #>
 
 [CmdletBinding()]
@@ -30,14 +30,14 @@ if (-not (Test-Path $BrainPath)) {
     } elseif (Test-Path "../../$BrainPath") {
         $BrainPath = "../../$BrainPath"
     } else {
-        Write-Output "INFO: Chưa tìm thấy file $BrainPath. Không có bài học nào được nạp."
+        Write-Output "INFO: $BrainPath not found. No learnings loaded."
         exit 0
     }
 }
 
 $content = Get-Content -Path $BrainPath -Raw -Encoding UTF8
 if ([string]::IsNullOrWhiteSpace($content)) {
-    Write-Output "INFO: File $BrainPath trống."
+    Write-Output "INFO: $BrainPath is empty."
     exit 0
 }
 
@@ -63,7 +63,7 @@ if ($learnings.Count -eq 0) {
 
 if ([string]::IsNullOrWhiteSpace($Query)) {
     $latest = $learnings | Select-Object -Last $Limit
-    Write-Output "=== [SEMANTIC BRAIN: $Limit BÀI HỌC MỚI NHẤT] ==="
+    Write-Output "=== [SEMANTIC BRAIN: $Limit MOST RECENT LEARNINGS] ==="
     foreach ($item in $latest) {
         Write-Output $item
         Write-Output "`n---`n"
@@ -97,14 +97,14 @@ foreach ($l in $learnings) {
 $results = $scoredLearnings | Sort-Object -Property Score -Descending | Select-Object -First $Limit
 
 if ($results.Count -eq 0) {
-    Write-Output "INFO: Không tìm thấy bài học nào khớp với từ khóa '$Query'."
+    Write-Output "INFO: No learnings found matching query '$Query'."
     $fallback = $learnings | Select-Object -Last 1
     if ($fallback) {
-        Write-Output "`n=== [FALLBACK: BÀI HỌC MỚI NHẤT] ==="
+        Write-Output "`n=== [FALLBACK: MOST RECENT LEARNING] ==="
         Write-Output $fallback
     }
 } else {
-    Write-Output "=== [SEMANTIC BRAIN: TOP $($results.Count) BÀI HỌC KHỚP VỚI '$Query'] ==="
+    Write-Output "=== [SEMANTIC BRAIN: TOP $($results.Count) LEARNINGS MATCHING '$Query'] ==="
     foreach ($r in $results) {
         Write-Output $r.Content
         Write-Output "`n---`n"

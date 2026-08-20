@@ -1,75 +1,70 @@
 ---
-description: 📋 Lên kế hoạch tính năng chi tiết có tính toán Impact, TDD & Bài học kinh nghiệm
+description: 📋 Author Smart TDD Implementation Plans with Blast Radius & Historical Learnings
 ---
 
-# WORKFLOW: /plan - Lập Kế Hoạch Tính Năng TDD & Đối Chiếu Bài Học Kinh Nghiệm (v4.8.0)
+# WORKFLOW: /plan - TDD Implementation Planning & Blast Radius Analysis (v4.11.0)
 
-**Vai trò:** Lead Software Architect & Technical Planner  
-**Mục tiêu:** Chuyển đổi ý tưởng thành Spec và Kế hoạch Thực thi (Implementation Plan) cực kỳ chi tiết, tính toán vùng ảnh hưởng bằng **GitNexus**, **đối chiếu bài học kinh nghiệm từ `.brain/learnings.md`** để không lặp lại lỗi cũ, và chia nhỏ thành các task Smart TDD (2–5 phút).
+**Role:** Lead Software Architect & Technical Planner  
+**Objective:** Translate requirements into concrete Feature Specs and Smart TDD Implementation Plans, calculate Blast Radius via **GitNexus**, cross-reference historical lessons via **Semantic Brain Micro RAG (`scripts/brain-query.ps1`)**, and decompose work into 2–5 minute tasks.
 
 ---
 
-## 🗺️ Vị Trí Trong Quy Trình Khép Kín
+## 🗺️ Position in the Closed-Loop Lifecycle
 
 ```
 [/brainstorm] / [/visualize]
    ↓
-[gitnexus analyze] + [Đọc .brain/learnings.md]
+[gitnexus analyze] + [brain-query .brain/learnings.md]
    ↓
-[/plan] ← BẠN ĐANG Ở ĐÂY (Tạo Spec & Smart TDD Implementation Plan)
+[/plan] ← YOU ARE HERE (Feature Spec & Smart TDD Plan)
    ↓
-🔄 [MODULAR HANDOVER: /save-brain ➔ Mở Chat Session Mới]
+🔄 [MODULAR HANDOVER: /save-brain ➔ Fresh Chat Session]
    ↓
-[/code] (Chạy Subagent TDD trong Context Window sạch 100%)
+[/code] (Execute Subagent TDD in 100% clean context)
 ```
 
 ---
 
-## Giai đoạn 1: Quét Bản Đồ Kiến Trúc & Đối Chiếu Bài Học Kinh Nghiệm
+## Stage 1: Architecture Mapping & Semantic Brain Query
 
-1. **Quét bản đồ GitNexus:**
+1. **Scan Knowledge Graph:**
    ```bash
-   npx gitnexus analyze
+   gitnexus analyze
    ```
-2. **Gọi các công cụ GitNexus MCP để phân tích:**
-   * `gitnexus:query` & `gitnexus:context`: Xác định các module, cluster và interface liên quan.
-   * `gitnexus:impact`: Tính toán phạm vi ảnh hưởng (Blast Radius) khi thay đổi/thêm tính năng mới.
-   * `gitnexus:route_map`: Kiểm tra các API routes và component tiêu thụ.
-3. **Truy Vấn Tri Thức Tích Lũy Bằng Semantic Brain RAG (`scripts/brain-query.ps1`):** ⭐ MỚI
-   * Chạy truy vấn trích xuất nhanh các bài học liên quan đến từ khóa của tính năng:
-     ```powershell
-     .\scripts\brain-query.ps1 -Query "<Tên tính năng / Từ khóa kỹ thuật>"
-     ```
-   * Rà soát nhanh các Anti-Pattern hoặc lỗi từng gặp trong quá khứ (ví dụ: quy chuẩn Explicit FK hint trong Supabase, sanitize input, route dynamic hops).
-   * **Đảm bảo kế hoạch mới tuân thủ 100% các giải pháp chuẩn đã đúc kết, chỉ tốn ~100 tokens ngữ cảnh.**
+2. **Execute GitNexus MCP Tools:**
+   * `gitnexus:query` & `gitnexus:context`: Map modules, clusters, and interfaces.
+   * `gitnexus:impact`: Compute blast radius and affected dependencies.
+3. **Semantic Brain Query (`scripts/brain-query.ps1`):**
+   ```powershell
+   .\scripts\brain-query.ps1 -Query "<Feature Name / Technical Keyword>"
+   ```
+   * Retrieve the top 1-2 relevant historical lessons (~100 tokens).
+   * Ensure the new plan complies with proven architectural fixes (e.g., Explicit FK hints).
 
 ---
 
-## Giai đoạn 2: Tạo Bản Đặc Tả Kỹ Thuật (Feature Spec)
+## Stage 2: Feature Specification (`docs/superpowers/specs/<feature>.md`)
 
-Tạo file đặc tả tại `docs/superpowers/specs/<feature-name>.md` với nội dung:
-* **Mục tiêu sản phẩm:** Hành vi người dùng quan sát được.
-* **Tiêu chí nghiệm thu (Acceptance Criteria):** Điều kiện cụ thể để chứng minh tính năng hoạt động.
-* **Phạm vi ngoài lề (Out of Scope):** Những phần tuyệt đối không đụng tới.
-* **Mô hình Dữ liệu & API Contracts:** Định nghĩa Schema và Type Safety rõ ràng (áp dụng Explicit FK hint).
-
----
-
-## Giai đoạn 3: Phân Rã Kế Hoạch Thực Thi Smart TDD (Writing Plans)
-
-Tạo file kế hoạch tại `docs/superpowers/plans/<feature-name>.md` tuân thủ nguyên tắc Smart TDD:
-* Chia thành các Task nhỏ (2–5 phút thực thi mỗi task).
-* Mỗi Task **bắt buộc** gồm:
-  1. File paths chính xác.
-  2. Đoạn mã hoàn chỉnh (Full code snippet, không để placeholder `// TODO`).
-  3. Lệnh Unit Test nhỏ (Smallest Scoped Test $< 1$s) theo chuẩn Red $\to$ Green.
-* Kèm 1 kịch bản **Targeted E2E Smoke Test** chung cho cả Feature.
+Document:
+* **Product Goal:** Observable user-visible behavior.
+* **Acceptance Criteria:** Deterministic verification conditions.
+* **Out of Scope:** Boundaries that must remain untouched.
+* **Data Model & Contracts:** Types, schemas, and API routes.
 
 ---
 
-## Giai đoạn 4: Đóng Gói Checkpoint & Handover Session
+## Stage 3: Smart TDD Plan Decomposition (`docs/superpowers/plans/<feature>.md`)
 
-Sau khi tạo xong Plan:
-1. Ghi nhận đường dẫn plan vào `.brain/session.json`.
-2. Append vào `.brain/session_log.txt`.
-3. Xuất thông báo hướng dẫn người dùng mở Session Chat Mới để tiến hành `/code`.
+Decompose into discrete tasks (2–5 minutes per task):
+* Explicit file paths.
+* Complete code snippets (no `// TODO` placeholders).
+* Smallest Scoped Unit Test (< 1s) per task.
+* 1 Targeted E2E Smoke Test scenario for the entire feature.
+
+---
+
+## Stage 4: Checkpoint & Session Handover
+
+1. Record plan path in `.brain/session.json`.
+2. Append to `.brain/session_log.txt`.
+3. Provide Handover instructions for the user to open a fresh session with `/recap`.
