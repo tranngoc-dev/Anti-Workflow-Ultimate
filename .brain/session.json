@@ -1,0 +1,97 @@
+{
+  "updated_at": "2026-08-15T12:05:00Z",
+  "working_on": {
+    "feature": "Q&A Community Features & Admin Management",
+    "task": "Hoàn thành trả lời bình luận đa cấp (Facebook-style), quản lý Rank/Gold có nút SAVE trong Admin, cơ chế tự động cộng điểm Gold và nhận diện Hyperlink toàn hệ thống",
+    "status": "completed",
+    "files": [
+      "app/thread/[id]/page.js",
+      "app/admin/users/page.js",
+      "app/admin/comments/page.js",
+      "app/components/QAHomeClient.js",
+      "app/[slug]/PostClient.js",
+      "utils/qa-api.js",
+      "scripts/qa-setup.sql"
+    ],
+    "blockers": [],
+    "notes": "Đã test vượt qua toàn bộ Guardrails và push lên remote origin và ultimate."
+  },
+  "pending_tasks": [],
+  "recent_changes": [
+    {
+      "timestamp": "2026-08-15T04:20:00Z",
+      "type": "feature",
+      "description": "Bổ sung chức năng trả lời lồng nhau (Facebook-style Nested Replies) cho các bình luận Q&A với cột parent_id trên Supabase.",
+      "files": [
+        "app/thread/[id]/page.js",
+        "utils/qa-api.js",
+        "scripts/qa-setup.sql"
+      ]
+    },
+    {
+      "timestamp": "2026-08-15T04:40:00Z",
+      "type": "feature",
+      "description": "Trang /admin/users: Bổ sung nút '💾 LƯU NGAY' cho từng thành viên, nhận diện thay đổi cục bộ (dirty state) và tạo RPC admin_update_user_rank_and_gold bảo mật.",
+      "files": [
+        "app/admin/users/page.js",
+        "utils/qa-api.js",
+        "scripts/qa-setup.sql"
+      ]
+    },
+    {
+      "timestamp": "2026-08-15T04:48:00Z",
+      "type": "feature",
+      "description": "Kích hoạt hệ thống trigger tự động cộng điểm: +10 Gold khi tạo Thread, +1 Gold khi bình luận, +1 Gold khi nhận Like, +10 Gold cho Best Answer; đồng thời cộng bù điểm (backfill) cho toàn bộ thành viên.",
+      "files": [
+        "scripts/qa-setup.sql"
+      ]
+    },
+    {
+      "timestamp": "2026-08-15T04:53:00Z",
+      "type": "bugfix",
+      "description": "Cập nhật hàm is_admin() và get_registered_users() trên Supabase, sửa lỗi đồng bộ hiển thị cột ĐIỂM GOLD trên trang /admin/users.",
+      "files": [
+        "app/admin/users/page.js",
+        "scripts/qa-setup.sql"
+      ]
+    },
+    {
+      "timestamp": "2026-08-15T05:00:00Z",
+      "type": "feature",
+      "description": "Tự động nhận diện, highlight và tạo thẻ hyperlink an toàn cho toàn bộ URL trong bài viết, trích đoạn, câu hỏi, bình luận và phản hồi.",
+      "files": [
+        "utils/qa-api.js",
+        "app/components/QAHomeClient.js",
+        "app/thread/[id]/page.js",
+        "app/[slug]/PostClient.js",
+        "app/admin/comments/page.js"
+      ]
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Trigger protect_profile_score chặn âm thầm việc cộng điểm và thay đổi Rank của Admin",
+      "solution": "Gỡ bỏ trigger cũ và chuyển quyền can thiệp điểm/rank sang hàm RPC bảo mật admin_update_user_rank_and_gold với SECURITY DEFINER.",
+      "resolved": true
+    },
+    {
+      "error": "Hàm is_admin() trả về false đối với tài khoản vutrongvtv24@gmail.com khi thiếu raw_user_meta_data",
+      "solution": "Bổ sung kiểm tra email trực tiếp vutrongvtv24@gmail.com trong hàm is_admin() cấp CSDL.",
+      "resolved": true
+    }
+  ],
+  "decisions_made": [
+    {
+      "decision": "Thiết kế bảng thread_comments có khóa ngoại đệ quy parent_id ON DELETE CASCADE",
+      "reason": "Cho phép cấu trúc cây bình luận và phản hồi lồng nhau mượt mà như Facebook"
+    },
+    {
+      "decision": "Nút '💾 LƯU NGAY' trên bảng Admin Users chỉ sáng và đổi màu khi có dữ liệu sửa đổi chưa lưu",
+      "reason": "Tối ưu trải nghiệm trực quan cho Admin, tránh bấm nhầm"
+    },
+    {
+      "decision": "Viết hàm renderWithLinks nhận diện URL có stopPropagation() và tách dấu câu ở đuôi",
+      "reason": "Click link không làm kích hoạt card bài viết và không làm hỏng URL đích"
+    }
+  ]
+}
