@@ -66,8 +66,8 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
    * **Database Migration Impact Analysis:** Mỗi khi tạo bảng mới hoặc sửa Foreign Key trong SQL $\to$ **BẮT BUỘC** quét lại toàn bộ file gọi API trong codebase để phát hiện và sửa các câu query embed bị ảnh hưởng.
 7. **Phân Loại Lỗi Có Hệ Thống & Sửa Lỗi Lần Đầu Thất Bại (Error Classification & Failed-First-Fix):** ⭐ MỚI
    * **Lỗi tạm thời (Transient Errors - 503, 429, Network Timeout):** Tự động retry với Exponential Backoff (tối đa 3 lần).
-   * **Lỗi xác định (Deterministic Errors - Ambiguous FK, Logic, Type Error, 400, 401/403):** **CẤM retry mù quáng.** Dừng lại ngay lập tức, dùng `gitnexus trace` để tìm nguyên nhân gốc rễ và sửa code có bằng chứng.
-   * Nếu lần sửa đầu tiên thất bại $\to$ **DỪNG LẠI NGAY LẬP TỨC**, rollback thay đổi và quay lại bước điều tra. Cấm đắp thêm các tầng vá lỗi suy đoán (speculative patching) hoặc fallback che giấu lỗi.
+   * **Lỗi xác định (Deterministic Errors - Ambiguous FK, Logic, Type Error, 400, 401/403):** **CẤM retry mù quáng.** Dừng lại ngay lập tức, điều tra nguyên nhân gốc rễ (root cause) dựa trên bằng chứng (evidence) thực tế từ log runtime và `gitnexus trace`.
+   * **Failed-First-Fix Rule:** Nếu lần sửa đầu tiên đã thất bại (the first fix attempt has failed) $\to$ **DỪNG LẠI NGAY LẬP TỨC**, rollback thay đổi và quay lại bước điều tra (return to phase A investigation). Cấm đắp thêm các tầng vá lỗi suy đoán (speculative patching) hoặc fallback che giấu lỗi.
 8. **🧠 HỌC HỎI, ĐÚC KẾT & TỔNG HỢP KỸ NĂNG (CONTINUOUS LEARNING & SKILL SYNTHESIS):** ⭐ MỚI
    * **Tự động trích xuất bài học:** Sau mỗi lần fix bug thành công và E2E pass trong `/debug`, AI tự động đúc kết nguyên nhân, giải pháp chuẩn và anti-pattern vào `.brain/learnings.md`.
    * **Đóng gói Kỹ năng Tái sử dụng (Autonomous Skill Synthesis):** Nếu giải pháp đại diện cho một kỹ thuật phức tạp có tính tái sử dụng cao, AI tự động đóng gói thành file `skills/custom/[skill-name]/SKILL.md` chuẩn `agentskills.io` để dùng lại cho các dự án sau.
@@ -79,7 +79,7 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
    * Cấm commit khi chưa vượt qua các kiểm tra thật: `tests`, `lint`, `typecheck`, `build`, và `e2e` (nếu có).
    * **Pre-flight Task Contract Gate:** Trước khi Subagent code, bắt buộc thẩm định task brief qua `scripts/task-brief.ps1 -Validate`.
 10. **Cổng Triển Khai (Live-Test Deployment Gate):**
-   * Tuyệt đối không tự ý deploy lên production khi chưa có sự xác nhận rõ ràng của người dùng sau khi đã kiểm thử trực tiếp (Live-test) và 100% targeted tests đạt chuẩn.
+   * **Never deploy** or perform a production mutation without the user's **explicit approval** after the user has live-tested the change (Tuyệt đối không tự ý deploy lên production khi chưa có sự xác nhận rõ ràng của người dùng sau khi đã kiểm thử trực tiếp và 100% targeted tests đạt chuẩn).
 
 ---
 

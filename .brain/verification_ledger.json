@@ -1,0 +1,29 @@
+[
+  {
+    "type": "guardrail_verification",
+    "category": "tests",
+    "command": "python3 -m unittest discover -s guardrails/tests -v",
+    "status": "FAILED",
+    "exit_code": 9009,
+    "duration_ms": 90,
+    "timestamp": "2026-08-20T05:30:38.267910+00:00"
+  },
+  {
+    "type": "guardrail_verification",
+    "category": "tests",
+    "command": "C:\\Users\\Trong\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -m unittest discover -s guardrails/tests -v",
+    "status": "FAILED",
+    "exit_code": 1,
+    "duration_ms": 8327,
+    "timestamp": "2026-08-20T05:30:56.704904+00:00"
+  },
+  {
+    "type": "guardrail_verification",
+    "category": "tests",
+    "command": "C:\\Users\\Trong\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -m unittest discover -s guardrails/tests -v",
+    "status": "PASSED",
+    "exit_code": 0,
+    "duration_ms": 8598,
+    "timestamp": "2026-08-20T05:31:18.074011+00:00"
+  }
+]

@@ -254,24 +254,27 @@ def execute_commands(repo: Path, commands: list[Command], policy: dict[str, Any]
 
     import time
     for command in commands:
-        if shutil.which(command.argv[0]) is None:
-            findings.append(Finding("command.unavailable", f"Required {command.category} tool {command.argv[0]!r} is not available.", "guardrails/policy.json", remedy=f"Install {command.argv[0]!r} or correct the declared command."))
+        argv = list(command.argv)
+        if argv[0] in ("python3", "python"):
+            argv[0] = sys.executable
+        if shutil.which(argv[0]) is None:
+            findings.append(Finding("command.unavailable", f"Required {command.category} tool {argv[0]!r} is not available.", "guardrails/policy.json", remedy=f"Install {argv[0]!r} or correct the declared command."))
             continue
         start_t = time.perf_counter()
         try:
-            completed = subprocess.run(command.argv, cwd=repo, text=True, capture_output=True, timeout=timeout)
+            completed = subprocess.run(argv, cwd=repo, text=True, capture_output=True, timeout=timeout)
             dur_ms = int((time.perf_counter() - start_t) * 1000)
-            _record_ledger(repo, command.category, command.argv, completed.returncode, dur_ms)
+            _record_ledger(repo, command.category, argv, completed.returncode, dur_ms)
         except subprocess.TimeoutExpired as exc:
             dur_ms = int((time.perf_counter() - start_t) * 1000)
-            _record_ledger(repo, command.category, command.argv, 124, dur_ms)
-            findings.append(Finding("command.timeout", f"Command {command.category} ({' '.join(command.argv)}) timed out after {timeout} seconds.", remedy="Optimize test execution, eliminate infinite loops, and ensure processes terminate properly."))
+            _record_ledger(repo, command.category, argv, 124, dur_ms)
+            findings.append(Finding("command.timeout", f"Command {command.category} ({' '.join(argv)}) timed out after {timeout} seconds.", remedy="Optimize test execution, eliminate infinite loops, and ensure processes terminate properly."))
             continue
         if completed.returncode:
             detail = (completed.stderr or completed.stdout).strip()
             if len(detail) > 800:
                 detail = detail[-800:]
-            findings.append(Finding("command.failed", f"Required {command.category} command failed ({' '.join(command.argv)}). {detail}", remedy="Run the same command locally, fix its reported failure, and rerun the guardrail."))
+            findings.append(Finding("command.failed", f"Required {command.category} command failed ({' '.join(argv)}). {detail}", remedy="Run the same command locally, fix its reported failure, and rerun the guardrail."))
     return findings
 
 

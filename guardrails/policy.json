@@ -16,7 +16,9 @@
     "track_verification_ledger": true,
     "ledger_path": ".brain/verification_ledger.json"
   },
-  "commands": {},
+  "commands": {
+    "tests": [["python3", "-m", "unittest", "discover", "-s", "guardrails/tests", "-v"]]
+  },
   "debug_markers": ["DEBUG_ONLY"],
   "allowlist": [
     {"rule": "secret.private-key", "path": "guardrails/tests/test_guardrail.py", "reason": "Intentional scanner test fixture"},
@@ -24,6 +26,8 @@
     {"rule": "source.conflict-marker", "path": "guardrails/tests/test_guardrail.py", "reason": "Intentional scanner test fixture"},
     {"rule": "test.disabled", "path": "guardrails/tests/test_guardrail.py", "reason": "Intentional scanner test fixture"},
     {"rule": "source.debug-marker", "path": "guardrails/tests/test_guardrail.py", "reason": "Intentional scanner test fixture"},
-    {"rule": "source.debug-marker", "path": "GUARDRAILS.md", "reason": "Documentation of the configured marker example"}
+    {"rule": "source.debug-marker", "path": "GUARDRAILS.md", "reason": "Documentation of the configured marker example"},
+    {"rule": "source.debug-marker", "path": "README.md", "reason": "Documentation of policy and markers"},
+    {"rule": "source.debug-marker", "path": "global_workflows/audit.md", "reason": "Audit workflow documentation and instructions"}
   ]
 }

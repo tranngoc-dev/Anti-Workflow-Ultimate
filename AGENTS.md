@@ -1,5 +1,7 @@
 # AGENTS.md - Multi-Agent Directives for Anti-Workflow Ultimate
 
+> **Core Workflow Requirement:** All agents must read and strictly adhere to [AI_CODE_WORKFLOW.md](AI_CODE_WORKFLOW.md) in full before making any modifications.
+
 This repository operates under a unified multi-agent hierarchy combining Antigravity 2.0, Superpowers Subagents, and GitNexus Relational Intelligence.
 
 ## 1. Controller & Subagent Hierarchy

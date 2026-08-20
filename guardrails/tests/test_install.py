@@ -34,7 +34,9 @@ class InstallerTests(unittest.TestCase):
         install.install(self.repo)
         value = subprocess.run(["git", "config", "--local", "--get", "core.hooksPath"], cwd=self.repo, text=True, capture_output=True, check=True).stdout.strip()
         self.assertEqual("guardrails/hooks", value)
-        self.assertTrue((self.repo / "guardrails" / "hooks" / "pre-commit").stat().st_mode & 0o111)
+        import sys
+        if sys.platform != "win32":
+            self.assertTrue((self.repo / "guardrails" / "hooks" / "pre-commit").stat().st_mode & 0o111)
 
     def test_install_is_idempotent_and_preserves_previous_value(self):
         self.init_repo()
