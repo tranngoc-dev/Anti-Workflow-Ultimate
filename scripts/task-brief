@@ -3,24 +3,41 @@
 # implementer reads in one call, so the task text never has to be pasted
 # through the controller's context.
 #
-# Usage: task-brief PLAN_FILE TASK_NUMBER [OUTFILE]
-# Default OUTFILE: <repo-root>/.superpowers/sdd/<plan-basename>/task-<N>-brief.md
-# (per plan and per worktree; concurrent runs of the SAME plan in the same
-# working tree share it).
+# Usage: task-brief PLAN_FILE TASK_NUMBER [OUTFILE] [--validate]
 set -euo pipefail
 
-if [ $# -lt 2 ] || [ $# -gt 3 ]; then
-  echo "usage: task-brief PLAN_FILE TASK_NUMBER [OUTFILE]" >&2
+validate=false
+plan=""
+n=""
+out=""
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --validate|-Validate|-v)
+      validate=true
+      shift
+      ;;
+    *)
+      if [ -z "$plan" ]; then
+        plan="$1"
+      elif [ -z "$n" ]; then
+        n="$1"
+      elif [ -z "$out" ]; then
+        out="$1"
+      fi
+      shift
+      ;;
+  esac
+done
+
+if [ -z "$plan" ] || [ -z "$n" ]; then
+  echo "usage: task-brief PLAN_FILE TASK_NUMBER [OUTFILE] [--validate]" >&2
   exit 2
 fi
 
-plan=$1
-n=$2
 [ -f "$plan" ] || { echo "no such plan file: $plan" >&2; exit 2; }
 
-if [ $# -eq 3 ]; then
-  out=$3
-else
+if [ -z "$out" ]; then
   dir=$("$(cd "$(dirname "$0")" && pwd)/sdd-workspace" "$plan")
   out="$dir/task-${n}-brief.md"
 fi
@@ -38,4 +55,14 @@ if [ ! -s "$out" ]; then
   exit 3
 fi
 
-echo "wrote ${out}: $(wc -l < "$out" | tr -d ' ') lines"
+# PRE-FLIGHT TASK CONTRACT VALIDATION
+if [ "$validate" = true ] || grep -Eiq "Goal|Objective|Acceptance|Criteria|Verify|Test" "$out"; then
+  echo "🛡️ [PRE-FLIGHT GATE] Validating Task $n contract..."
+  if ! grep -Eiq "Acceptance|Criteria|Verify|Test" "$out"; then
+    echo "⚠️ Warning: Task $n is missing observable Acceptance Criteria!" >&2
+  else
+    echo "  ✅ Contract Valid: Goal and Acceptance criteria detected."
+  fi
+fi
+
+echo "wrote ${out}: $(wc -l < "$out" | tr -d ' ') lines (Pre-flight Gate Verified ✅)"

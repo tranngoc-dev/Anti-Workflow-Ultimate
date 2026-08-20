@@ -54,15 +54,28 @@ if (Test-Path $sourceScripts) {
 }
 
 # 4. Install Autonomous Skills
-Write-Host "[4/6] Installing Autonomous Skills (Superpowers, GitNexus, AWF)..." -ForegroundColor Green
+Write-Host "[4/7] Installing Autonomous Skills (Superpowers, GitNexus, AWF)..." -ForegroundColor Green
 $sourceSkills = Join-Path $sourceDir "skills"
 if (Test-Path $sourceSkills) {
     Copy-Item -Path "$sourceSkills\*" -Destination $skillsDir -Recurse -Force
     Write-Host "  [OK] Installed all skills to $skillsDir" -ForegroundColor Gray
 }
 
-# 5. Configure MCP Servers
-Write-Host "[5/6] Configuring MCP Server settings..." -ForegroundColor Green
+# 5. Install Schemas & Templates
+Write-Host "[5/7] Installing Schemas and Templates..." -ForegroundColor Green
+$sourceSchemas = Join-Path $sourceDir "schemas"
+if (Test-Path $sourceSchemas) {
+    Copy-Item -Path "$sourceSchemas\*" -Destination $schemasDir -Recurse -Force
+    Write-Host "  [OK] Installed schemas to $schemasDir" -ForegroundColor Gray
+}
+$sourceTemplates = Join-Path $sourceDir "templates"
+if (Test-Path $sourceTemplates) {
+    Copy-Item -Path "$sourceTemplates\*" -Destination $templatesDir -Recurse -Force
+    Write-Host "  [OK] Installed templates to $templatesDir" -ForegroundColor Gray
+}
+
+# 6. Configure MCP Servers
+Write-Host "[6/7] Configuring MCP Server settings..." -ForegroundColor Green
 $mcpConfigFile = Join-Path $antigravityDir "mcp_config.json"
 $sourceMcp = Join-Path $sourceDir ".gemini\mcp_config.json"
 if (Test-Path $sourceMcp) {
@@ -74,7 +87,7 @@ if (Test-Path $sourceMcp) {
     }
 }
 
-# 6. Save Version
+# 7. Save Version
 $versionFile = Join-Path $userHome ".gemini\awf_version"
 Set-Content -Path $versionFile -Value "4.11.0-ultimate" -Encoding UTF8
 

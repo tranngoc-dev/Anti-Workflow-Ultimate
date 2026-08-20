@@ -39,6 +39,13 @@
 │ • GitNexus: Knowledge Graph (LadybugDB / Cypher), Flows & Blast Radius      │
 │ • CodeGraph: Live Watcher (Auto-sync), Single-shot Explore, Framework Routes│
 │ • Smart Test Selector (codegraph affected via git diff)                     │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │
+┌──────────────────────────────────────▼──────────────────────────────────────┐
+│ 5. SMART TESTING PYRAMID & PROCESS GUARD                                    │
+│ • Layered Testing: Unit (< 1s) ➔ Targeted E2E Smoke (30s) ➔ Full Suite Gate  │
+│ • Zero Network Errors (HTTP >= 400) Acceptance Criterion                    │
+│ • Process Tree Auto-Kill: Eliminates orphan background servers & browsers   │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -50,7 +57,7 @@
    - Preserves **byte-stable** system prompts, core rules (`GEMINI.md`, `AI_CODE_WORKFLOW.md`), and tool schemas.
    - Enables Gemini and Claude to hit **90%+ Prefix Caching**, reducing token costs by 70–85% and maximizing latency performance.
 2. **🧠 Semantic Brain Micro RAG (`scripts/brain-query.ps1`):**
-   - Indexes project learnings into a fast searchable vector/FTS store. Queries only the 1-2 most relevant learnings (~100 tokens) instead of parsing entire text files.
+   - Indexes project learnings into a fast searchable store. Queries only the 1-2 most relevant learnings (~100 tokens) instead of parsing entire text files.
 3. **🛡️ Pre-flight Task Contract Gate (`scripts/task-brief.ps1 -Validate`):**
    - Verifies Goal, Acceptance Criteria, Scoped Test Files, and Database constraints **before** subagents write code, catching hallucinations early.
 4. **📜 Observability & Verification Ledger (`.brain/verification_ledger.json`):**
@@ -64,12 +71,12 @@
 
 ### Windows (PowerShell):
 ```powershell
-& "D:\AntiGravity\Anti-Workflow-Ultimate\install.ps1"
+& ".\install.ps1"
 ```
 
 ### Linux / macOS (Bash):
 ```bash
-bash "D:\AntiGravity\Anti-Workflow-Ultimate/install.sh"
+bash "./install.sh"
 ```
 
 ---

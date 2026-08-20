@@ -30,9 +30,13 @@ Incident Occurs Post-Deployment
 
 ## Stage 2: Execute Reversion
 
-1. Safe Git Revert:
+1. Safe Git Revert (Detects commit type automatically):
    ```bash
-   git revert HEAD -m 1 --no-edit
+   # If reverting a standard commit:
+   git revert HEAD --no-edit
+
+   # If reverting a merge commit:
+   git revert -m 1 HEAD --no-edit
    ```
 2. Redeploy the known stable build.
 

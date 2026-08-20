@@ -37,9 +37,10 @@ Generate diff package:
 ## Stage 2: Code Quality & Architecture Review
 
 * Check for dead code, magic strings/numbers, explicit error handling, and type safety.
-* Run GitNexus shape check and AST validation:
+* Run GitNexus change detection and API shape verification:
   ```bash
   gitnexus detect-changes
+  gitnexus shape-check
   ```
 
 ---

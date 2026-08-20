@@ -225,9 +225,26 @@ def _record_ledger(repo: Path, category: str, command: list[str], returncode: in
                 if not isinstance(entries, list):
                     entries = []
             except Exception:
+                backup = brain_dir / f"verification_ledger_corrupt_{int(time.time())}.json"
+                try:
+                    ledger_path.rename(backup)
+                except Exception:
+                    pass
                 entries = []
                 
         import datetime
+        commit_hash = "unknown"
+        branch_name = "unknown"
+        try:
+            head_p = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=repo, text=True, capture_output=True)
+            if head_p.returncode == 0:
+                commit_hash = head_p.stdout.strip()
+            branch_p = subprocess.run(["git", "branch", "--show-current"], cwd=repo, text=True, capture_output=True)
+            if branch_p.returncode == 0 and branch_p.stdout.strip():
+                branch_name = branch_p.stdout.strip()
+        except Exception:
+            pass
+
         record = {
             "type": "guardrail_verification",
             "category": category,
@@ -235,10 +252,11 @@ def _record_ledger(repo: Path, category: str, command: list[str], returncode: in
             "status": "PASSED" if returncode == 0 else "FAILED",
             "exit_code": returncode,
             "duration_ms": duration_ms,
+            "commit": commit_hash,
+            "branch": branch_name,
             "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
         }
         entries.append(record)
-        # Giữ tối đa 100 entries gần nhất để bảo vệ dung lượng
         if len(entries) > 100:
             entries = entries[-100:]
         ledger_path.write_text(json.dumps(entries, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -249,8 +267,10 @@ def _record_ledger(repo: Path, category: str, command: list[str], returncode: in
 def execute_commands(repo: Path, commands: list[Command], policy: dict[str, Any] | None = None) -> list[Finding]:
     findings: list[Finding] = []
     timeout = 120
+    auto_kill = True
     if policy and isinstance(policy.get("execution_isolation"), dict):
         timeout = policy["execution_isolation"].get("timeout_seconds", 120)
+        auto_kill = policy["execution_isolation"].get("auto_kill_orphans", True)
 
     import time
     for command in commands:
@@ -262,19 +282,37 @@ def execute_commands(repo: Path, commands: list[Command], policy: dict[str, Any]
             continue
         start_t = time.perf_counter()
         try:
-            completed = subprocess.run(argv, cwd=repo, text=True, capture_output=True, timeout=timeout)
+            proc = subprocess.Popen(argv, cwd=repo, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            try:
+                stdout, stderr = proc.communicate(timeout=timeout)
+                returncode = proc.returncode
+            except subprocess.TimeoutExpired:
+                if auto_kill:
+                    if sys.platform == "win32":
+                        subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)], capture_output=True)
+                    else:
+                        try:
+                            import signal, os
+                            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+                        except Exception:
+                            proc.kill()
+                else:
+                    proc.kill()
+                proc.communicate()
+                dur_ms = int((time.perf_counter() - start_t) * 1000)
+                _record_ledger(repo, command.category, argv, 124, dur_ms)
+                findings.append(Finding("command.timeout", f"Command {command.category} ({' '.join(argv)}) timed out after {timeout} seconds.", remedy="Optimize test execution, eliminate infinite loops, and ensure processes terminate properly."))
+                continue
+
             dur_ms = int((time.perf_counter() - start_t) * 1000)
-            _record_ledger(repo, command.category, argv, completed.returncode, dur_ms)
-        except subprocess.TimeoutExpired as exc:
-            dur_ms = int((time.perf_counter() - start_t) * 1000)
-            _record_ledger(repo, command.category, argv, 124, dur_ms)
-            findings.append(Finding("command.timeout", f"Command {command.category} ({' '.join(argv)}) timed out after {timeout} seconds.", remedy="Optimize test execution, eliminate infinite loops, and ensure processes terminate properly."))
-            continue
-        if completed.returncode:
-            detail = (completed.stderr or completed.stdout).strip()
-            if len(detail) > 800:
-                detail = detail[-800:]
-            findings.append(Finding("command.failed", f"Required {command.category} command failed ({' '.join(argv)}). {detail}", remedy="Run the same command locally, fix its reported failure, and rerun the guardrail."))
+            _record_ledger(repo, command.category, argv, returncode, dur_ms)
+            if returncode != 0:
+                detail = (stderr or stdout).strip()
+                if len(detail) > 800:
+                    detail = detail[-800:]
+                findings.append(Finding("command.failed", f"Required {command.category} command failed ({' '.join(argv)}). {detail}", remedy="Run the same command locally, fix its reported failure, and rerun the guardrail."))
+        except Exception as exc:
+            findings.append(Finding("command.failed", f"Execution error for {command.category}: {exc}", remedy="Investigate execution environment."))
     return findings
 
 

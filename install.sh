@@ -38,19 +38,35 @@ if [ -d "$SOURCE_DIR/scripts" ]; then
 fi
 
 # 4. Install Autonomous Skills
-echo "[4/6] Installing Autonomous Skills..."
+echo "[4/7] Installing Autonomous Skills..."
 if [ -d "$SOURCE_DIR/skills" ]; then
     cp -r "$SOURCE_DIR/skills/"* "$SKILLS_DIR/"
     echo "  [OK] Installed skills to $SKILLS_DIR"
 fi
 
-# 5. MCP Server Configuration
-echo "[5/6] Configuring MCP Server settings..."
-if [ -f "$SOURCE_DIR/.gemini/mcp_config.json" ]; then
-    cp "$SOURCE_DIR/.gemini/mcp_config.json" "$ANTIGRAVITY_DIR/mcp_config.json"
+# 5. Install Schemas & Templates
+echo "[5/7] Installing Schemas & Templates..."
+if [ -d "$SOURCE_DIR/schemas" ]; then
+    cp -r "$SOURCE_DIR/schemas/"* "$SCHEMAS_DIR/"
+    echo "  [OK] Installed schemas to $SCHEMAS_DIR"
+fi
+if [ -d "$SOURCE_DIR/templates" ]; then
+    cp -r "$SOURCE_DIR/templates/"* "$TEMPLATES_DIR/"
+    echo "  [OK] Installed templates to $TEMPLATES_DIR"
 fi
 
-# 6. Save Version
+# 6. MCP Server Configuration
+echo "[6/7] Configuring MCP Server settings..."
+if [ -f "$SOURCE_DIR/.gemini/mcp_config.json" ]; then
+    if [ ! -f "$ANTIGRAVITY_DIR/mcp_config.json" ]; then
+        cp "$SOURCE_DIR/.gemini/mcp_config.json" "$ANTIGRAVITY_DIR/mcp_config.json"
+        echo "  [OK] Configured mcp_config.json"
+    else
+        echo "  [INFO] mcp_config.json already exists (retaining existing config)"
+    fi
+fi
+
+# 7. Save Version
 echo "4.11.0-ultimate" > "$HOME/.gemini/awf_version"
 
 echo "=============================================================================="

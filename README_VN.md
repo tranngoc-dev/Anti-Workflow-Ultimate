@@ -39,6 +39,13 @@
 │ • GitNexus: Đồ thị tri thức (LadybugDB / Cypher), Luồng thực thi & Tác động │
 │ • CodeGraph: Live Watcher (Tự động đồng bộ), Single-shot Explore, Web Routes│
 │ • Smart Test Selector (codegraph affected qua git diff)                     │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │
+┌──────────────────────────────────────▼──────────────────────────────────────┐
+│ 5. KIM TỰ THÁP KIỂM THỬ THÔNG MINH & PROCESS GUARD                          │
+│ • Kiểm thử đa tầng: Unit (< 1s) ➔ Targeted E2E Smoke (30s) ➔ Full Suite Gate│
+│ • Tiêu chuẩn nghiệm thu: Zero Network Errors (HTTP >= 400)                  │
+│ • Process Tree Auto-Kill: Diệt sạch tiến trình rác khi timeout               │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -64,12 +71,12 @@
 
 ### Trên Windows (PowerShell):
 ```powershell
-& "D:\AntiGravity\Anti-Workflow-Ultimate\install.ps1"
+& ".\install.ps1"
 ```
 
 ### Trên Linux / macOS (Bash):
 ```bash
-bash "D:\AntiGravity\Anti-Workflow-Ultimate/install.sh"
+bash "./install.sh"
 ```
 
 ---

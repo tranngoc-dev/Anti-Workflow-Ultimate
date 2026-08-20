@@ -163,7 +163,7 @@
             "properties": {
               "from": { "type": "string" },
               "to": { "type": "string" },
-              "type": { "type": "string", "enum": ["one-to-one", "one-to-many", "many-to-many"] },
+              "type": { "type": "string", "enum": ["one-to-one", "one-to-many", "many-to-one", "many-to-many"] },
               "description": { "type": "string" }
             }
           }
@@ -211,7 +211,7 @@
             "type": "string",
             "enum": ["planned", "in_progress", "implemented", "tested", "deployed"]
           },
-          "spec_file": { "type": "string" },
+          "spec_file": { "type": ["string", "null"] },
           "files": { "type": "array", "items": { "type": "string" } },
           "notes": { "type": "string" }
         }

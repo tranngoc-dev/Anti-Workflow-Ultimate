@@ -28,7 +28,10 @@ description: 💻 Execute tasks via Subagents, Strict TDD & Targeted E2E Gate
 1. **Locate Active Plan:** Read `.brain/session.json` to get `current_plan_path`.
 2. **Create Isolated Worktree:**
    ```bash
-   git checkout -b feature/{feature-name}
+   # Create isolated git worktree for the feature task:
+   git worktree add .superpowers/worktrees/{feature-name} -b feature/{feature-name}
+   cd .superpowers/worktrees/{feature-name}
+   # (Or create a feature branch: git checkout -b feature/{feature-name})
    ```
    * Never code directly on `main` or `master`.
 

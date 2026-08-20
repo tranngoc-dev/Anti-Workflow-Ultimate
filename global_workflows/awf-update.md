@@ -11,8 +11,10 @@ description: 📦 Check for and apply Anti-Workflow-Ultimate updates
 
 ## Update Procedure
 
-1. Fetch latest changes from repository:
+1. Fetch latest changes from the Anti-Workflow-Ultimate repository:
    ```bash
+   # Navigate to the framework source repository:
+   cd "$HOME/.gemini/antigravity" || cd "D:/AntiGravity/Anti-Workflow-Ultimate"
    git pull origin main
    ```
 2. Run installer to refresh local Antigravity configuration:

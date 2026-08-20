@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # brain-query: Semantic / Keyword Micro RAG query for .brain/learnings.md
+# Usage: brain-query [QUERY] [LIMIT] [BRAIN_PATH]
 
-QUERY="$1"
+set -euo pipefail
+
+QUERY="${1:-}"
 LIMIT="${2:-2}"
-BRAIN_PATH=".brain/learnings.md"
+BRAIN_PATH="${3:-.brain/learnings.md}"
 
 if [ ! -f "$BRAIN_PATH" ]; then
     if [ -f "../$BRAIN_PATH" ]; then
@@ -11,16 +14,28 @@ if [ ! -f "$BRAIN_PATH" ]; then
     elif [ -f "../../$BRAIN_PATH" ]; then
         BRAIN_PATH="../../$BRAIN_PATH"
     else
-        echo "INFO: Chưa tìm thấy file $BRAIN_PATH."
+        echo "INFO: $BRAIN_PATH not found. No learnings loaded."
         exit 0
     fi
 fi
 
+if [ ! -s "$BRAIN_PATH" ]; then
+    echo "INFO: $BRAIN_PATH is empty."
+    exit 0
+fi
+
 if [ -z "$QUERY" ]; then
-    echo "=== [SEMANTIC BRAIN: $LIMIT BÀI HỌC GẦN NHẤT] ==="
+    echo "=== [SEMANTIC BRAIN: $LIMIT MOST RECENT LEARNINGS] ==="
     tail -n 40 "$BRAIN_PATH"
     exit 0
 fi
 
-echo "=== [SEMANTIC BRAIN: BÀI HỌC LIÊN QUAN ĐẾN '$QUERY'] ==="
-grep -in -C 5 "$QUERY" "$BRAIN_PATH" | head -n 30 || tail -n 20 "$BRAIN_PATH"
+echo "=== [SEMANTIC BRAIN: TOP LEARNINGS MATCHING '$QUERY'] ==="
+if grep -in -C 6 "$QUERY" "$BRAIN_PATH" | head -n 40; then
+    :
+else
+    echo "INFO: No learnings found matching query '$QUERY'."
+    echo ""
+    echo "=== [FALLBACK: MOST RECENT LEARNING] ==="
+    tail -n 25 "$BRAIN_PATH"
+fi

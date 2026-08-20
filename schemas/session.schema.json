@@ -24,7 +24,7 @@
         "project": { "type": "string", "description": "Project name" },
         "current_feature": { "type": "string", "description": "What user is working on" },
         "current_task": { "type": "string", "description": "Specific task" },
-        "status": { "type": "string", "enum": ["planning", "coding", "testing", "debugging", "reviewing", "deploying"] },
+        "status": { "type": "string", "enum": ["idle", "planning", "coding", "testing", "debugging", "reviewing", "deploying", "in_progress", "completed"] },
         "progress_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
         "last_action": { "type": "string", "description": "Last completed action" },
         "next_step": { "type": "string", "description": "Suggested next step" },
@@ -40,8 +40,8 @@
         "task": { "type": "string", "description": "Current task" },
         "status": {
           "type": "string",
-          "enum": ["planning", "coding", "testing", "debugging", "reviewing"],
-          "description": "Task status"
+          "enum": ["idle", "planning", "coding", "testing", "debugging", "reviewing", "deploying", "in_progress", "completed"],
+          "description": "Current overall status"
         },
         "current_plan_path": {
           "type": "string",
