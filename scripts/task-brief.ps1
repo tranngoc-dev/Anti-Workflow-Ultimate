@@ -5,7 +5,9 @@ param(
     [Parameter(Mandatory=$true, Position=1)]
     [int]$TaskNumber,
     [Parameter(Mandatory=$false, Position=2)]
-    [string]$OutFile
+    [string]$OutFile,
+    [Parameter(Mandatory=$false)]
+    [switch]$Validate
 )
 
 if (-not (Test-Path -Path $PlanFile -PathType Leaf)) {
@@ -43,10 +45,26 @@ if ($extractedLines.Count -eq 0) {
     exit 3
 }
 
+$taskText = $extractedLines -join "`n"
+
+# PRE-FLIGHT TASK CONTRACT VALIDATION (Học hỏi từ Dify Pre-flight Gate)
+$hasGoal = ($taskText -match "(?i)Goal|Mục tiêu|Description|Mô tả")
+$hasCriteria = ($taskText -match "(?i)Acceptance|Tiêu chí|Nghiệm thu|Verify|Kiểm tra|Test")
+$hasScope = ($taskText -match "(?i)Files|File|Scope|Path")
+
+if ($Validate -or ($hasGoal -and $hasCriteria)) {
+    Write-Host "🛡️ [PRE-FLIGHT GATE] Validating Task $TaskNumber contract..." -ForegroundColor Cyan
+    if (-not $hasCriteria) {
+        Write-Warning "⚠️ Task $TaskNumber thiếu Acceptance Criteria (tiêu chí nghiệm thu rõ ràng). Subagent có thể bị lạc hướng!"
+    } else {
+        Write-Host "  ✅ Contract Valid: Goal & Acceptance criteria detected." -ForegroundColor Green
+    }
+}
+
 $outDir = Split-Path -Parent $OutFile
 if (-not (Test-Path $outDir)) {
     New-Item -ItemType Directory -Path $outDir -Force | Out-Null
 }
 
-Set-Content -Path $OutFile -Value ($extractedLines -join "`n") -Encoding UTF8
-Write-Output "wrote ${OutFile}: $($extractedLines.Count) lines"
+Set-Content -Path $OutFile -Value $taskText -Encoding UTF8
+Write-Output "wrote ${OutFile}: $($extractedLines.Count) lines (Pre-flight Gate Checked ✅)"

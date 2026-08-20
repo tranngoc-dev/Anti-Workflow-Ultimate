@@ -1,7 +1,7 @@
-# ⚡ Anti-Workflow Ultimate (v4.10.0)
+# ⚡ Anti-Workflow Ultimate (v4.11.0)
 
 > **Khung Phát Triển Ứng Dụng Tự Trị Toàn Diện trên Antigravity 2.0.**  
-> Tích hợp tinh hoa: **AWF Orchestrator** + **Superpowers Subagent TDD** + **Hybrid Code-Intelligence (GitNexus Graph DB + CodeGraph Single-Shot & Watcher)** + **Strict Guardrails** + **Smart Testing Pyramid & Process Guard** + **Hermes-Inspired Architectural Innovations** *(Sacred Prompt Caching, Evidence Ledger & Autonomous Skill Synthesis)*.
+> Tích hợp tinh hoa: **AWF Orchestrator** + **Superpowers Subagent TDD** + **Hybrid Code-Intelligence (GitNexus Graph DB + CodeGraph Single-Shot & Watcher)** + **Dify-Inspired Production Capabilities** *(Semantic Brain Micro RAG, Pre-flight Contract Gate, Multi-Model Fallback & Observability Ledger)* + **Strict Guardrails** + **Smart Testing Pyramid & Process Guard**.
 
 ---
 
@@ -12,22 +12,23 @@
 │ 1. ORCHESTRATION & TRẢI NGHIỆM (AWF)                                        │
 │ • Giao tiếp tiếng Việt, Multi-persona (PM Hà, Dev Tuấn, Designer Mai, QA)   │
 │ • Vòng đời khép kín: /init, /visualize (UI Mockup), /deploy, /save-brain    │
-│ • Bộ nhớ vĩnh cửu: .brain/ (Lưu tiến độ, Ledger bằng chứng & Tự học hỏi)   │
+│ • Bộ nhớ vĩnh cửu: .brain/ (Semantic Micro RAG, Ledger bằng chứng)          │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
 ┌──────────────────────────────────────▼──────────────────────────────────────┐
-│ 2. GOVERNANCE & GUARDRAILS (Strict Enforcement)                             │
+│ 2. GOVERNANCE & GUARDRAILS (Strict Enforcement & Resilience)                │
 │ • Luật kỹ thuật: AI_CODE_WORKFLOW.md & GEMINI.md                            │
-│ • Cổng gác vật lý: guardrails/ (Pre-commit hook, chặn commit main, test thật)│
+│ • Cổng gác vật lý: guardrails/ (Pre-commit hook, Pre-flight Contract Gate)  │
+│ • Model Resilience: Tự động Fallback khi gặp lỗi HTTP 429/503               │
 │ • Sacred Prompt Caching: Byte-stable tiền tố -> Tăng 90% Cache Hit          │
-│ • Phân loại lỗi hệ thống: Error Taxonomy (Transient vs Deterministic)       │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
 ┌──────────────────────────────────────▼──────────────────────────────────────┐
 │ 3. EXECUTION ENGINE (Superpowers Subagents)                                 │
 │ • Subagent-Driven Development (chạy nền đa tác vụ tự trị theo task 2-5 phút)│
+│ • Pre-flight Task Validation (thẩm định tiêu chí nghiệm thu trước khi code) │
 │ • Smart TDD: RED ➔ GREEN ➔ REFACTOR (Smallest Scoped Test < 1s)             │
-│ • Sổ Cái Bằng Chứng: .brain/verification_ledger.json (chống tràn token)     │
+│ • Sổ Cái Đo Lường: .brain/verification_ledger.json (Duration, Token metric) │
 │ • Git Worktree Isolation & 2-Stage Code Review                              │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │

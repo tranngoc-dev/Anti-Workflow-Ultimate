@@ -21,14 +21,16 @@ $skillsDir = Join-Path $antigravityDir "skills"
 $schemasDir = Join-Path $antigravityDir "schemas"
 $templatesDir = Join-Path $antigravityDir "templates"
 
+$scriptsDir = Join-Path $antigravityDir "scripts"
+
 $sourceDir = $PSScriptRoot
 if ([string]::IsNullOrWhiteSpace($sourceDir)) {
     $sourceDir = (Get-Location).Path
 }
 
 # 1. Tao cac thu muc can thiet
-Write-Host "`n[1/5] Dang tao cau truc thu muc Antigravity..." -ForegroundColor Green
-$dirs = @($antigravityDir, $globalWorkflowsDir, $skillsDir, $schemasDir, $templatesDir)
+Write-Host "`n[1/6] Dang tao cau truc thu muc Antigravity..." -ForegroundColor Green
+$dirs = @($antigravityDir, $globalWorkflowsDir, $skillsDir, $schemasDir, $templatesDir, $scriptsDir)
 foreach ($d in $dirs) {
     if (-not (Test-Path $d)) {
         New-Item -ItemType Directory -Path $d -Force | Out-Null
@@ -36,7 +38,7 @@ foreach ($d in $dirs) {
 }
 
 # 2. Cai dat Global Workflows
-Write-Host "[2/5] Dang cai dat Workflows (/init, /plan, /code, /recap...)..." -ForegroundColor Green
+Write-Host "[2/6] Dang cai dat Workflows (/init, /plan, /code, /recap...)..." -ForegroundColor Green
 $sourceWorkflows = Join-Path $sourceDir "global_workflows"
 if (Test-Path $sourceWorkflows) {
     Copy-Item -Path "$sourceWorkflows\*" -Destination $globalWorkflowsDir -Recurse -Force
@@ -44,16 +46,24 @@ if (Test-Path $sourceWorkflows) {
     Write-Host "  [OK] Da cai dat $wfCount workflows vao $globalWorkflowsDir" -ForegroundColor Gray
 }
 
-# 3. Cai dat Skills (Superpowers + GitNexus + AWF)
-Write-Host "[3/5] Dang cai dat Ky nang tu tri (Superpowers, GitNexus, AWF)..." -ForegroundColor Green
+# 3. Cai dat Scripts (brain-query, task-brief, review-package...)
+Write-Host "[3/6] Dang cai dat Scripts tien ich (Semantic Brain Query, Pre-flight Gate)..." -ForegroundColor Green
+$sourceScripts = Join-Path $sourceDir "scripts"
+if (Test-Path $sourceScripts) {
+    Copy-Item -Path "$sourceScripts\*" -Destination $scriptsDir -Recurse -Force
+    Write-Host "  [OK] Da cai dat toan bo scripts vao $scriptsDir" -ForegroundColor Gray
+}
+
+# 4. Cai dat Skills (Superpowers + GitNexus + AWF)
+Write-Host "[4/6] Dang cai dat Ky nang tu tri (Superpowers, GitNexus, AWF)..." -ForegroundColor Green
 $sourceSkills = Join-Path $sourceDir "skills"
 if (Test-Path $sourceSkills) {
     Copy-Item -Path "$sourceSkills\*" -Destination $skillsDir -Recurse -Force
     Write-Host "  [OK] Da cai dat toan bo skills vao $skillsDir" -ForegroundColor Gray
 }
 
-# 4. Cau hinh MCP Server cho GitNexus
-Write-Host "[4/5] Dang cau hinh GitNexus MCP Server..." -ForegroundColor Green
+# 5. Cau hinh MCP Server cho GitNexus
+Write-Host "[5/6] Dang cau hinh GitNexus MCP Server..." -ForegroundColor Green
 $mcpConfigFile = Join-Path $antigravityDir "mcp_config.json"
 $sourceMcp = Join-Path $sourceDir ".gemini\mcp_config.json"
 if (Test-Path $sourceMcp) {
@@ -65,9 +75,9 @@ if (Test-Path $sourceMcp) {
     }
 }
 
-# 5. Luu phien ban
+# 6. Luu phien ban
 $versionFile = Join-Path $userHome ".gemini\awf_version"
-Set-Content -Path $versionFile -Value "4.10.0-ultimate" -Encoding UTF8
+Set-Content -Path $versionFile -Value "4.11.0-ultimate" -Encoding UTF8
 
 Write-Host "`n==============================================================================" -ForegroundColor Cyan
 Write-Host "  [OK] CAI DAT HOAN TAT THANH CONG!" -ForegroundColor Yellow

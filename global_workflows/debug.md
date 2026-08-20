@@ -37,8 +37,9 @@ Tiếp tục [/code] hoặc [/test]
   * *Hành động:* **CẤM RETRY MÙ QUÁNG.** Dừng ngay lập tức để điều tra nguyên nhân cốt lõi.
 
 ### 🔹 1.2. Truy vết chuỗi gọi & Trích xuất mã nguồn phẫu thuật (Hybrid Trace & Explore):
+* **Semantic Brain Query:** Chạy `.\scripts\brain-query.ps1 -Query "<Triệu chứng lỗi>"` để tra cứu nhanh xem lỗi này đã từng gặp và có giải pháp chuẩn chưa.
 * **GitNexus:** Dùng `gitnexus:trace` để tìm đường dẫn gọi giữa điểm nổ lỗi và nguồn input, và `gitnexus:impact` để kiểm tra vùng ảnh hưởng.
-* **CodeGraph:** Dùng `codegraph explore <vấn đề>` để lấy ngay mã nguồn thực tế (verbatim line-numbered source) của các điểm nút nghi vấn mà không cần duyệt từng file.
+* **CodeGraph:** Dùng `codegraph explore <vấn đề>` để lấy ngay mã nguồn thực tế (verbatim line-numbered source) của các điểm nút nghi vấn.
 * **Staleness Guard:** Kiểm tra cảnh báo `⚠️` của CodeGraph để đảm bảo không phân tích trên mã nguồn cũ đang sửa dở.
 * Hình thành tối đa 3 giả thuyết xếp hạng được chứng minh bằng log runtime.
 

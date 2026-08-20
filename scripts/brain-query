@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# brain-query: Semantic / Keyword Micro RAG query for .brain/learnings.md
+
+QUERY="$1"
+LIMIT="${2:-2}"
+BRAIN_PATH=".brain/learnings.md"
+
+if [ ! -f "$BRAIN_PATH" ]; then
+    if [ -f "../$BRAIN_PATH" ]; then
+        BRAIN_PATH="../$BRAIN_PATH"
+    elif [ -f "../../$BRAIN_PATH" ]; then
+        BRAIN_PATH="../../$BRAIN_PATH"
+    else
+        echo "INFO: Chưa tìm thấy file $BRAIN_PATH."
+        exit 0
+    fi
+fi
+
+if [ -z "$QUERY" ]; then
+    echo "=== [SEMANTIC BRAIN: $LIMIT BÀI HỌC GẦN NHẤT] ==="
+    tail -n 40 "$BRAIN_PATH"
+    exit 0
+fi
+
+echo "=== [SEMANTIC BRAIN: BÀI HỌC LIÊN QUAN ĐẾN '$QUERY'] ==="
+grep -in -C 5 "$QUERY" "$BRAIN_PATH" | head -n 30 || tail -n 20 "$BRAIN_PATH"

@@ -1,5 +1,21 @@
 {
   "protected_branches": ["main", "master"],
+  "model_resilience": {
+    "primary": "gemini-3.7-flash",
+    "fallbacks": ["gemini-2.5-flash", "claude-3.7-sonnet", "deepseek-v3"],
+    "max_retries": 3,
+    "backoff_factor": 1.5,
+    "retry_on_status": [429, 503]
+  },
+  "execution_isolation": {
+    "timeout_seconds": 30,
+    "auto_kill_orphans": true,
+    "sandbox_enabled": false
+  },
+  "observability": {
+    "track_verification_ledger": true,
+    "ledger_path": ".brain/verification_ledger.json"
+  },
   "commands": {},
   "debug_markers": ["DEBUG_ONLY"],
   "allowlist": [

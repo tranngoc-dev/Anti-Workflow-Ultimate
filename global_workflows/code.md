@@ -43,22 +43,23 @@ description: 💻 Thực thi viết code theo chuẩn Smart TDD & Cổng Targete
 
 ```mermaid
 flowchart TD
-    A["Đọc Task N từ Plan File (task-brief)"] --> B["Dispatch Implementer Subagent"]
-    B --> B1["🔍 CodeGraph Single-Shot Explore (Trích xuất code + call paths trong 1 nốt nhạc)"]
-    B1 --> C["1. RED: Viết Smallest Scoped Unit Test Fail (< 1s)"]
-    C --> D["2. GREEN: Viết Code tối thiểu để Unit Test Pass"]
-    D --> D1["⚡ CodeGraph Live Watcher tự động cập nhật đồ thị (Debounce 2s, Staleness Banner Guard)"]
-    D1 --> E["3. REFACTOR: Tối ưu code & Thêm Explicit FK Hints"]
-    E --> F{"Đã xong toàn bộ Tasks của Feature?"}
-    F -->|Chưa xong| G["Commit Task N qua Guardrail ➔ Làm tiếp Task N+1"]
-    G --> A
-    F -->|Đã xong hết| H["🚨 4. CỔNG TARGETED E2E SMOKE TEST"]
-    H --> I["Chạy Server ngầm + Playwright / API Probe (Timeout 30s)"]
-    I --> J["Tự động Kill Background Process (Auto-Cleanup)"]
-    J --> K{"E2E Pass 100% & 0 Lỗi Network $\ge 400$?"}
-    K -->|❌ FAIL| L["Vào Fix Loop (Tối đa 3 lần, Failed-First-Fix)"]
-    L --> B
-    K -->|✅ PASS| M["Dispatch Task Reviewer Subagent (Spec + Quality)"]
+    A["Đọc Task N từ Plan File: .\scripts\task-brief.ps1 -Validate"] --> B["🛡️ Pre-flight Task Contract Check (Goal + Acceptance Criteria)"]
+    B --> C["Dispatch Implementer Subagent"]
+    C --> C1["🔍 CodeGraph Single-Shot Explore (Trích xuất code + call paths)"]
+    C1 --> D["1. RED: Viết Smallest Scoped Unit Test Fail (< 1s)"]
+    D --> E["2. GREEN: Viết Code tối thiểu để Unit Test Pass"]
+    E --> E1["⚡ CodeGraph Live Watcher tự động cập nhật đồ thị (Debounce 2s)"]
+    E1 --> F["3. REFACTOR: Tối ưu code & Thêm Explicit FK Hints"]
+    F --> G{"Đã xong toàn bộ Tasks của Feature?"}
+    G -->|Chưa xong| H["Commit Task N qua Guardrail ➔ Làm tiếp Task N+1"]
+    H --> A
+    G -->|Đã xong hết| I["🚨 4. CỔNG TARGETED E2E SMOKE TEST"]
+    I --> J["Chạy Server ngầm + Playwright / API Probe (Timeout 30s)"]
+    J --> K["Tự động Kill Background Process (Auto-Cleanup & Process Guard)"]
+    K --> L{"E2E Pass 100% & 0 Lỗi Network $\ge 400$?"}
+    L -->|❌ FAIL| M["Vào Fix Loop (Tối đa 3 lần, Failed-First-Fix)"]
+    M --> C
+    L -->|✅ PASS| N["Dispatch Task Reviewer Subagent (Spec + Quality)"]
 ```
 
 ---

@@ -72,11 +72,12 @@ Tài liệu này là **Nguồn Sự Thật Tối Cao (Single Source of Truth)** 
    * **Tự động trích xuất bài học:** Sau mỗi lần fix bug thành công và E2E pass trong `/debug`, AI tự động đúc kết nguyên nhân, giải pháp chuẩn và anti-pattern vào `.brain/learnings.md`.
    * **Đóng gói Kỹ năng Tái sử dụng (Autonomous Skill Synthesis):** Nếu giải pháp đại diện cho một kỹ thuật phức tạp có tính tái sử dụng cao, AI tự động đóng gói thành file `skills/custom/[skill-name]/SKILL.md` chuẩn `agentskills.io` để dùng lại cho các dự án sau.
    * **Đối chiếu trước khi lập plan mới:** Trước khi lập `/plan` cho tính năng mới, AI bắt buộc đọc lại `.brain/learnings.md` để không lặp lại lỗi kiến trúc cũ.
-9. **Cổng Gác Vật lý (Strict Physical Guardrails):**
-   * Cài đặt và kích hoạt hook `guardrails/guardrail.py`.
+9. **Cổng Gác Vật lý Bắt Buộc (Strict Automated Guardrails & Pre-flight Gate):**
+   * Cài đặt và kích hoạt hệ thống **automated guardrails** (`guardrails/guardrail.py` và `guardrails/hooks/pre-commit`).
+   * Agents **must not bypass**, disable, weaken, hoặc dùng `git commit --no-verify` để lách qua cổng kiểm tra.
    * Cấm commit trực tiếp lên nhánh được bảo vệ (`main`, `master`).
    * Cấm commit khi chưa vượt qua các kiểm tra thật: `tests`, `lint`, `typecheck`, `build`, và `e2e` (nếu có).
-   * Tuyệt đối không dùng `git commit --no-verify` để lách cổng.
+   * **Pre-flight Task Contract Gate:** Trước khi Subagent code, bắt buộc thẩm định task brief qua `scripts/task-brief.ps1 -Validate`.
 10. **Cổng Triển Khai (Live-Test Deployment Gate):**
    * Tuyệt đối không tự ý deploy lên production khi chưa có sự xác nhận rõ ràng của người dùng sau khi đã kiểm thử trực tiếp (Live-test) và 100% targeted tests đạt chuẩn.
 

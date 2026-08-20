@@ -1,6 +1,6 @@
 # Strict AI Coding Guardrails - Cổng Kiểm Soát Vật Lý
 
-Bộ này tạo một cổng kiểm tra bắt buộc cho mọi dự án Git. Nó chặn commit khi không chứng minh được rằng các kiểm tra cần thiết đã đạt. Nó không cài dependency bừa bãi, không gửi dữ liệu ra ngoài và **tuyệt đối không tự ý deploy**.
+Bộ này tạo một cổng kiểm tra bắt buộc cho mọi dự án Git. Nó chặn commit khi không chứng minh được rằng các kiểm tra cần thiết đã đạt. Nó không cài dependency bừa bãi, không gửi dữ liệu ra ngoài và **never deploys** (tuyệt đối không tự ý deploy).
 
 ---
 
@@ -17,7 +17,7 @@ python guardrails/install.py
 
 Installer cấu hình repository hiện tại sử dụng hook phiên bản tại `guardrails/hooks`. Nó ghi lại giá trị `core.hooksPath` cũ để có thể rollback an toàn bất kỳ lúc nào.
 
-> ⚠️ **Lưu ý quan trọng:** Luôn làm việc trên feature branch. Commit trực tiếp trên `main` và `master` sẽ bị chặn cứng.
+> ⚠️ **Lưu ý quan trọng (Branch Protection):** Luôn làm việc trên feature branch. Cơ chế branch protection sẽ chặn cứng mọi hành vi commit trực tiếp trên `main` và `master`.
 
 ---
 

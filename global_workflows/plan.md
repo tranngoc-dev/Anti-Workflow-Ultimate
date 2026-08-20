@@ -35,9 +35,13 @@ description: 📋 Lên kế hoạch tính năng chi tiết có tính toán Impac
    * `gitnexus:query` & `gitnexus:context`: Xác định các module, cluster và interface liên quan.
    * `gitnexus:impact`: Tính toán phạm vi ảnh hưởng (Blast Radius) khi thay đổi/thêm tính năng mới.
    * `gitnexus:route_map`: Kiểm tra các API routes và component tiêu thụ.
-3. **Đối Chiếu Tri Thức Tích Lũy (`.brain/learnings.md`):** ⭐ MỚI
-   * Đọc file `.brain/learnings.md` để rà soát các Anti-Pattern hoặc lỗi từng gặp trong quá khứ (ví dụ: quy chuẩn Explicit FK hint trong Supabase, quy chuẩn sanitize input).
-   * **Đảm bảo kế hoạch mới tuân thủ 100% các giải pháp chuẩn đã đúc kết.**
+3. **Truy Vấn Tri Thức Tích Lũy Bằng Semantic Brain RAG (`scripts/brain-query.ps1`):** ⭐ MỚI
+   * Chạy truy vấn trích xuất nhanh các bài học liên quan đến từ khóa của tính năng:
+     ```powershell
+     .\scripts\brain-query.ps1 -Query "<Tên tính năng / Từ khóa kỹ thuật>"
+     ```
+   * Rà soát nhanh các Anti-Pattern hoặc lỗi từng gặp trong quá khứ (ví dụ: quy chuẩn Explicit FK hint trong Supabase, sanitize input, route dynamic hops).
+   * **Đảm bảo kế hoạch mới tuân thủ 100% các giải pháp chuẩn đã đúc kết, chỉ tốn ~100 tokens ngữ cảnh.**
 
 ---
 

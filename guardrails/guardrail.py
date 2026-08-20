@@ -212,16 +212,60 @@ def scan_repository(repo: Path, policy: dict[str, Any], mode: str) -> list[Findi
     return findings
 
 
-def execute_commands(repo: Path, commands: list[Command]) -> list[Finding]:
+def _record_ledger(repo: Path, category: str, command: list[str], returncode: int, duration_ms: int) -> None:
+    try:
+        brain_dir = repo / ".brain"
+        brain_dir.mkdir(parents=True, exist_ok=True)
+        ledger_path = brain_dir / "verification_ledger.json"
+        
+        entries = []
+        if ledger_path.is_file():
+            try:
+                entries = json.loads(ledger_path.read_text(encoding="utf-8"))
+                if not isinstance(entries, list):
+                    entries = []
+            except Exception:
+                entries = []
+                
+        import datetime
+        record = {
+            "type": "guardrail_verification",
+            "category": category,
+            "command": " ".join(command),
+            "status": "PASSED" if returncode == 0 else "FAILED",
+            "exit_code": returncode,
+            "duration_ms": duration_ms,
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
+        }
+        entries.append(record)
+        # Giữ tối đa 100 entries gần nhất để bảo vệ dung lượng
+        if len(entries) > 100:
+            entries = entries[-100:]
+        ledger_path.write_text(json.dumps(entries, indent=2, ensure_ascii=False), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def execute_commands(repo: Path, commands: list[Command], policy: dict[str, Any] | None = None) -> list[Finding]:
     findings: list[Finding] = []
+    timeout = 120
+    if policy and isinstance(policy.get("execution_isolation"), dict):
+        timeout = policy["execution_isolation"].get("timeout_seconds", 120)
+
+    import time
     for command in commands:
         if shutil.which(command.argv[0]) is None:
             findings.append(Finding("command.unavailable", f"Required {command.category} tool {command.argv[0]!r} is not available.", "guardrails/policy.json", remedy=f"Install {command.argv[0]!r} or correct the declared command."))
             continue
+        start_t = time.perf_counter()
         try:
-            completed = subprocess.run(command.argv, cwd=repo, text=True, capture_output=True, timeout=120)
+            completed = subprocess.run(command.argv, cwd=repo, text=True, capture_output=True, timeout=timeout)
+            dur_ms = int((time.perf_counter() - start_t) * 1000)
+            _record_ledger(repo, command.category, command.argv, completed.returncode, dur_ms)
         except subprocess.TimeoutExpired as exc:
-            findings.append(Finding("command.timeout", f"Command {command.category} ({' '.join(command.argv)}) timed out after 120 seconds.", remedy="Optimize test execution, eliminate infinite loops, and ensure processes terminate properly."))
+            dur_ms = int((time.perf_counter() - start_t) * 1000)
+            _record_ledger(repo, command.category, command.argv, 124, dur_ms)
+            findings.append(Finding("command.timeout", f"Command {command.category} ({' '.join(command.argv)}) timed out after {timeout} seconds.", remedy="Optimize test execution, eliminate infinite loops, and ensure processes terminate properly."))
             continue
         if completed.returncode:
             detail = (completed.stderr or completed.stdout).strip()
@@ -247,7 +291,7 @@ def run(repo: Path, mode: str = "staged", skip_project_checks: bool = False) -> 
         commands, command_findings = resolve_commands(repo, policy)
         findings.extend(command_findings)
         if not command_findings:
-            findings.extend(execute_commands(repo, commands))
+            findings.extend(execute_commands(repo, commands, policy))
     return GateResult(findings)
 
 
