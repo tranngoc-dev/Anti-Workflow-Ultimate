@@ -1,5 +1,7 @@
 # ⚡ Anti-Workflow Ultimate (v4.11.0)
 
+[English](README.md) | [Tiếng Việt](README_VN.md)
+
 > **Autonomous Software Engineering Operating System & Governance Framework for Antigravity 2.0.**  
 > Combining the power of: **AWF Orchestrator** + **Superpowers Subagent TDD** + **Hybrid Code-Intelligence (GitNexus Graph DB + CodeGraph Single-Shot & Watcher)** + **Dify-Inspired Production Capabilities** *(Semantic Brain Micro RAG, Pre-flight Contract Gate, Multi-Model Fallback & Observability Ledger)* + **Strict Physical Guardrails** + **Smart Testing Pyramid & Process Guard**.
 

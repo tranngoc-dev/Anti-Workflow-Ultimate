@@ -28,6 +28,7 @@
     {"rule": "source.debug-marker", "path": "guardrails/tests/test_guardrail.py", "reason": "Intentional scanner test fixture"},
     {"rule": "source.debug-marker", "path": "GUARDRAILS.md", "reason": "Documentation of the configured marker example"},
     {"rule": "source.debug-marker", "path": "README.md", "reason": "Documentation of policy and markers"},
+    {"rule": "source.debug-marker", "path": "README_VN.md", "reason": "Vietnamese documentation of policy and markers"},
     {"rule": "source.debug-marker", "path": "global_workflows/audit.md", "reason": "Audit workflow documentation and instructions"}
   ]
 }
