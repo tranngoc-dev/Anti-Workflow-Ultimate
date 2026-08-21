@@ -1,0 +1,2 @@
+# Anti-Workflow Ultimate - Runtime Dependencies
+jsonschema==4.25.1
