@@ -67,7 +67,7 @@ if [ -f "$SOURCE_DIR/.gemini/mcp_config.json" ]; then
 fi
 
 # 7. Save Version
-echo "4.11.0-ultimate" > "$HOME/.gemini/awf_version"
+echo "4.12.0-ultimate" > "$HOME/.gemini/awf_version"
 
 echo "=============================================================================="
 echo "  [OK] INSTALLATION COMPLETED SUCCESSFULLY!"

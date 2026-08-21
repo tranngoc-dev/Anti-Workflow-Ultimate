@@ -84,6 +84,16 @@ def integrity_findings(repo: Path) -> list[Finding]:
         for label, tokens in required.items():
             if not all(token in text for token in tokens):
                 findings.append(Finding("workflow.core-safety", f"Core workflow is missing the essential {label} gate.", core.name, remedy="Restore the approved safety language in AI_CODE_WORKFLOW.md."))
+
+    # Agent Skills Directory Standard Check
+    skills_dir = repo / "skills"
+    if skills_dir.is_dir():
+        for category_dir in skills_dir.iterdir():
+            if category_dir.is_dir() and category_dir.name not in ("custom", "__pycache__"):
+                for stray_file in category_dir.glob("*.md"):
+                    if stray_file.name != "README.md":
+                        findings.append(Finding("skill.format", f"Stray skill file {stray_file.relative_to(repo)} must be packaged as {stray_file.stem}/SKILL.md according to agentskills.io spec.", str(stray_file.relative_to(repo)), remedy="Wrap the skill markdown file into its own directory containing SKILL.md."))
+
     return findings
 
 
