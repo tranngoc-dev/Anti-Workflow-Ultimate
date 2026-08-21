@@ -2,10 +2,33 @@
 description: 🔒 Comprehensive security, architecture integrity & database relationship audit
 ---
 
-# WORKFLOW: /audit - 4-Layer Empirical Verification & Security Gate (v4.13.0)
+# WORKFLOW: /audit - 4-Layer Empirical Verification & Security Gate (v4.15.0)
 
 **Role:** Lead Security Auditor & Empirical Verification Specialist  
 **Objective:** Execute an automated 4-Layer Empirical Verification Matrix covering structural schemas, deep payload semantics, runtime tool readiness, supply-chain integrity, and physical guardrail security.
+
+---
+
+## 🧭 Operational Directives (Cognitive Protocols)
+
+### 1. Scope Gate: Full Audit vs. Review Diff
+* `/audit` is a **Full Repository & Architecture Audit** across the entire codebase and its live environment.
+* **Do NOT short-circuit to `/review`:** The `/review` subagent/skill only compares Git diffs on staged changes or branches. `/audit` evaluates the entire system state, data cleanliness, graph health, and security posture.
+
+### 2. Hypothesis Elimination Protocol (HEP)
+Before drawing conclusions, formulate explicit hypotheses ($H_1, H_2, \dots, H_n$) and eliminate or validate them using stdout evidence:
+| Hypothesis | Initial Assumption | Empirical Evidence | Verdict |
+|---|---|---|---|
+| $H_1$ (Schema) | Are unknown properties rejected? | `.\scripts\schema-probe.ps1` output | Confirmed / Refuted |
+| $H_2$ (Data) | Is there foreign project contamination? | `.\scripts\data-probe.ps1` output | Confirmed / Refuted |
+| $H_3$ (Runtime) | Are hybrid search & PDG live? | `gitnexus query` / `context` | Confirmed / Refuted |
+| $H_4$ (Guardrails) | Are all unit tests and hooks clean? | `guardrail.py --mode all` | Confirmed / Refuted |
+
+### 3. Diagnostic Accuracy: Operational Mistake vs. System Outage
+* If a probe symbol or file returns `not found`, verify whether the symbol actually exists in the codebase before declaring a tool outage or index corruption.
+
+### 4. Security Invariant: "Absence $\neq$ Safety"
+* A scanner or Taint/PDG returning `0 findings` means no violations were detected under the current model; it does NOT prove absolute absence of vulnerabilities. Defense-in-depth across all 4 layers is mandatory.
 
 ---
 
@@ -30,7 +53,7 @@ Run the automated schema probe validator:
 # or bash ./scripts/schema-probe
 ```
 * Verifies 100% compliance across `schemas/*.schema.json` and `templates/*.example.json`.
-* **Zero Discrepancies Rule:** Flag any type mismatch, unmapped enum, or missing required field.
+* **Zero Discrepancies Rule:** Enforce `additionalProperties: false` across top-level and nested objects. Flag any type mismatch or missing required field.
 
 ---
 
@@ -40,8 +63,8 @@ Run the deep payload validator:
 .\scripts\data-probe.ps1
 # or bash ./scripts/data-probe
 ```
-* **Project Identity Check:** Matches `project.name` and `repository` in `.brain/brain.json` against the active project context.
-* **Payload Cleanliness:** Deeply scans all `.brain/`, `templates/`, and docs for foreign project IDs, foreign URLs, or unmapped entity references.
+* **Project Identity Check:** Matches `project.name` and `repository` in `.brain/brain.json` against active project context.
+* **Payload Cleanliness & Isolation:** Scans `.brain/`, `templates/`, and docs for foreign project IDs, foreign URLs, or unmapped entity references, while cleanly isolating test fixtures to prevent self-poisoning.
 
 ---
 
@@ -56,7 +79,8 @@ Never conclude indexing or MCP tools are healthy without executing live smoke pr
    ```bash
    gitnexus query "<core_concept>"
    ```
-   * If FTS indexes are missing, flag degradation and suggest repair: `gitnexus analyze --repair-fts`.
+   * Ensure both BM25 and vector semantic search execute cleanly with fresh commit index.
+   * If FTS or PDG layers are missing, repair: `gitnexus analyze --repair-fts --pdg`.
 
 ---
 
