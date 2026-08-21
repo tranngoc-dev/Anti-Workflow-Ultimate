@@ -39,35 +39,42 @@ This document serves as the **Single Source of Truth** for all AI Agents operati
    - Write smallest scoped failing test $\to$ Verify failure $\to$ Write minimal implementation to pass $\to$ Refactor $\to$ Commit.
    - Never write production logic before the test is established.
    - Never weaken or delete valid assertions merely to make tests pass.
-4. **Empirical Verification & No Blind Confirmation (Zero Silent Failures):** ⭐ NEW (v4.12.0)
+4. **Empirical Verification & No Blind Confirmation (Zero Silent Failures):** ⭐ UPDATED (v4.13.0)
    - **No Exit-Code Only Assumptions:** Never conclude a tool or subsystem is healthy based merely on an exit code 0 or passive file existence without verifying that the output payload is non-empty and semantically valid.
-   - **Automated Schema Probing:** Always run automated validators (`.\scripts\schema-probe.ps1`) rather than visual inspection to prove that Schemas, Examples, and Application Configs match with zero discrepancies.
+   - **Automated Schema & Payload Probing:** Always run automated structural validators (`.\scripts\schema-probe.ps1`) AND deep semantic payload validators (`.\scripts\data-probe.ps1`) rather than visual inspection. Verify both schema shape and data content (e.g., zero foreign project references).
    - **Runtime Smoke Probes:** When initializing or auditing indexing engines (GitNexus, CodeGraph), execute at least 2–3 live queries (Smoke Probes) to verify runtime readiness (e.g., FTS and Graph status).
    - **CLI Edge-Case & Cross-Platform Integrity:** Thoroughly verify all command arguments and flags (e.g., distinguishing between merge commits and standard commits in `git revert`, path separators across OS, and POSIX execution permissions).
-5. **Smart Testing Pyramid & Process Guard:**
+5. **Two-Way Lifecycle, Chaining & Clean Reversibility:** ⭐ NEW (v4.13.0)
+   - **Idempotency Guarantee:** Installation scripts and configuration modifiers must be idempotent (executing $N$ times produces identical, error-free results).
+   - **Non-Destructive Hook Chaining:** Framework hooks must never overwrite existing user hooks; prior hooks must be chained to run first.
+   - **Clean Uninstallation:** Every system/Git configuration module must support complete, byte-for-byte reversal (e.g., `python guardrails/install.py --uninstall`).
+6. **Supply-Chain Hardening & Strict Version Pinning:** ⭐ NEW (v4.13.0)
+   - Never use floating tags such as `@latest` or `*` in MCP configurations (`.gemini/mcp_config.json`), dependency manifests, or CI workflows.
+   - All third-party tools and subagent dependencies must be pinned to exact immutable versions (e.g., `gitnexus@1.6.9`).
+7. **Smart Testing Pyramid & Process Guard:**
    - **Test what your app owns:** Never re-test primitives guaranteed by the framework or database engine (e.g., UUID uniqueness, ACID properties).
    - **Smallest Scoped Unit Test (< 1s):** Executed during individual task coding in `/code`.
    - **Targeted E2E Smoke Test (Timeout 30s):** Executed upon feature completion. Must meet **Zero Network Errors (HTTP $\ge 400$)** and cleanly kill background process trees.
    - **Evidence Ledger:** Record test metadata into `.brain/verification_ledger.json` instead of dumping raw stdout to chat context.
-6. **Sacred Prompt Caching Protection:**
+8. **Sacred Prompt Caching Protection:**
    - Maintain **byte-stable** system prompts, core rules (`GEMINI.md`, `AI_CODE_WORKFLOW.md`), and tool schemas across turns to achieve 90%+ prefix cache hit rates.
-7. **Database Integrity & Explicit Foreign Key Hints:**
+9. **Database Integrity & Explicit Foreign Key Hints:**
    - When writing Supabase / PostgREST embedded queries, **ALWAYS** specify explicit foreign key hints (e.g., `supabase.from('questions').select('*, profiles!author_id(*)')`) whenever more than one relationship exists.
    - Run migration impact analysis across all API query files whenever modifying database schema or foreign keys.
-8. **Systematic Error Classification & Failed-First-Fix Rule:**
-   - **Transient Errors (503, 429, Timeout):** Apply exponential backoff with jitter (max 3 retries).
-   - **Deterministic Errors (Ambiguous FK, Logic, Type Error, 400, 401/403):** Stop immediately. Investigate the root cause and confirm hypotheses with evidence from runtime logs and `gitnexus trace`.
-   - **Failed-First-Fix Stop Gate:** If the first fix attempt has failed, stop immediately, revert the speculative patch, and return to phase A investigation. Never stack speculative patches on top of a failed fix.
-9. **Continuous Learning & Autonomous Skill Synthesis:**
-   - Automatically record root causes and proven solutions in `.brain/learnings.md` following successful bug fixes.
-   - Synthesize complex reusable solutions into `skills/custom/[skill-name]/SKILL.md` strictly adhering to the `agentskills.io` directory standard.
-   - Query `.brain/learnings.md` via `.\scripts\brain-query.ps1` before authoring new plans.
-10. **Strict Automated Guardrails & Pre-flight Gate:**
+10. **Systematic Error Classification & Failed-First-Fix Rule:**
+    - **Transient Errors (503, 429, Timeout):** Apply exponential backoff with jitter (max 3 retries).
+    - **Deterministic Errors (Ambiguous FK, Logic, Type Error, 400, 401/403):** Stop immediately. Investigate the root cause and confirm hypotheses with evidence from runtime logs and `gitnexus trace`.
+    - **Failed-First-Fix Stop Gate:** If the first fix attempt has failed, stop immediately, revert the speculative patch, and return to phase A investigation. Never stack speculative patches on top of a failed fix.
+11. **Continuous Learning & Autonomous Skill Synthesis:**
+    - Automatically record root causes and proven solutions in `.brain/learnings.md` following successful bug fixes.
+    - Synthesize complex reusable solutions into `skills/custom/[skill-name]/SKILL.md` strictly adhering to the `agentskills.io` directory standard.
+    - Query `.brain/learnings.md` via `.\scripts\brain-query.ps1` before authoring new plans.
+12. **Strict Automated Guardrails & Pre-flight Gate:**
     - Install and enforce **automated guardrails** (`guardrails/guardrail.py` and pre-commit hooks).
     - Agents **must not bypass**, disable, or weaken guardrails, and must never use `git commit --no-verify`.
     - Direct commits on protected branches (`main`, `master`) are strictly blocked.
     - Pre-flight Task Validation: Run `.\scripts\task-brief.ps1 -Validate` before dispatching implementer subagents.
-11. **Live-Test Deployment Gate:**
+13. **Live-Test Deployment Gate:**
     - **Never deploy** or execute production mutations without the user's **explicit approval** after the user has live-tested the verified change.
 
 ---

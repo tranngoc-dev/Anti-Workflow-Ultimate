@@ -89,7 +89,7 @@ if (Test-Path $sourceMcp) {
 
 # 7. Save Version
 $versionFile = Join-Path $userHome ".gemini\awf_version"
-Set-Content -Path $versionFile -Value "4.12.0-ultimate" -Encoding UTF8
+Set-Content -Path $versionFile -Value "4.13.0-ultimate" -Encoding UTF8
 
 Write-Host "`n==============================================================================" -ForegroundColor Cyan
 Write-Host "  [OK] INSTALLATION COMPLETED SUCCESSFULLY!" -ForegroundColor Yellow

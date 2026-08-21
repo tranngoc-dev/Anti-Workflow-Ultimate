@@ -1,4 +1,4 @@
-# ⚡ Anti-Workflow Ultimate (v4.12.0)
+# ⚡ Anti-Workflow Ultimate (v4.13.0)
 
 [English](README.md) | [Tiếng Việt](README_VN.md)
 

@@ -94,6 +94,13 @@ def integrity_findings(repo: Path) -> list[Finding]:
                     if stray_file.name != "README.md":
                         findings.append(Finding("skill.format", f"Stray skill file {stray_file.relative_to(repo)} must be packaged as {stray_file.stem}/SKILL.md according to agentskills.io spec.", str(stray_file.relative_to(repo)), remedy="Wrap the skill markdown file into its own directory containing SKILL.md."))
 
+    # Supply-Chain Hardening Check (.gemini/mcp_config.json)
+    mcp_config_path = repo / ".gemini" / "mcp_config.json"
+    if mcp_config_path.is_file():
+        mcp_content = mcp_config_path.read_text(encoding="utf-8", errors="replace")
+        if "@latest" in mcp_content:
+            findings.append(Finding("supply_chain.floating_version", "Floating version tag '@latest' is prohibited in .gemini/mcp_config.json.", str(mcp_config_path.relative_to(repo)), remedy="Pin all MCP packages to exact immutable semantic versions (e.g. 'gitnexus@1.6.9')."))
+
     return findings
 
 
