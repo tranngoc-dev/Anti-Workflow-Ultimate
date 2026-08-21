@@ -1,23 +1,22 @@
-# Handover Note - Anti-Workflow Ultimate (v4.12.0)
+# Handover Note - Anti-Workflow Ultimate (v4.14.0)
 
 **Project:** Anti-Workflow Ultimate  
-**Version:** 4.12.0-ultimate  
+**Version:** 4.14.0-ultimate (Zero False-Green Enterprise Edition)  
 **Repository:** `tranngoc-dev/Anti-Workflow-Ultimate`  
-**Status:** Clean, Production-Grade, 100% Audit Remediated ✅  
+**Status:** Physical Hook Active, Live Schemas 100% Valid, Supply-Chain Pinned ✅  
 
 ---
 
 ## 🌟 Key Accomplishments
 
-1. **Empirical Verification Engine:**
-   - Implemented `scripts/schema-probe.py` / `schema-probe.ps1` validating all JSON schemas with zero errors.
-   - Upgraded `guardrails/guardrail.py` with process-tree auto-kill (`taskkill /F /T` / `os.killpg`) and secure verification ledger.
-   - Enforced `No Blind Confirmation` policy across `/audit` and `/review`.
+1. **Physical Pre-Commit Hook Active:**
+   - Active Git hook configured at `guardrails/hooks` with `--run-previous-hook` chaining and byte-for-byte `--uninstall` restoration.
 
-2. **Clean Project State:**
-   - Purged all foreign application artifacts and database SQL scripts.
-   - Reset `.brain/` state cleanly for `Anti-Workflow Ultimate`.
+2. **Zero False-Green Verification Matrix:**
+   - `scripts/schema-probe.py` validates BOTH static templates and live runtime `.brain/*.json` artifacts (0 errors).
+   - `scripts/data-probe.py` deeply verifies payload identity, foreign references, and data cleanliness across 140+ files.
 
-3. **Standardization:**
-   - Converted 8 GitNexus skills to canonical `skills/gitnexus/[skill-name]/SKILL.md` format compliant with `agentskills.io`.
-   - Standardized all 21 global workflows and documentation to professional international standard with bilingual README support.
+3. **Supply-Chain & CI Hardening:**
+   - Pinned development dependencies in `requirements-dev.txt` (`jsonschema==4.25.1`, `ruff==0.12.10`).
+   - Pinned GitHub Actions commit SHAs in `.github/workflows/guardrails.yml` with `timeout-minutes: 15`.
+   - Prohibited floating `@latest` tags in `.gemini/mcp_config.json`.

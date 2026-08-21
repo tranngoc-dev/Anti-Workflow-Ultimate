@@ -4,17 +4,24 @@ set -eu
 repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
 
-if command -v python3 >/dev/null 2>&1; then
+py_cmd=""
+if command -v py >/dev/null 2>&1 && py -3 --version >/dev/null 2>&1; then
+    py_cmd="py -3"
+elif command -v python3 >/dev/null 2>&1 && python3 --version >/dev/null 2>&1; then
     py_cmd="python3"
-elif command -v python >/dev/null 2>&1; then
+elif command -v python >/dev/null 2>&1 && python --version >/dev/null 2>&1; then
     py_cmd="python"
-else
-    echo "❌ Python is required for Guardrail checks but was not found in PATH." >&2
+elif [ -f "/c/Users/Trong/AppData/Local/Programs/Python/Python312/python.exe" ]; then
+    py_cmd="/c/Users/Trong/AppData/Local/Programs/Python/Python312/python.exe"
+fi
+
+if [ -z "$py_cmd" ]; then
+    echo "❌ Python 3 is required for Guardrail checks but was not found in PATH." >&2
     exit 1
 fi
 
 # 1. Run previous chained hook if recorded
-"$py_cmd" guardrails/install.py --run-previous-hook -- "$@"
+$py_cmd guardrails/install.py --run-previous-hook -- "$@"
 
 # 2. Run Anti-Workflow staged guardrail
-exec "$py_cmd" guardrails/guardrail.py --mode staged
+exec $py_cmd guardrails/guardrail.py --mode staged

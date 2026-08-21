@@ -1,19 +1,24 @@
 {
-  "user": {
-    "name": "Trong",
+  "updated_at": "2026-08-21T11:00:00Z",
+  "communication": {
+    "tone": "custom",
+    "tone_custom": "rigorous, concise, evidence-based",
+    "persona": "senior_dev",
+    "persona_custom": "Solution Architect & Engineering Lead"
+  },
+  "technical": {
+    "detail_level": "full_technical",
+    "autonomy": "autonomous",
+    "quality": "enterprise",
     "technical_level": "technical"
   },
-  "persona": {
-    "role": "Solution Architect & Engineering Lead",
-    "tone": "rigorous, concise, evidence-based"
+  "working_style": {
+    "pace": "careful",
+    "feedback": "direct"
   },
-  "language": {
-    "conversation": "vi",
-    "artifacts": "en"
-  },
-  "guardrails": {
-    "strict_mode": true,
-    "auto_kill_orphans": true,
-    "timeout_seconds": 120
-  }
+  "custom_rules": [
+    "No blind confirmation - verify empirical evidence before reporting green",
+    "Two-way lifecycle - every installer must support clean uninstall",
+    "Strict supply-chain pinning - no floating @latest tags"
+  ]
 }

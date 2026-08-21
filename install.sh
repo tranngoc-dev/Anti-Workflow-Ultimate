@@ -45,7 +45,7 @@ if [ -d "$SOURCE_DIR/skills" ]; then
 fi
 
 # 5. Install Schemas & Templates
-echo "[5/7] Installing Schemas & Templates..."
+echo "[5/8] Installing Schemas & Templates..."
 if [ -d "$SOURCE_DIR/schemas" ]; then
     cp -r "$SOURCE_DIR/schemas/"* "$SCHEMAS_DIR/"
     echo "  [OK] Installed schemas to $SCHEMAS_DIR"
@@ -55,8 +55,21 @@ if [ -d "$SOURCE_DIR/templates" ]; then
     echo "  [OK] Installed templates to $TEMPLATES_DIR"
 fi
 
-# 6. MCP Server Configuration
-echo "[6/7] Configuring MCP Server settings..."
+# 6. Install Guardrails Kit & Core Constitution
+echo "[6/8] Installing Guardrails Kit & Constitution..."
+mkdir -p "$ANTIGRAVITY_DIR/guardrails"
+if [ -d "$SOURCE_DIR/guardrails" ]; then
+    cp -r "$SOURCE_DIR/guardrails/"* "$ANTIGRAVITY_DIR/guardrails/"
+    echo "  [OK] Installed guardrails kit to $ANTIGRAVITY_DIR/guardrails"
+fi
+for doc in AGENTS.md GEMINI.md AI_CODE_WORKFLOW.md GUARDRAILS.md VERSION; do
+    if [ -f "$SOURCE_DIR/$doc" ]; then
+        cp "$SOURCE_DIR/$doc" "$ANTIGRAVITY_DIR/$doc"
+    fi
+done
+
+# 7. MCP Server Configuration
+echo "[7/8] Configuring MCP Server settings..."
 if [ -f "$SOURCE_DIR/.gemini/mcp_config.json" ]; then
     if [ ! -f "$ANTIGRAVITY_DIR/mcp_config.json" ]; then
         cp "$SOURCE_DIR/.gemini/mcp_config.json" "$ANTIGRAVITY_DIR/mcp_config.json"
@@ -66,8 +79,8 @@ if [ -f "$SOURCE_DIR/.gemini/mcp_config.json" ]; then
     fi
 fi
 
-# 7. Save Version
-echo "4.13.0-ultimate" > "$HOME/.gemini/awf_version"
+# 8. Save Version
+echo "4.14.0-ultimate" > "$HOME/.gemini/awf_version"
 
 echo "=============================================================================="
 echo "  [OK] INSTALLATION COMPLETED SUCCESSFULLY!"

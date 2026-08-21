@@ -62,7 +62,7 @@ if (Test-Path $sourceSkills) {
 }
 
 # 5. Install Schemas & Templates
-Write-Host "[5/7] Installing Schemas and Templates..." -ForegroundColor Green
+Write-Host "[5/8] Installing Schemas and Templates..." -ForegroundColor Green
 $sourceSchemas = Join-Path $sourceDir "schemas"
 if (Test-Path $sourceSchemas) {
     Copy-Item -Path "$sourceSchemas\*" -Destination $schemasDir -Recurse -Force
@@ -74,8 +74,24 @@ if (Test-Path $sourceTemplates) {
     Write-Host "  [OK] Installed templates to $templatesDir" -ForegroundColor Gray
 }
 
-# 6. Configure MCP Servers
-Write-Host "[6/7] Configuring MCP Server settings..." -ForegroundColor Green
+# 6. Install Guardrails Kit & Constitution (for /init onboarding)
+Write-Host "[6/8] Installing Guardrails Kit & Core Constitution..." -ForegroundColor Green
+$guardrailsDir = Join-Path $antigravityDir "guardrails"
+$sourceGuardrails = Join-Path $sourceDir "guardrails"
+if (Test-Path $sourceGuardrails) {
+    if (-not (Test-Path $guardrailsDir)) { New-Item -ItemType Directory -Path $guardrailsDir -Force | Out-Null }
+    Copy-Item -Path "$sourceGuardrails\*" -Destination $guardrailsDir -Recurse -Force
+    Write-Host "  [OK] Installed guardrails kit to $guardrailsDir" -ForegroundColor Gray
+}
+foreach ($doc in @("AGENTS.md", "GEMINI.md", "AI_CODE_WORKFLOW.md", "GUARDRAILS.md", "VERSION")) {
+    $docSource = Join-Path $sourceDir $doc
+    if (Test-Path $docSource) {
+        Copy-Item -Path $docSource -Destination (Join-Path $antigravityDir $doc) -Force
+    }
+}
+
+# 7. Configure MCP Servers
+Write-Host "[7/8] Configuring MCP Server settings..." -ForegroundColor Green
 $mcpConfigFile = Join-Path $antigravityDir "mcp_config.json"
 $sourceMcp = Join-Path $sourceDir ".gemini\mcp_config.json"
 if (Test-Path $sourceMcp) {
@@ -87,9 +103,9 @@ if (Test-Path $sourceMcp) {
     }
 }
 
-# 7. Save Version
+# 8. Save Version
 $versionFile = Join-Path $userHome ".gemini\awf_version"
-Set-Content -Path $versionFile -Value "4.13.0-ultimate" -Encoding UTF8
+Set-Content -Path $versionFile -Value "4.14.0-ultimate" -Encoding UTF8
 
 Write-Host "`n==============================================================================" -ForegroundColor Cyan
 Write-Host "  [OK] INSTALLATION COMPLETED SUCCESSFULLY!" -ForegroundColor Yellow

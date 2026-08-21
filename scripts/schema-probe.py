@@ -11,21 +11,14 @@ if hasattr(sys.stderr, "reconfigure"):
 try:
     import jsonschema
 except ImportError:
-    print("[WARN] jsonschema library is not installed. Installing...")
-    import subprocess
-    subprocess.run([sys.executable, "-m", "pip", "install", "jsonschema", "-q"], check=False)
-    import jsonschema
+    print("❌ ERROR: 'jsonschema' is not installed.")
+    print("   Please install pinned dependencies: python -m pip install -r requirements-dev.txt")
+    sys.exit(1)
 
-schemas_dir = Path("schemas")
-templates_dir = Path("templates")
-
-if not schemas_dir.is_dir():
-    if Path("../schemas").is_dir():
-        schemas_dir = Path("../schemas")
-        templates_dir = Path("../templates")
-    elif Path("../../schemas").is_dir():
-        schemas_dir = Path("../../schemas")
-        templates_dir = Path("../../templates")
+repo_root = Path(__file__).resolve().parents[1]
+schemas_dir = repo_root / "schemas"
+templates_dir = repo_root / "templates"
+brain_dir = repo_root / ".brain"
 
 if not schemas_dir.is_dir():
     print("INFO: No schemas directory found to validate.")
@@ -34,47 +27,84 @@ if not schemas_dir.is_dir():
 total_checked = 0
 total_errors = 0
 
-print("🔍 [SCHEMA PROBE] Validating all Schemas against Templates/Examples...\n")
+print("🔍 [SCHEMA PROBE] Validating Templates AND Live .brain States...\n")
 
-for schema_file in sorted(schemas_dir.glob("*.schema.json")):
-    base_name = schema_file.name.replace(".schema.json", "")
-    example_file = templates_dir / f"{base_name}.example.json"
-    
-    if not example_file.is_file():
-        example_file = templates_dir / f"{base_name}.json"
-        
-    if not example_file.is_file():
-        print(f"  ⚪ {schema_file.name}: No matching template found in {templates_dir} (Skipped)")
+# Map of schema to template and live state files
+SCHEMA_MAPPINGS = {
+    "brain.schema.json": {
+        "template": templates_dir / "brain.example.json",
+        "live": brain_dir / "brain.json"
+    },
+    "session.schema.json": {
+        "template": templates_dir / "session.example.json",
+        "live": brain_dir / "session.json"
+    },
+    "preferences.schema.json": {
+        "template": templates_dir / "preferences.example.json",
+        "live": brain_dir / "preferences.json"
+    }
+}
+
+for schema_name, targets in SCHEMA_MAPPINGS.items():
+    schema_file = schemas_dir / schema_name
+    if not schema_file.is_file():
         continue
         
-    total_checked += 1
     try:
         with open(schema_file, "r", encoding="utf-8") as sf:
             schema = json.load(sf)
-        with open(example_file, "r", encoding="utf-8") as ef:
-            data = json.load(ef)
-            
         validator = jsonschema.Draft7Validator(schema)
-        errors = list(validator.iter_errors(data))
-        
-        if errors:
-            total_errors += len(errors)
-            print(f"  ❌ {schema_file.name} vs {example_file.name}: FAILED ({len(errors)} errors)")
-            for i, err in enumerate(errors, 1):
-                path_str = " -> ".join(str(p) for p in err.path) if err.path else "root"
-                print(f"     [{i}] Path: {path_str} | Message: {err.message}")
-        else:
-            print(f"  ✅ {schema_file.name} vs {example_file.name}: PASSED (0 errors)")
     except Exception as exc:
+        print(f"  ❌ {schema_name}: Schema syntax error - {exc}")
         total_errors += 1
-        print(f"  ❌ {schema_file.name}: Exception during validation - {exc}")
+        continue
+
+    # 1. Validate Template
+    template_file = targets.get("template")
+    if template_file and template_file.is_file():
+        total_checked += 1
+        try:
+            with open(template_file, "r", encoding="utf-8") as tf:
+                t_data = json.load(tf)
+            t_errors = list(validator.iter_errors(t_data))
+            if t_errors:
+                total_errors += len(t_errors)
+                print(f"  ❌ [TEMPLATE] {template_file.name}: FAILED ({len(t_errors)} errors)")
+                for i, err in enumerate(t_errors, 1):
+                    p = " -> ".join(str(x) for x in err.path) if err.path else "root"
+                    print(f"     [{i}] Path: {p} | Message: {err.message}")
+            else:
+                print(f"  ✅ [TEMPLATE] {template_file.name}: PASSED (0 errors)")
+        except Exception as exc:
+            total_errors += 1
+            print(f"  ❌ [TEMPLATE] {template_file.name}: Read/Validate error - {exc}")
+
+    # 2. Validate Live State (.brain)
+    live_file = targets.get("live")
+    if live_file and live_file.is_file():
+        total_checked += 1
+        try:
+            with open(live_file, "r", encoding="utf-8") as lf:
+                l_data = json.load(lf)
+            l_errors = list(validator.iter_errors(l_data))
+            if l_errors:
+                total_errors += len(l_errors)
+                print(f"  ❌ [LIVE STATE] {live_file.relative_to(repo_root)}: FAILED ({len(l_errors)} errors)")
+                for i, err in enumerate(l_errors, 1):
+                    p = " -> ".join(str(x) for x in err.path) if err.path else "root"
+                    print(f"     [{i}] Path: {p} | Message: {err.message}")
+            else:
+                print(f"  ✅ [LIVE STATE] {live_file.relative_to(repo_root)}: PASSED (0 errors)")
+        except Exception as exc:
+            total_errors += 1
+            print(f"  ❌ [LIVE STATE] {live_file.relative_to(repo_root)}: Read/Validate error - {exc}")
 
 print(f"\n=======================================================")
 if total_errors == 0:
-    print(f"  🎉 ALL {total_checked} SCHEMA(S) VALIDATED PERFECTLY! (0 ERRORS)")
+    print(f"  🎉 ALL {total_checked} TEMPLATE & LIVE ARTIFACT(S) VALIDATED PERFECTLY! (0 ERRORS)")
     print("=======================================================")
     sys.exit(0)
 else:
-    print(f"  ⚠️ SCHEMA VALIDATION FAILED WITH {total_errors} TOTAL ERROR(S)!")
+    print(f"  ⚠️ SCHEMA PROBE FAILED WITH {total_errors} TOTAL ERROR(S)!")
     print("=======================================================")
     sys.exit(1)

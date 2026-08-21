@@ -1,0 +1,3 @@
+# Anti-Workflow Ultimate - Pinned Development Dependencies
+jsonschema==4.25.1
+ruff==0.12.10

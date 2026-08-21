@@ -26,7 +26,7 @@
         "description": { "type": "string" },
         "type": {
           "type": "string",
-          "enum": ["website", "webapp", "api", "fullstack", "mobile"]
+          "enum": ["website", "webapp", "api", "fullstack", "mobile", "framework"]
         },
         "status": {
           "type": "string",

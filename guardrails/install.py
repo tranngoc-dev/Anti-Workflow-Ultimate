@@ -16,7 +16,7 @@ class InstallError(RuntimeError):
 
 
 def _git(repo: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(["git", *args], cwd=repo, text=True, capture_output=True, check=check)
+    return subprocess.run(["git", *args], cwd=repo, text=True, capture_output=True, check=check, encoding="utf-8", errors="replace")
 
 
 def _get_state_path(repo: Path) -> Path:
