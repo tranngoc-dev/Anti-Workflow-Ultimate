@@ -10,7 +10,7 @@
   },
   "working_on": {
     "feature": "Empirical Verification Engine & Audit Remediation",
-    "task": "Clean Tulanh foreign state and integrate schema validation and process guard",
+    "task": "Clean foreign application state and integrate schema validation and process guard",
     "status": "completed",
     "files": [
       "AI_CODE_WORKFLOW.md",

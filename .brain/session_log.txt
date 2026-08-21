@@ -1,4 +1,4 @@
 [2026-08-20 12:00] INITIALIZE: Upgraded Anti-Workflow Ultimate to v4.11.0 (Dify-Inspired Capabilities).
 [2026-08-20 13:00] I18N: Standardized all documentation and 21 workflows to professional English.
-[2026-08-20 13:40] AUDIT_REMEDIATION: Cleaned foreign Tulanh state, fixed JSON schemas, and converted 8 GitNexus skills to agentskills.io format.
+[2026-08-20 13:40] AUDIT_REMEDIATION: Cleaned foreign application state, fixed JSON schemas, and converted 8 GitNexus skills to agentskills.io format.
 [2026-08-21 09:00] RELEASE: Integrated Empirical Verification Engine (v4.12.0) with automated Schema Probe and Process Tree Guard.

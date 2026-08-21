@@ -15,7 +15,7 @@
    - Enforced `No Blind Confirmation` policy across `/audit` and `/review`.
 
 2. **Clean Project State:**
-   - Purged all foreign Tulanh application artifacts and database SQL scripts.
+   - Purged all foreign application artifacts and database SQL scripts.
    - Reset `.brain/` state cleanly for `Anti-Workflow Ultimate`.
 
 3. **Standardization:**
