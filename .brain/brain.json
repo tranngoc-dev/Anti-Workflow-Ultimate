@@ -40,6 +40,6 @@
   "workflows": [
     "/init", "/plan", "/code", "/test", "/debug", "/design", "/visualize",
     "/brainstorm", "/audit", "/review", "/refactor", "/deploy", "/rollback",
-    "/recap", "/save-brain", "/next", "/help", "/customize", "/run", "/awf-update"
+    "/recap", "/save-brain", "/next", "/help", "/customize", "/run"
   ]
 }

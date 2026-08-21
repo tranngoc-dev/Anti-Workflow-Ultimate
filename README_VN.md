@@ -139,7 +139,6 @@ bash "./install.sh"
 | `/customize` | `customize.md` | ⚙️ Tùy chỉnh persona, độ sâu kỹ thuật & cấu hình |
 | `/refactor` | `refactor.md` | 🔧 Tái cấu trúc code mà không đổi hành vi |
 | `/run` | `run.md` | ▶️ Chạy ứng dụng an toàn với bộ quản lý tiến trình |
-| `/awf-update` | `awf-update.md` | 📦 Cập nhật framework Anti-Workflow-Ultimate |
 
 ---
 

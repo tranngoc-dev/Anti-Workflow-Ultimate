@@ -139,7 +139,6 @@ bash "./install.sh"
 | `/customize` | `customize.md` | ⚙️ Persona, technical level, and workflow tuning |
 | `/refactor` | `refactor.md` | 🔧 Code restructuring without behavior alteration |
 | `/run` | `run.md` | ▶️ Safe application launch with process guard |
-| `/awf-update` | `awf-update.md` | 📦 Update Anti-Workflow-Ultimate framework |
 
 ---
 

@@ -25,4 +25,3 @@ This directory contains the core workflow definitions for **Anti-Workflow-Ultima
 | `/customize` | `customize.md` | ⚙️ Persona and framework configuration |
 | `/refactor` | `refactor.md` | 🔧 Code restructuring without behavior change |
 | `/run` | `run.md` | ▶️ Safe application execution & process management |
-| `/awf-update` | `awf-update.md` | 📦 Framework updater |
