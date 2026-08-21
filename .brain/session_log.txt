@@ -4,3 +4,4 @@
 [2026-08-21 09:00] RELEASE: Integrated Empirical Verification Engine (v4.12.0) with automated Schema Probe and Process Tree Guard.
 [2026-08-21 10:20] HARDENING: Institutionalized 4 deep audit lessons into v4.13.0 with Data Payload Probe and 4-Layer Empirical Matrix.
 [2026-08-21 11:00] RELEASE: Upgraded to v4.14.0 Enterprise Edition (Physical Hook Active, Live State Schema Probe, Supply-Chain Pinned).
+[2026-08-21 12:00] RELEASE: Upgraded to v4.15.0 Zero Fail-Open Edition (Fail-Closed Probes, Schema Hardened, Scanner Isolation, 38/38 Tests).

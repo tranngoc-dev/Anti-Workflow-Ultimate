@@ -175,5 +175,67 @@
     "commit": "ac45014",
     "branch": "feat/v4.14.0-enterprise-edition",
     "timestamp": "2026-08-21T04:25:34.143759+00:00"
+  },
+  {
+    "type": "guardrail_verification",
+    "category": "tests",
+    "command": "C:\\Users\\Trong\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -m unittest discover -s guardrails/tests -v",
+    "status": "PASSED",
+    "exit_code": 0,
+    "duration_ms": 4962,
+    "commit": "aa8133b",
+    "branch": "fix/ci-pip-cache-path",
+    "timestamp": "2026-08-21T04:28:16.051501+00:00"
+  },
+  {
+    "type": "guardrail_verification",
+    "category": "tests",
+    "command": "C:\\Users\\Trong\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -m unittest discover -s guardrails/tests -v",
+    "status": "FAILED",
+    "exit_code": 1,
+    "duration_ms": 8955,
+    "commit": "158cb54",
+    "branch": "main",
+    "timestamp": "2026-08-21T04:47:00.959018+00:00"
+  },
+  {
+    "type": "guardrail_verification",
+    "category": "tests",
+    "command": "C:\\Users\\Trong\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -m unittest discover -s guardrails/tests -v",
+    "status": "FAILED",
+    "exit_code": 1,
+    "duration_ms": 8614,
+    "commit": "158cb54",
+    "branch": "main",
+    "timestamp": "2026-08-21T05:10:30.384652+00:00"
+  },
+  {
+    "type": "project_audit",
+    "category": "audit",
+    "command": "4-layer empirical matrix: schema-probe + data-probe + gitnexus smoke + unittest + guardrail --mode all",
+    "status": "FAILED",
+    "exit_code": 1,
+    "duration_ms": null,
+    "commit": "158cb54",
+    "branch": "main",
+    "timestamp": "2026-08-21T05:11:47.844274+00:00",
+    "layers": {
+      "schema_probe": "PASSED",
+      "data_probe": "FAILED",
+      "gitnexus_context": "PASSED",
+      "gitnexus_query_fts": "DEGRADED",
+      "guardrail_tests": "FAILED 13/47"
+    }
+  },
+  {
+    "type": "guardrail_verification",
+    "category": "tests",
+    "command": "C:\\Users\\Trong\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -m unittest discover -s guardrails/tests -v",
+    "status": "PASSED",
+    "exit_code": 0,
+    "duration_ms": 9551,
+    "commit": "158cb54",
+    "branch": "main",
+    "timestamp": "2026-08-21T05:23:34.836147+00:00"
   }
 ]

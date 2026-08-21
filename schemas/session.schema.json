@@ -149,5 +149,6 @@
         "warn_threshold": { "type": "integer", "default": 80, "description": "Warn at N% context usage" }
       }
     }
-  }
+  },
+  "additionalProperties": false
 }

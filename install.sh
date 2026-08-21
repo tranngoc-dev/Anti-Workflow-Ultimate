@@ -19,18 +19,18 @@ SCRIPTS_DIR="$ANTIGRAVITY_DIR/scripts"
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # 1. Create directory structure
-echo "[1/6] Initializing Antigravity directory hierarchy..."
+echo "[1/7] Initializing Antigravity directory hierarchy..."
 mkdir -p "$ANTIGRAVITY_DIR" "$GLOBAL_WORKFLOWS_DIR" "$SKILLS_DIR" "$SCHEMAS_DIR" "$TEMPLATES_DIR" "$SCRIPTS_DIR"
 
 # 2. Install Global Workflows
-echo "[2/6] Installing Core Workflows (/init, /plan, /code, /recap...)..."
+echo "[2/7] Installing Core Workflows (/init, /plan, /code, /recap...)..."
 if [ -d "$SOURCE_DIR/global_workflows" ]; then
     cp -r "$SOURCE_DIR/global_workflows/"* "$GLOBAL_WORKFLOWS_DIR/"
     echo "  [OK] Installed workflows to $GLOBAL_WORKFLOWS_DIR"
 fi
 
 # 3. Install Utility Scripts
-echo "[3/6] Installing Utility Scripts..."
+echo "[3/7] Installing Utility Scripts..."
 if [ -d "$SOURCE_DIR/scripts" ]; then
     cp -r "$SOURCE_DIR/scripts/"* "$SCRIPTS_DIR/"
     chmod +x "$SCRIPTS_DIR/"* 2>/dev/null || true
@@ -45,7 +45,7 @@ if [ -d "$SOURCE_DIR/skills" ]; then
 fi
 
 # 5. Install Schemas & Templates
-echo "[5/8] Installing Schemas & Templates..."
+echo "[5/7] Installing Schemas & Templates..."
 if [ -d "$SOURCE_DIR/schemas" ]; then
     cp -r "$SOURCE_DIR/schemas/"* "$SCHEMAS_DIR/"
     echo "  [OK] Installed schemas to $SCHEMAS_DIR"
@@ -56,7 +56,7 @@ if [ -d "$SOURCE_DIR/templates" ]; then
 fi
 
 # 6. Install Guardrails Kit & Core Constitution
-echo "[6/8] Installing Guardrails Kit & Constitution..."
+echo "[6/7] Installing Guardrails Kit & Constitution..."
 mkdir -p "$ANTIGRAVITY_DIR/guardrails"
 if [ -d "$SOURCE_DIR/guardrails" ]; then
     cp -r "$SOURCE_DIR/guardrails/"* "$ANTIGRAVITY_DIR/guardrails/"
@@ -68,8 +68,8 @@ for doc in AGENTS.md GEMINI.md AI_CODE_WORKFLOW.md GUARDRAILS.md VERSION; do
     fi
 done
 
-# 7. MCP Server Configuration
-echo "[7/8] Configuring MCP Server settings..."
+# 7. MCP Server Configuration & Save Version
+echo "[7/7] Configuring MCP Server settings & Finalizing..."
 if [ -f "$SOURCE_DIR/.gemini/mcp_config.json" ]; then
     if [ ! -f "$ANTIGRAVITY_DIR/mcp_config.json" ]; then
         cp "$SOURCE_DIR/.gemini/mcp_config.json" "$ANTIGRAVITY_DIR/mcp_config.json"
@@ -79,8 +79,7 @@ if [ -f "$SOURCE_DIR/.gemini/mcp_config.json" ]; then
     fi
 fi
 
-# 8. Save Version
-echo "4.14.0-ultimate" > "$HOME/.gemini/awf_version"
+echo "4.15.0-ultimate" > "$HOME/.gemini/awf_version"
 
 echo "=============================================================================="
 echo "  [OK] INSTALLATION COMPLETED SUCCESSFULLY!"

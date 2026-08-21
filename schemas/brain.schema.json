@@ -289,10 +289,29 @@
         }
       }
     },
+    "guardrails": {
+      "type": "object",
+      "description": "Guardrails and protection policies",
+      "properties": {
+        "pre_commit_hook": { "type": "string" },
+        "engine": { "type": "string" },
+        "policy": { "type": "string" },
+        "protected_branches": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "workflows": {
+      "type": "array",
+      "description": "Installed framework workflows",
+      "items": { "type": "string" }
+    },
     "updated_at": {
       "type": "string",
       "format": "date-time",
       "description": "Last update timestamp"
     }
-  }
+  },
+  "additionalProperties": false
 }

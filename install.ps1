@@ -28,7 +28,7 @@ if ([string]::IsNullOrWhiteSpace($sourceDir)) {
 }
 
 # 1. Create directory structure
-Write-Host "`n[1/6] Initializing Antigravity directory hierarchy..." -ForegroundColor Green
+Write-Host "`n[1/7] Initializing Antigravity directory hierarchy..." -ForegroundColor Green
 $dirs = @($antigravityDir, $globalWorkflowsDir, $skillsDir, $schemasDir, $templatesDir, $scriptsDir)
 foreach ($d in $dirs) {
     if (-not (Test-Path $d)) {
@@ -37,7 +37,7 @@ foreach ($d in $dirs) {
 }
 
 # 2. Install Global Workflows
-Write-Host "[2/6] Installing Core Workflows (/init, /plan, /code, /recap...)..." -ForegroundColor Green
+Write-Host "[2/7] Installing Core Workflows (/init, /plan, /code, /recap...)..." -ForegroundColor Green
 $sourceWorkflows = Join-Path $sourceDir "global_workflows"
 if (Test-Path $sourceWorkflows) {
     Copy-Item -Path "$sourceWorkflows\*" -Destination $globalWorkflowsDir -Recurse -Force
@@ -46,7 +46,7 @@ if (Test-Path $sourceWorkflows) {
 }
 
 # 3. Install Utility Scripts
-Write-Host "[3/6] Installing Utility Scripts (Semantic Brain Query, Pre-flight Gate)..." -ForegroundColor Green
+Write-Host "[3/7] Installing Utility Scripts (Semantic Brain Query, Pre-flight Gate)..." -ForegroundColor Green
 $sourceScripts = Join-Path $sourceDir "scripts"
 if (Test-Path $sourceScripts) {
     Copy-Item -Path "$sourceScripts\*" -Destination $scriptsDir -Recurse -Force
@@ -62,7 +62,7 @@ if (Test-Path $sourceSkills) {
 }
 
 # 5. Install Schemas & Templates
-Write-Host "[5/8] Installing Schemas and Templates..." -ForegroundColor Green
+Write-Host "[5/7] Installing Schemas and Templates..." -ForegroundColor Green
 $sourceSchemas = Join-Path $sourceDir "schemas"
 if (Test-Path $sourceSchemas) {
     Copy-Item -Path "$sourceSchemas\*" -Destination $schemasDir -Recurse -Force
@@ -74,8 +74,8 @@ if (Test-Path $sourceTemplates) {
     Write-Host "  [OK] Installed templates to $templatesDir" -ForegroundColor Gray
 }
 
-# 6. Install Guardrails Kit & Constitution (for /init onboarding)
-Write-Host "[6/8] Installing Guardrails Kit & Core Constitution..." -ForegroundColor Green
+# 6. Install Guardrails Kit & Core Constitution
+Write-Host "[6/7] Installing Guardrails Kit & Core Constitution..." -ForegroundColor Green
 $guardrailsDir = Join-Path $antigravityDir "guardrails"
 $sourceGuardrails = Join-Path $sourceDir "guardrails"
 if (Test-Path $sourceGuardrails) {
@@ -90,8 +90,8 @@ foreach ($doc in @("AGENTS.md", "GEMINI.md", "AI_CODE_WORKFLOW.md", "GUARDRAILS.
     }
 }
 
-# 7. Configure MCP Servers
-Write-Host "[7/8] Configuring MCP Server settings..." -ForegroundColor Green
+# 7. Configure MCP Servers & Save Version
+Write-Host "[7/7] Configuring MCP Server settings & Finalizing..." -ForegroundColor Green
 $mcpConfigFile = Join-Path $antigravityDir "mcp_config.json"
 $sourceMcp = Join-Path $sourceDir ".gemini\mcp_config.json"
 if (Test-Path $sourceMcp) {
@@ -103,9 +103,8 @@ if (Test-Path $sourceMcp) {
     }
 }
 
-# 8. Save Version
 $versionFile = Join-Path $userHome ".gemini\awf_version"
-Set-Content -Path $versionFile -Value "4.14.0-ultimate" -Encoding UTF8
+Set-Content -Path $versionFile -Value "4.15.0-ultimate" -Encoding UTF8
 
 Write-Host "`n==============================================================================" -ForegroundColor Cyan
 Write-Host "  [OK] INSTALLATION COMPLETED SUCCESSFULLY!" -ForegroundColor Yellow

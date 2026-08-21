@@ -1,3 +1,4 @@
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -15,19 +16,27 @@ except ImportError:
     print("   Please install pinned dependencies: python -m pip install -r requirements-dev.txt")
     sys.exit(1)
 
-repo_root = Path(__file__).resolve().parents[1]
+parser = argparse.ArgumentParser(description="Empirical JSON Schema Probe Validator")
+parser.add_argument("--root", type=str, default=None, help="Repository root directory to probe")
+args = parser.parse_args()
+
+if args.root:
+    repo_root = Path(args.root).resolve()
+else:
+    repo_root = Path(__file__).resolve().parents[1]
+
 schemas_dir = repo_root / "schemas"
 templates_dir = repo_root / "templates"
 brain_dir = repo_root / ".brain"
 
 if not schemas_dir.is_dir():
-    print("INFO: No schemas directory found to validate.")
-    sys.exit(0)
+    print(f"❌ FAIL-CLOSED ERROR: Schemas directory not found at: {schemas_dir}")
+    sys.exit(1)
 
 total_checked = 0
 total_errors = 0
 
-print("🔍 [SCHEMA PROBE] Validating Templates AND Live .brain States...\n")
+print(f"🔍 [SCHEMA PROBE] Validating Templates AND Live .brain States (Root: {repo_root})...\n")
 
 # Map of schema to template and live state files
 SCHEMA_MAPPINGS = {
@@ -48,6 +57,8 @@ SCHEMA_MAPPINGS = {
 for schema_name, targets in SCHEMA_MAPPINGS.items():
     schema_file = schemas_dir / schema_name
     if not schema_file.is_file():
+        print(f"  ❌ Required schema file missing: {schema_name}")
+        total_errors += 1
         continue
         
     try:
@@ -61,7 +72,10 @@ for schema_name, targets in SCHEMA_MAPPINGS.items():
 
     # 1. Validate Template
     template_file = targets.get("template")
-    if template_file and template_file.is_file():
+    if not template_file or not template_file.is_file():
+        print(f"  ❌ [TEMPLATE] Missing template file: {template_file}")
+        total_errors += 1
+    else:
         total_checked += 1
         try:
             with open(template_file, "r", encoding="utf-8") as tf:
@@ -81,7 +95,10 @@ for schema_name, targets in SCHEMA_MAPPINGS.items():
 
     # 2. Validate Live State (.brain)
     live_file = targets.get("live")
-    if live_file and live_file.is_file():
+    if not live_file or not live_file.is_file():
+        print(f"  ❌ [LIVE STATE] Missing live state file: {live_file}")
+        total_errors += 1
+    else:
         total_checked += 1
         try:
             with open(live_file, "r", encoding="utf-8") as lf:
@@ -89,15 +106,15 @@ for schema_name, targets in SCHEMA_MAPPINGS.items():
             l_errors = list(validator.iter_errors(l_data))
             if l_errors:
                 total_errors += len(l_errors)
-                print(f"  ❌ [LIVE STATE] {live_file.relative_to(repo_root)}: FAILED ({len(l_errors)} errors)")
+                print(f"  ❌ [LIVE STATE] {live_file.name}: FAILED ({len(l_errors)} errors)")
                 for i, err in enumerate(l_errors, 1):
                     p = " -> ".join(str(x) for x in err.path) if err.path else "root"
                     print(f"     [{i}] Path: {p} | Message: {err.message}")
             else:
-                print(f"  ✅ [LIVE STATE] {live_file.relative_to(repo_root)}: PASSED (0 errors)")
+                print(f"  ✅ [LIVE STATE] {live_file.name}: PASSED (0 errors)")
         except Exception as exc:
             total_errors += 1
-            print(f"  ❌ [LIVE STATE] {live_file.relative_to(repo_root)}: Read/Validate error - {exc}")
+            print(f"  ❌ [LIVE STATE] {live_file.name}: Read/Validate error - {exc}")
 
 print(f"\n=======================================================")
 if total_errors == 0:

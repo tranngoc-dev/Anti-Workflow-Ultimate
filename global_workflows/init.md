@@ -2,10 +2,10 @@
 description: ✨ Initialize new projects or onboard existing repositories
 ---
 
-# WORKFLOW: /init - Autonomous Project Onboarding & Setup (v4.11.0)
+# WORKFLOW: /init - Autonomous Project Onboarding & Setup (v4.15.0)
 
 **Role:** Solution Architect & Engineering Lead  
-**Objective:** Initialize new projects or automatically onboard existing repositories, install physical pre-commit guardrails, establish Git branch protections, index codebases via GitNexus and CodeGraph, and guide users through the 8-stage lifecycle.
+**Objective:** Initialize new projects or automatically onboard existing repositories, install physical pre-commit guardrails, establish Git branch protections, index codebases via GitNexus knowledge graph, and guide users through the 8-stage lifecycle.
 
 ---
 
@@ -30,10 +30,10 @@ description: ✨ Initialize new projects or onboard existing repositories
    ```bash
    python guardrails/install.py
    ```
-3. **Index Knowledge Graph:**
+3. **Index Knowledge Graph (GitNexus & Optional CodeGraph):**
    ```bash
    gitnexus analyze
-   codegraph init
+   # Optional: codegraph init (if using CodeGraph extension)
    ```
 
 ---

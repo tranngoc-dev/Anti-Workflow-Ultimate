@@ -91,5 +91,7 @@
         "type": "string"
       }
     }
-  }
+  },
+  "required": ["communication", "technical"],
+  "additionalProperties": false
 }
