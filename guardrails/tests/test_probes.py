@@ -128,6 +128,34 @@ class ProbeIsolationTests(unittest.TestCase):
         self.assertNotEqual(res.returncode, 0)
         self.assertIn("Additional properties are not allowed", res.stdout)
 
+    def test_brain_schema_rejects_unknown_nested_key(self):
+        self._setup_valid_repo()
+        brain_file = self.repo_root / ".brain" / "brain.json"
+        data = json.loads(brain_file.read_text(encoding="utf-8"))
+        data["project"]["rogue_nested_key"] = "bad_val"
+        brain_file.write_text(json.dumps(data), encoding="utf-8")
+        
+        res = subprocess.run(
+            [PYTHON, str(ROOT / "scripts" / "schema-probe.py"), "--root", str(self.repo_root)],
+            capture_output=True, text=True, encoding="utf-8"
+        )
+        self.assertNotEqual(res.returncode, 0)
+        self.assertIn("Additional properties are not allowed", res.stdout)
+
+    def test_preferences_schema_rejects_unknown_nested_key(self):
+        self._setup_valid_repo()
+        pref_file = self.repo_root / ".brain" / "preferences.json"
+        data = json.loads(pref_file.read_text(encoding="utf-8"))
+        data["communication"]["rogue_comm_key"] = "bad_val"
+        pref_file.write_text(json.dumps(data), encoding="utf-8")
+        
+        res = subprocess.run(
+            [PYTHON, str(ROOT / "scripts" / "schema-probe.py"), "--root", str(self.repo_root)],
+            capture_output=True, text=True, encoding="utf-8"
+        )
+        self.assertNotEqual(res.returncode, 0)
+        self.assertIn("Additional properties are not allowed", res.stdout)
+
     def test_data_probe_passes_on_clean_repo(self):
         self._setup_valid_repo()
         res = subprocess.run(

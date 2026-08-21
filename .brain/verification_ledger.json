@@ -284,5 +284,38 @@
       "layer_4_guardrails_suite": "PASSED (38/38 unit tests, exit code 0)"
     },
     "verdict": "READY FOR PRODUCTION RELEASE /deploy"
+  },
+  {
+    "type": "guardrail_verification",
+    "category": "tests",
+    "command": "C:\\Users\\Trong\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -m unittest discover -s guardrails/tests -v",
+    "status": "PASSED",
+    "exit_code": 0,
+    "duration_ms": 9405,
+    "commit": "a512e23",
+    "branch": "main",
+    "timestamp": "2026-08-21T07:48:42.786194+00:00"
+  },
+  {
+    "type": "project_audit",
+    "category": "audit",
+    "command": "4-layer empirical matrix: schema-probe + data-probe + gitnexus smoke + unittest + guardrail --mode all",
+    "status": "PASSED_WITH_WARNINGS",
+    "exit_code": 0,
+    "duration_ms": null,
+    "commit": "a512e2374de96441927f6e9212d19c1842021d37",
+    "branch": "main",
+    "version": "4.15.0-ultimate",
+    "timestamp": "2026-08-21T07:49:36.532836+00:00",
+    "layers": {
+      "schema_probe": "PASSED 6/6",
+      "data_probe": "PASSED 158 files",
+      "gitnexus_context": "PASSED execute_commands found",
+      "gitnexus_query_fts": "PASSED BM25+vector",
+      "gitnexus_taint": "0 findings (layer present, not proof of safety)",
+      "gitnexus_index": "STALE_1_COMMIT",
+      "guardrail_mode_all": "PASSED",
+      "guardrail_tests": "PASSED 38/38"
+    }
   }
 ]

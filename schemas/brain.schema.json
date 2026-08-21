@@ -16,13 +16,15 @@
         "created_at": { "type": "string", "format": "date-time" },
         "updated_at": { "type": "string", "format": "date-time" }
       },
-      "required": ["schema_version", "awf_version"]
+      "required": ["schema_version", "awf_version"],
+      "additionalProperties": false
     },
     "project": {
       "type": "object",
       "description": "Project overview",
       "properties": {
         "name": { "type": "string" },
+        "version": { "type": "string" },
         "description": { "type": "string" },
         "type": {
           "type": "string",
@@ -39,15 +41,43 @@
             "local": { "type": "string" },
             "staging": { "type": "string" },
             "production": { "type": "string" }
-          }
+          },
+          "additionalProperties": false
         }
       },
-      "required": ["name", "type"]
+      "required": ["name", "type"],
+      "additionalProperties": false
     },
     "tech_stack": {
       "type": "object",
       "description": "Technology stack",
       "properties": {
+        "languages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "purpose": { "type": "string" }
+            },
+            "required": ["name", "purpose"],
+            "additionalProperties": false
+          }
+        },
+        "frameworks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "purpose": { "type": "string" }
+            },
+            "required": ["name", "purpose"],
+            "additionalProperties": false
+          }
+        },
         "frontend": {
           "type": "object",
           "properties": {
@@ -56,7 +86,8 @@
             "ui_library": { "type": "string" },
             "state_management": { "type": "string" },
             "styling": { "type": "string" }
-          }
+          },
+          "additionalProperties": false
         },
         "backend": {
           "type": "object",
@@ -64,7 +95,8 @@
             "framework": { "type": "string" },
             "language": { "type": "string" },
             "runtime": { "type": "string" }
-          }
+          },
+          "additionalProperties": false
         },
         "database": {
           "type": "object",
@@ -72,7 +104,8 @@
             "type": { "type": "string" },
             "orm": { "type": "string" },
             "name": { "type": "string" }
-          }
+          },
+          "additionalProperties": false
         },
         "infrastructure": {
           "type": "object",
@@ -80,7 +113,8 @@
             "hosting": { "type": "string" },
             "cdn": { "type": "string" },
             "ci_cd": { "type": "string" }
-          }
+          },
+          "additionalProperties": false
         },
         "dependencies": {
           "type": "array",
@@ -91,10 +125,12 @@
               "name": { "type": "string" },
               "version": { "type": "string" },
               "purpose": { "type": "string" }
-            }
+            },
+            "additionalProperties": false
           }
         }
-      }
+      },
+      "additionalProperties": false
     },
     "architecture": {
       "type": "object",
@@ -103,6 +139,11 @@
         "pattern": {
           "type": "string",
           "description": "e.g., MVC, Clean Architecture, Microservices"
+        },
+        "pillars": {
+          "type": "array",
+          "description": "Core architectural pillars",
+          "items": { "type": "string" }
         },
         "modules": {
           "type": "array",
@@ -113,7 +154,8 @@
               "path": { "type": "string" },
               "responsibility": { "type": "string" },
               "dependencies": { "type": "array", "items": { "type": "string" } }
-            }
+            },
+            "additionalProperties": false
           }
         },
         "external_services": {
@@ -124,10 +166,12 @@
               "name": { "type": "string" },
               "purpose": { "type": "string" },
               "env_vars": { "type": "array", "items": { "type": "string" } }
-            }
+            },
+            "additionalProperties": false
           }
         }
-      }
+      },
+      "additionalProperties": false
     },
     "database_schema": {
       "type": "object",
@@ -285,9 +329,11 @@
             "build": { "type": "string" },
             "test": { "type": "string" },
             "lint": { "type": "string" }
-          }
+          },
+          "additionalProperties": false
         }
-      }
+      },
+      "additionalProperties": false
     },
     "guardrails": {
       "type": "object",
@@ -300,7 +346,8 @@
           "type": "array",
           "items": { "type": "string" }
         }
-      }
+      },
+      "additionalProperties": false
     },
     "workflows": {
       "type": "array",

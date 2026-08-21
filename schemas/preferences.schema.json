@@ -34,7 +34,8 @@
           "type": "string",
           "description": "Custom persona description if persona=custom"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "technical": {
       "type": "object",
@@ -64,7 +65,8 @@
           "default": "basic",
           "description": "User technical proficiency level for language adaptation"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "working_style": {
       "type": "object",
@@ -82,7 +84,8 @@
           "default": "gentle",
           "description": "How AI gives feedback"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "custom_rules": {
       "type": "array",

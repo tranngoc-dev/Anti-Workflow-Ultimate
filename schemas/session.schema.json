@@ -25,12 +25,14 @@
         "current_feature": { "type": "string", "description": "What user is working on" },
         "current_task": { "type": "string", "description": "Specific task" },
         "status": { "type": "string", "enum": ["idle", "planning", "coding", "testing", "debugging", "reviewing", "deploying", "in_progress", "completed"] },
+        "phase": { "type": "string", "description": "Current phase or edition name" },
         "progress_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
         "last_action": { "type": "string", "description": "Last completed action" },
         "next_step": { "type": "string", "description": "Suggested next step" },
         "blockers_count": { "type": "integer", "default": 0 }
       },
-      "required": ["project", "status"]
+      "required": ["project", "status"],
+      "additionalProperties": false
     },
     "working_on": {
       "type": "object",
@@ -62,7 +64,8 @@
           "description": "Current blockers"
         },
         "notes": { "type": "string", "description": "Quick notes" }
-      }
+      },
+      "additionalProperties": false
     },
     "pending_tasks": {
       "type": "array",
@@ -147,7 +150,8 @@
         "notify_on_save": { "type": "boolean", "default": true },
         "checkpoint_interval": { "type": "integer", "default": 15, "description": "Save every N messages" },
         "warn_threshold": { "type": "integer", "default": 80, "description": "Warn at N% context usage" }
-      }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false
