@@ -1,3 +1,4 @@
+import json
 import shutil
 import subprocess
 import tempfile
@@ -44,7 +45,17 @@ class InstallerTests(unittest.TestCase):
         install.install(self.repo)
         install.install(self.repo)
         state = subprocess.run(["git", "rev-parse", "--git-path", "guardrails/previous-hooks-path"], cwd=self.repo, text=True, capture_output=True, check=True).stdout.strip()
-        self.assertEqual("custom-hooks", (self.repo / state).read_text(encoding="utf-8"))
+        data = json.loads((self.repo / state).read_text(encoding="utf-8"))
+        self.assertEqual("custom-hooks", data.get("value"))
+        self.assertTrue(data.get("was_set"))
+
+    def test_uninstall_restores_previous_configuration(self):
+        self.init_repo()
+        subprocess.run(["git", "config", "--local", "core.hooksPath", "custom-hooks"], cwd=self.repo, check=True)
+        install.install(self.repo)
+        install.uninstall(self.repo)
+        restored = subprocess.run(["git", "config", "--local", "--get", "core.hooksPath"], cwd=self.repo, text=True, capture_output=True, check=True).stdout.strip()
+        self.assertEqual("custom-hooks", restored)
 
     def test_hook_invokes_engine_from_repository_root(self):
         self.init_repo()

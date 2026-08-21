@@ -1,0 +1,19 @@
+{
+  "user": {
+    "name": "Trong",
+    "technical_level": "technical"
+  },
+  "persona": {
+    "role": "Solution Architect & Engineering Lead",
+    "tone": "rigorous, concise, evidence-based"
+  },
+  "language": {
+    "conversation": "vi",
+    "artifacts": "en"
+  },
+  "guardrails": {
+    "strict_mode": true,
+    "auto_kill_orphans": true,
+    "timeout_seconds": 120
+  }
+}

@@ -1,125 +1,45 @@
 {
-  "meta": {
-    "schema_version": "1.3.0",
-    "awf_version": "4.0.2",
-    "last_updated": "2026-08-15T12:05:00Z"
-  },
   "project": {
-    "name": "Tulanh",
-    "type": "Web Application (Next.js App Router)",
-    "status": "Production & Development",
-    "repository": "tranngoc-dev/tulanh_simple",
-    "secondary_repository": "tranngoc-dev/Anti-Workflow-Ultimate"
+    "name": "Anti-Workflow Ultimate",
+    "version": "4.12.0",
+    "description": "Autonomous Software Engineering Operating System & Governance Framework for Antigravity 2.0",
+    "type": "framework",
+    "repository": "tranngoc-dev/Anti-Workflow-Ultimate",
+    "created_at": "2026-08-20T00:00:00Z",
+    "updated_at": "2026-08-21T09:00:00Z"
   },
   "tech_stack": {
-    "frontend": "Next.js 16 (App Router), React 19, CSS thuần (Design Tokens, không Tailwind), Lucide Icons, DOMPurify, Marked",
-    "backend": "Next.js API Routes, Next.js Middleware, Supabase PostgreSQL Functions (RPC)",
-    "database": "PostgreSQL via Supabase (Project ID: xywmdsieytqsxqpqvcwj, Region: ap-northeast-2)",
-    "auth": "Supabase Auth (Google OAuth & Email/Password hybrid), RLS (Row Level Security)",
-    "testing": "Playwright, Python Guardrails"
-  },
-  "database_schema": {
-    "summary": "Hệ thống CSDL toàn diện gồm: Quản lý người dùng & Gamification (Gold/Rank), Diễn đàn Q&A có phản hồi phân cấp, Blog bài viết & Bình luận, Thống kê lượt xem & Nhật ký IP, Không gian làm việc cá nhân (Workspace).",
-    "tables": [
-      {
-        "name": "profiles",
-        "description": "Hồ sơ người dùng liên kết auth.users, lưu số dư Vàng (gold_balance), Cấp bậc (rank: Kim Ngư -> Thiên Long), và thời hạn cấm bình luận (comment_banned_until)."
-      },
-      {
-        "name": "threads",
-        "description": "Bài đăng hỏi đáp trong diễn đàn Q&A. Tạo bài tự động thưởng +10 Gold cho tác giả."
-      },
-      {
-        "name": "thread_comments",
-        "description": "Bình luận và câu trả lời trong Q&A. Hỗ trợ trường parent_id để trả lời phân cấp (Nested Replies) như Facebook, đánh dấu câu trả lời hay nhất (is_best_answer) nhận +10 Gold."
-      },
-      {
-        "name": "thread_comment_likes",
-        "description": "Lưu lượt thả tim câu trả lời Q&A. Tác giả được like tự động nhận +1 Gold."
-      },
-      {
-        "name": "site_settings",
-        "description": "Cài đặt toàn trang: site_name, excluded_view_ips, predefined_tags."
-      },
-      {
-        "name": "posts",
-        "description": "Bài viết Blog, hỗ trợ slug, tag, bảo vệ mật khẩu (post_password), ẩn/hiện, bản nháp."
-      },
-      {
-        "name": "comments",
-        "description": "Bình luận bài viết Blog với luồng kiểm duyệt (pending/approved/rejected)."
-      },
-      {
-        "name": "visit_logs",
-        "description": "Nhật ký truy cập trang web (IP, User Agent, Referrer, Path) có chỉ mục tăng tốc."
-      },
-      {
-        "name": "page_views",
-        "description": "Lượt xem chi tiết từng bài viết phục vụ bảng xếp hạng Top Posts."
-      },
-      {
-        "name": "mindmaps",
-        "description": "Dữ liệu sơ đồ tư duy."
-      },
-      {
-        "name": "workspace_todos",
-        "description": "Danh sách Todo trong không gian làm việc cá nhân."
-      },
-      {
-        "name": "workspace_notes",
-        "description": "Ghi chú nhanh cá nhân trong không gian làm việc."
-      },
-      {
-        "name": "workspace_pomodoro_history",
-        "description": "Lịch sử các phiên tập trung Pomodoro hoàn thành."
-      }
+    "languages": [
+      { "name": "Python", "version": "3.11+", "purpose": "Guardrails, artifact validation, and verification engine" },
+      { "name": "PowerShell", "version": "7+", "purpose": "Windows CLI wrappers and task brief tools" },
+      { "name": "POSIX Shell / Bash", "version": "5+", "purpose": "Linux / macOS CLI wrappers and hooks" }
     ],
-    "relationships_explained": "auth.users liên kết 1-1 với profiles; threads chứa nhiều thread_comments; thread_comments có khóa ngoại tự tham chiếu parent_id để tạo nhánh reply con; visit_logs và page_views phục vụ các hàm RPC thống kê."
-  },
-  "api_endpoints": [
-    {
-      "path": "/api/track",
-      "method": "POST/GET",
-      "explained": "Theo dõi lượt truy cập (visit) và xem bài viết (post_view), tự động lọc bỏ các IP nằm trong danh sách loại trừ."
-    },
-    {
-      "path": "RPC: public.admin_update_user_rank_and_gold",
-      "method": "POST",
-      "explained": "Hàm bảo mật cho Admin điều chỉnh Level và điểm Gold của thành viên."
-    },
-    {
-      "path": "RPC: public.get_registered_users",
-      "method": "POST",
-      "explained": "Hàm bảo mật cho Admin lấy danh sách toàn bộ người dùng kèm avatar, email, rank, gold_balance và trạng thái cấm."
-    }
-  ],
-  "business_rules": [
-    "Tài khoản Admin đặc quyền vutrongvtv24@gmail.com có toàn quyền quản trị trên cả FE và BE.",
-    "Cơ chế điểm Gold: +10 Gold khi tạo Thread mới, +1 Gold cho mỗi bình luận/câu trả lời, +1 Gold cho mỗi like nhận được, +10 Gold khi được chọn là Best Answer.",
-    "Cơ chế Cấp bậc Rank: Kim Ngư (0+), Linh Long (50+), Đế Long (200+), Hỏa Long (500+), Thiên Long (1000+ hoặc Admin).",
-    "Admin có thể set Level và điều chỉnh điểm Gold trực tiếp tại /admin/users và bấm '💾 LƯU NGAY' để lưu vào Supabase.",
-    "Admin có thể cấm thành viên bình luận trong 24h hoặc mở khóa ngay lập tức.",
-    "Tất cả các URL xuất hiện trong bài viết, trích đoạn, câu hỏi, bình luận và reply con đều được tự động highlight và tạo hyperlink target=_blank."
-  ],
-  "features": [
-    "Trang chủ Blog & Đọc bài viết (Markdown/HTML có nhận diện Hyperlink)",
-    "Hệ thống Quản trị Admin Dashboard (/admin, /admin/posts, /admin/comments, /admin/users, /admin/settings, /admin/visit-logs)",
-    "Diễn đàn Hỏi đáp Q&A có phân cấp Nested Replies, thưởng Gold tự động & Thăng hạng",
-    "Không gian làm việc Focus Workspace (/working: Pomodoro, Todo, Ghi chú)",
-    "Bộ lọc IP loại trừ tự động đếm view"
-  ],
-  "knowledge_items": {
-    "patterns": [
-      "Sử dụng window.location.href để điều hướng an toàn trong Admin, làm sạch router cache Next.js.",
-      "Gán RPC và RLS bảo mật cấp cơ sở dữ liệu trên Supabase với SECURITY DEFINER cho các hàm thống kê và admin overrides.",
-      "Hàm renderWithLinks sử dụng Regex tách URL an toàn, xử lý dấu câu ở đuôi và stopPropagation tránh click xuyên qua thẻ cha."
-    ],
-    "gotchas": [
-      "Không dùng trigger chặn UPDATE trên profiles cho authenticated client mà không loại trừ trigger nội bộ, thay vào đó dùng RPC SECURITY DEFINER cho Admin.",
-      "Next.js Middleware chạy ở Edge runtime cần đồng bộ chuẩn URL và Anon Key của project Supabase mới."
-    ],
-    "conventions": [
-      "Mọi quy trình sửa đổi tuân thủ nghiêm ngặt AWF v4.0.2 và Guardrails CI/CD trước khi push."
+    "frameworks": [
+      { "name": "Antigravity 2.0", "purpose": "Agentic IDE and multi-agent orchestration runtime" },
+      { "name": "Superpowers SDD", "purpose": "Subagent-driven development in isolated Git worktrees" },
+      { "name": "GitNexus", "version": "1.6.9", "purpose": "Relational knowledge graph and call path analysis" },
+      { "name": "CodeGraph", "version": "1.5.0", "purpose": "Single-shot exploration, live watcher, and route mapping" }
     ]
-  }
+  },
+  "architecture": {
+    "pattern": "5-Pillar Autonomous Engineering OS",
+    "pillars": [
+      "1. Orchestration & Agentic Interaction (AWF)",
+      "2. Governance & Strict Guardrails (Enforcement & Resilience)",
+      "3. Execution Engine (Superpowers Subagents & Strict TDD)",
+      "4. Hybrid Code-Intelligence & MCP (GitNexus + CodeGraph)",
+      "5. Smart Testing Pyramid & Process Guard"
+    ]
+  },
+  "guardrails": {
+    "pre_commit_hook": "guardrails/hooks/pre-commit",
+    "engine": "guardrails/guardrail.py",
+    "policy": "guardrails/policy.json",
+    "protected_branches": ["main", "master"]
+  },
+  "workflows": [
+    "/init", "/plan", "/code", "/test", "/debug", "/design", "/visualize",
+    "/brainstorm", "/audit", "/review", "/refactor", "/deploy", "/rollback",
+    "/recap", "/save-brain", "/next", "/help", "/customize", "/run", "/awf-update"
+  ]
 }
